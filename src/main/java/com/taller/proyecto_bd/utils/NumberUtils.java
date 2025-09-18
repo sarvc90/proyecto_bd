@@ -11,7 +11,7 @@ import java.util.Locale;
  * @author Sistema
  * @version 1.0
  */
-public class NumberUtil {
+public class NumberUtils {
 
     private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
     private static final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
