@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Clase que representa la entidad Venta en el sistema de electrodomésticos
  * @author Sistema
- * @version 1.0
+ * @version 1.1 - Corregido método validarVenta
  */
 public class Venta {
     // ==================== ATRIBUTOS ====================
@@ -129,16 +129,32 @@ public class Venta {
      * Verifica si la venta es válida (tiene cliente y al menos un detalle)
      */
     public boolean validarVenta() {
-        return idCliente > 0 && detalles != null && !detalles.isEmpty() && subtotal > 0;
+        boolean codigoValido = codigo != null && !codigo.trim().isEmpty();
+        boolean clienteValido = idCliente > 0;
+        boolean usuarioValido = idUsuario > 0;
+        boolean totalValido = total >= 0;
+        boolean fechaValida = fechaVenta != null;
+
+        // Validación adicional para ventas a crédito
+        boolean creditoValido = true;
+        if (esCredito) {
+            creditoValido = cuotaInicial >= 0 &&
+                    plazoMeses > 0 &&
+                    cuotaInicial <= total;
+        }
+
+        return codigoValido && clienteValido && usuarioValido &&
+                totalValido && fechaValida && creditoValido;
     }
 
     /**
      * Obtiene una descripción corta de la venta
      */
     public String getResumen() {
-        return "Venta " + codigo + " - Cliente: " + nombreCliente +
-                " - Total: $" + String.format("%.2f", total) +
-                (esCredito ? " [CRÉDITO]" : " [CONTADO]");
+        String clienteStr = (nombreCliente != null && !nombreCliente.trim().isEmpty())
+                ? nombreCliente : "N/A";
+        return String.format("Venta %s - Cliente: %s - Total: $%.2f [%s]",
+                codigo, clienteStr, total, esCredito ? "CRÉDITO" : "CONTADO");
     }
 
     // ==================== MÉTODOS OVERRIDE ====================
@@ -148,8 +164,8 @@ public class Venta {
         return "Venta{" +
                 "ID=" + idVenta +
                 ", Código='" + codigo + '\'' +
-                ", Cliente=" + nombreCliente +
-                ", Vendedor=" + nombreVendedor +
+                ", Cliente=" + (nombreCliente != null ? nombreCliente : "N/A") +
+                ", Vendedor=" + (nombreVendedor != null ? nombreVendedor : "N/A") +
                 ", Fecha=" + fechaVenta +
                 ", Total=$" + String.format("%.2f", total) +
                 ", Tipo=" + (esCredito ? "Crédito" : "Contado") +

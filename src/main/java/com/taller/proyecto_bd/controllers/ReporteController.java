@@ -15,11 +15,11 @@ import java.util.Map;
  * @version 1.0
  */
 public class ReporteController {
-    private VentaDAO ventaDAO = new VentaDAO();
-    private CreditoDAO creditoDAO = new CreditoDAO();
-    private CuotaDAO cuotaDAO = new CuotaDAO();
-    private InventarioDAO inventarioDAO = new InventarioDAO();
-    private UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private VentaDAO ventaDAO = VentaDAO.getInstance();
+    private CreditoDAO creditoDAO = CreditoDAO.getInstance();
+    private CuotaDAO cuotaDAO = CuotaDAO.getInstance();
+    private InventarioDAO inventarioDAO = InventarioDAO.getInstance();
+    private UsuarioDAO usuarioDAO = UsuarioDAO.getInstance();
 
     /**
      * Reporte de ventas totales (suma de todas las ventas)

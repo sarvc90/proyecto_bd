@@ -15,8 +15,8 @@ import java.util.List;
  * @version 1.1
  */
 public class InventarioController {
-    private InventarioDAO inventarioDAO = new InventarioDAO();
-    private ProductoDAO productoDAO = new ProductoDAO();
+    private InventarioDAO inventarioDAO = InventarioDAO.getInstance();
+    private ProductoDAO productoDAO = ProductoDAO.getInstance();
 
     /**
      * Verifica si hay suficiente stock para una lista de detalles de venta

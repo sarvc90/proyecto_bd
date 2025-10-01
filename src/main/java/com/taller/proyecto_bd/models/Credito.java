@@ -100,9 +100,15 @@ public class Credito {
         cuotas = new ArrayList<>();
         if (plazoMeses <= 0) return;
 
-        // Fórmula simplificada: monto financiado + interés dividido en cuotas
-        double montoFinanciado = montoTotal + (montoTotal * interes);
-        double valorCuota = montoFinanciado / plazoMeses;
+        // Usar fórmula de interés compuesto
+        double tasaMensual = interes / 12.0;
+        double factor = Math.pow(1 + tasaMensual, plazoMeses);
+        double valorCuota = montoTotal * (tasaMensual * factor) / (factor - 1);
+
+        // Si no hay interés, dividir equitativamente
+        if (interes == 0) {
+            valorCuota = montoTotal / plazoMeses;
+        }
 
         for (int i = 1; i <= plazoMeses; i++) {
             Cuota c = new Cuota(i, idCredito, valorCuota, new Date());

@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * Clase que representa la entidad Detalle de Venta en el sistema de electrodomésticos
  * @author Sistema
- * @version 1.0
+ * @version 1.1 - Corregidos métodos getDescripcion y toString
  */
 public class DetalleVenta {
     // ==================== ATRIBUTOS ====================
@@ -107,23 +107,20 @@ public class DetalleVenta {
      * Obtiene una descripción corta del detalle
      */
     public String getDescripcion() {
-        return nombreProducto + " x" + cantidad +
-                " @ $" + String.format("%.2f", precioUnitario) +
-                " = $" + String.format("%.2f", total);
+        String nombre = (nombreProducto != null && !nombreProducto.trim().isEmpty()) ?
+                nombreProducto : "Producto #" + idProducto;
+        return String.format("%s x%d - Precio unitario: $%.2f - Total: $%.2f",
+                nombre, cantidad, precioUnitario, total);
     }
 
     // ==================== MÉTODOS OVERRIDE ====================
 
     @Override
     public String toString() {
-        return "DetalleVenta{" +
-                "Producto='" + nombreProducto + '\'' +
-                ", Cantidad=" + cantidad +
-                ", PrecioUnitario=$" + String.format("%.2f", precioUnitario) +
-                ", Subtotal=$" + String.format("%.2f", subtotal) +
-                ", IVA=$" + String.format("%.2f", montoIVA) +
-                ", Total=$" + String.format("%.2f", total) +
-                '}';
+        String nombre = (nombreProducto != null && !nombreProducto.trim().isEmpty()) ?
+                nombreProducto : "Producto #" + idProducto;
+        return String.format("DetalleVenta{Producto='%s', Cantidad=%d, PrecioUnitario=$%.2f, Subtotal=$%.2f, IVA=$%.2f, Total=$%.2f}",
+                nombre, cantidad, precioUnitario, subtotal, montoIVA, total);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.taller.proyecto_bd.models;
 
+import com.taller.proyecto_bd.utils.Encriptacion; // Importar la clase de encriptación
 import java.util.Date;
 
 /**
@@ -30,21 +31,25 @@ public class Usuario {
         this.activo = true;
     }
 
-    public Usuario(String nombreCompleto, String username, String password, String rol) {
+    // Constructor modificado para hashear la contraseña al crear el objeto
+    public Usuario(String nombreCompleto, String username, String passwordPlana, String rol) {
         this();
         this.nombreCompleto = nombreCompleto;
         this.username = username;
-        this.password = password;
+        // Hashear la contraseña al momento de la creación del objeto
+        this.password = Encriptacion.encriptarSHA256(passwordPlana);
         this.rol = rol;
     }
 
-    public Usuario(int idUsuario, String nombreCompleto, String username, String password,
+    // Constructor completo (con ID - para usuarios existentes)
+    // Asume que la contraseña ya viene hasheada si se carga de BD
+    public Usuario(int idUsuario, String nombreCompleto, String username, String passwordHash,
                    String rol, String email, String telefono, boolean activo,
                    Date fechaRegistro, Date ultimoAcceso) {
         this.idUsuario = idUsuario;
         this.nombreCompleto = nombreCompleto;
         this.username = username;
-        this.password = password;
+        this.password = passwordHash; // Aquí se espera el hash, no la contraseña plana
         this.rol = rol;
         this.email = email;
         this.telefono = telefono;
@@ -58,7 +63,7 @@ public class Usuario {
     public int getIdUsuario() { return idUsuario; }
     public String getNombreCompleto() { return nombreCompleto; }
     public String getUsername() { return username; }
-    public String getPassword() { return password; }
+    public String getPassword() { return password; } // Retorna el hash
     public String getRol() { return rol; }
     public String getEmail() { return email; }
     public String getTelefono() { return telefono; }
@@ -71,7 +76,8 @@ public class Usuario {
     public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
     public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
     public void setUsername(String username) { this.username = username; }
-    public void setPassword(String password) { this.password = password; }
+    // Setter para la contraseña: debería recibir la contraseña plana y hashearla
+    public void setPassword(String passwordPlana) { this.password = Encriptacion.encriptarSHA256(passwordPlana); }
     public void setRol(String rol) { this.rol = rol; }
     public void setEmail(String email) { this.email = email; }
     public void setTelefono(String telefono) { this.telefono = telefono; }
@@ -90,14 +96,18 @@ public class Usuario {
 
     /**
      * Simula el inicio de sesión verificando credenciales
+     * NOTA: Este método en el modelo no debería hacer la validación de contraseña,
+     * eso es responsabilidad del DAO/Controller. Aquí solo se actualiza el acceso.
      */
     public boolean login(String user, String pass) {
-        if (!activo) return false;
-        boolean ok = username.equals(user) && password.equals(pass);
-        if (ok) {
+        // Este método en el modelo no es el lugar ideal para la lógica de login completa.
+        // La validación de credenciales y estado activo se hace en UsuarioDAO y UsuarioController.
+        // Aquí solo se actualiza el último acceso si ya se validó externamente.
+        if (username.equals(user) && password.equals(pass)) { // Esta comparación es con el hash
             this.ultimoAcceso = new Date();
+            return true;
         }
-        return ok;
+        return false;
     }
 
     /**
@@ -140,5 +150,12 @@ public class Usuario {
     @Override
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
+    }
+
+    public void setNombre(String administradorActualizado) {
+        this.nombreCompleto = administradorActualizado;
+    }
+    public String getNombre() {
+        return nombreCompleto;
     }
 }

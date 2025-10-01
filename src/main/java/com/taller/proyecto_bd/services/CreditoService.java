@@ -15,9 +15,9 @@ import java.util.List;
  */
 public class CreditoService {
     // ==================== DEPENDENCIAS ====================
-    private CreditoDAO creditoDAO = new CreditoDAO();
-    private CuotaDAO cuotaDAO = new CuotaDAO();
-    private AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
+    private CreditoDAO creditoDAO = CreditoDAO.getInstance();
+    private CuotaDAO cuotaDAO = CuotaDAO.getInstance();
+    private AuditoriaDAO auditoriaDAO = AuditoriaDAO.getInstance();
 
     // ==================== PROCESOS PRINCIPALES ====================
 
@@ -47,20 +47,26 @@ public class CreditoService {
         Cuota cuota = cuotaDAO.obtenerPorId(idCuota);
         if (cuota == null || cuota.isPagada()) return false;
 
+        // Marcar cuota como pagada
         cuota.pagarCuota(new Date());
         cuotaDAO.actualizar(cuota);
 
-        // Verificar si el crédito ya quedó cancelado
+        // Actualizar saldo pendiente del crédito
         Credito credito = creditoDAO.obtenerPorId(cuota.getIdCredito());
         if (credito != null) {
+            // Reducir saldo por el monto de la cuota
+            credito.setSaldoPendiente(credito.getSaldoPendiente() - cuota.getValor());
+
+            // Verificar si todas las cuotas están pagadas
             boolean todasPagadas = cuotaDAO.obtenerPorCredito(credito.getIdCredito())
                     .stream().allMatch(Cuota::isPagada);
 
             if (todasPagadas) {
                 credito.setEstado("CANCELADO");
                 credito.setSaldoPendiente(0);
-                creditoDAO.actualizar(credito);
             }
+
+            creditoDAO.actualizar(credito);
         }
 
         auditoriaDAO.agregar(new Auditoria(usuario.getIdUsuario(), "PAGO_CUOTA",
@@ -92,10 +98,17 @@ public class CreditoService {
         Credito credito = creditoDAO.obtenerPorId(idCredito);
         if (credito == null) return false;
 
-        boolean tieneVencidas = cuotaDAO.obtenerPorCredito(idCredito)
-                .stream().anyMatch(Cuota::estaVencida);
+        // No verificar si ya está cancelado o anulado
+        if ("CANCELADO".equals(credito.getEstado()) || "ANULADO".equals(credito.getEstado())) {
+            return false;
+        }
 
-        if (tieneVencidas) {
+        boolean tieneVencidas = cuotaDAO.obtenerPorCredito(idCredito)
+                .stream()
+                .filter(cuota -> !cuota.isPagada())
+                .anyMatch(Cuota::estaVencida);
+
+        if (tieneVencidas && credito.getSaldoPendiente() > 0) {
             credito.setEstado("MOROSO");
             creditoDAO.actualizar(credito);
             return true;

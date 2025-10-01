@@ -3,31 +3,30 @@ package com.taller.proyecto_bd.dao;
 import com.taller.proyecto_bd.models.Credito;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-/**
- * DAO para la entidad Credito.
- * Maneja operaciones CRUD sobre créditos (en memoria por ahora).
- *
- * @author Sistema
- * @version 1.0
- */
 public class CreditoDAO {
-    // ==================== ATRIBUTOS ====================
-    private List<Credito> creditos;
+    private final List<Credito> creditos;
+    private static int idCounter = 10000;
+    private static CreditoDAO instance;
 
-    // ==================== CONSTRUCTOR ====================
-
-    public CreditoDAO() {
+    private CreditoDAO() {
         this.creditos = new ArrayList<>();
         cargarDatosPrueba();
     }
 
-    // ==================== CRUD ====================
+    public static CreditoDAO getInstance() {
+        if (instance == null) {
+            instance = new CreditoDAO();
+        }
+        return instance;
+    }
 
     public boolean agregar(Credito credito) {
-        if (credito != null && credito.getMontoTotal() > 0) {
+        if (credito != null && credito.getMontoTotal() >= 0) {
+            if (credito.getIdCredito() == 0) {
+                credito.setIdCredito(idCounter++);
+            }
             return creditos.add(credito);
         }
         return false;
@@ -64,8 +63,6 @@ public class CreditoDAO {
     public boolean eliminar(int idCredito) {
         return creditos.removeIf(c -> c.getIdCredito() == idCredito);
     }
-
-    // ==================== MÉTODOS EXTRA ====================
 
     public List<Credito> obtenerPorCliente(int idCliente) {
         List<Credito> resultado = new ArrayList<>();
@@ -105,19 +102,17 @@ public class CreditoDAO {
         return morosos;
     }
 
-    // ==================== DATOS DE PRUEBA ====================
-
     private void cargarDatosPrueba() {
-        Credito c1 = new Credito(1, 1, 800, 200, 6, 0.05);
-        c1.setIdCredito(1);
+        Credito c1 = new Credito(1001, 1001, 800, 200, 6, 5.0);
+        c1.setIdCredito(idCounter++);
         c1.generarCuotas();
 
-        Credito c2 = new Credito(2, 2, 1200, 300, 12, 0.08);
-        c2.setIdCredito(2);
+        Credito c2 = new Credito(1002, 1002, 1200, 300, 12, 8.0);
+        c2.setIdCredito(idCounter++);
         c2.generarCuotas();
 
-        Credito c3 = new Credito(3, 1, 500, 100, 10, 0.07);
-        c3.setIdCredito(3);
+        Credito c3 = new Credito(1003, 1001, 500, 100, 10, 7.0);
+        c3.setIdCredito(idCounter++);
         c3.setEstado("CANCELADO");
         c3.setSaldoPendiente(0);
 

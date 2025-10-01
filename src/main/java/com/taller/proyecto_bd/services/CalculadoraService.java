@@ -1,19 +1,12 @@
 package com.taller.proyecto_bd.services;
 
-import com.taller.proyecto_bd.models.Credito;
-
+import com.taller.proyecto_bd.utils.Constantes; // Importar Constantes
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Servicio que centraliza cálculos financieros y de utilidad
- * para el sistema de electrodomésticos.
- *
- * @author Sistema
- * @version 1.0
- */
 public class CalculadoraService {
-    private static final double IVA_PORCENTAJE = 0.19; // 19% IVA
+    // Usar la constante de IVA definida globalmente
+    private static final double IVA_PORCENTAJE = Constantes.IVA_DEFAULT;
 
     // ==================== CALCULOS DE VENTA ====================
 
@@ -25,12 +18,12 @@ public class CalculadoraService {
 
     /** Calcular IVA total */
     public double calcularIVA(double subtotal) {
-        return subtotal * IVA_PORCENTAJE;
+        return redondear2Decimales(subtotal * IVA_PORCENTAJE);
     }
 
     /** Calcular total con IVA */
     public double calcularTotalConIVA(double subtotal) {
-        return subtotal + calcularIVA(subtotal);
+        return redondear2Decimales(subtotal + calcularIVA(subtotal));
     }
 
     // ==================== CALCULOS DE CREDITO ====================
@@ -44,16 +37,27 @@ public class CalculadoraService {
 
     /**
      * Calcula el valor de la cuota mensual con interés compuesto.
-     * Fórmula: C = P * (i / (1 - (1+i)^-n))
+     * Fórmula: C = P * (i * (1+i)^n) / ((1+i)^n - 1)
      * Donde:
      *  P = monto financiado
-     *  i = tasa de interés mensual
+     *  i = tasa de interés mensual (tasa anual / 100 / 12)
      *  n = número de cuotas
      */
     public double calcularCuotaMensual(double montoFinanciado, double interesAnual, int plazoMeses) {
-        if (plazoMeses <= 0) return 0;
-        double i = interesAnual / 12; // interés mensual
-        return montoFinanciado * (i / (1 - Math.pow(1 + i, -plazoMeses)));
+        if (plazoMeses <= 0 || montoFinanciado <= 0) return 0;
+
+        // CORRECCIÓN: Primero convertir a decimal, luego dividir por 12
+        double tasaMensual = (interesAnual / 100.0) / 12.0;
+
+        // Si no hay interés, dividir el monto entre las cuotas
+        if (tasaMensual == 0) {
+            return redondear2Decimales(montoFinanciado / plazoMeses);
+        }
+
+        double factor = Math.pow(1 + tasaMensual, plazoMeses);
+        double cuota = montoFinanciado * (tasaMensual * factor) / (factor - 1);
+
+        return redondear2Decimales(cuota);
     }
 
     /**
@@ -61,10 +65,12 @@ public class CalculadoraService {
      */
     public List<Double> generarPlanPagos(double montoFinanciado, double interesAnual, int plazoMeses) {
         List<Double> cuotas = new ArrayList<>();
-        double cuota = calcularCuotaMensual(montoFinanciado, interesAnual, plazoMeses);
+        double cuotaMensual = calcularCuotaMensual(montoFinanciado, interesAnual, plazoMeses);
+
         for (int i = 0; i < plazoMeses; i++) {
-            cuotas.add(cuota);
+            cuotas.add(cuotaMensual);
         }
+
         return cuotas;
     }
 
@@ -72,8 +78,13 @@ public class CalculadoraService {
      * Calcula el interés total pagado en un crédito.
      */
     public double calcularInteresTotal(double montoFinanciado, double interesAnual, int plazoMeses) {
-        double cuota = calcularCuotaMensual(montoFinanciado, interesAnual, plazoMeses);
-        return (cuota * plazoMeses) - montoFinanciado;
+        if (plazoMeses <= 0 || montoFinanciado <= 0) return 0;
+
+        double cuotaMensual = calcularCuotaMensual(montoFinanciado, interesAnual, plazoMeses);
+        double totalPagado = cuotaMensual * plazoMeses;
+        double interesTotal = totalPagado - montoFinanciado;
+
+        return redondear2Decimales(Math.max(interesTotal, 0));
     }
 
     // ==================== UTILES ====================

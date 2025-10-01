@@ -9,32 +9,36 @@ import com.taller.proyecto_bd.models.Venta;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controlador para la lógica de créditos.
  * Aplica reglas de negocio: cuotas iniciales, intereses, morosidad.
  *
  * @author Sistema
- * @version 1.2
+ * @version 1.6 - Validaciones reforzadas y mejoras en métodos
  */
 public class CreditoController {
-    private CreditoDAO creditoDAO = new CreditoDAO();
-    private CuotaDAO cuotaDAO = new CuotaDAO();
-    private VentaDAO ventaDAO = new VentaDAO();
+    private final CreditoDAO creditoDAO = CreditoDAO.getInstance();
+    private final CuotaDAO cuotaDAO = CuotaDAO.getInstance();
+    private final VentaDAO ventaDAO = VentaDAO.getInstance();
 
     /**
      * Crear un crédito a partir de una venta
      */
     public Credito generarCredito(Venta venta, double cuotaInicial, int plazoMeses, double interes) {
-        // Validación: el cliente no debe tener otro crédito pendiente
-        List<Credito> creditosCliente = creditoDAO.obtenerPorCliente(venta.getIdCliente());
-        for (Credito c : creditosCliente) {
-            if (c.tieneSaldoPendiente()) {
-                throw new IllegalStateException("El cliente ya tiene un crédito activo.");
-            }
+        if (venta == null) throw new IllegalArgumentException("La venta no puede ser nula");
+        if (plazoMeses <= 0) throw new IllegalArgumentException("El plazo debe ser mayor a 0");
+        if (interes < 0) throw new IllegalArgumentException("El interés no puede ser negativo");
+        if (cuotaInicial < 0 || cuotaInicial > venta.getTotal()) {
+            throw new IllegalArgumentException("La cuota inicial no es válida");
         }
 
-        // Crear crédito con el constructor correcto
+        if (clienteTieneCreditoActivo(venta.getIdCliente())) {
+            throw new IllegalStateException("El cliente ya tiene un crédito activo.");
+        }
+
+        // Crear crédito
         Credito credito = new Credito(
                 venta.getIdVenta(),
                 venta.getIdCliente(),
@@ -43,13 +47,14 @@ public class CreditoController {
                 plazoMeses,
                 interes
         );
+        credito.setEstado("ACTIVO");
 
-        // Generar cuotas
+        // Generar cuotas y persistir
         credito.generarCuotas();
         creditoDAO.agregar(credito);
 
-        // Guardar cuotas en el DAO
         for (Cuota cuota : credito.getCuotas()) {
+            cuota.setIdCredito(credito.getIdCredito());
             cuotaDAO.agregar(cuota);
         }
 
@@ -63,24 +68,33 @@ public class CreditoController {
         Credito credito = creditoDAO.obtenerPorId(idCredito);
         if (credito == null) return false;
 
-        // Buscar la cuota dentro de las del crédito
-        Cuota cuota = cuotaDAO.obtenerPorCredito(idCredito)
+        Optional<Cuota> optCuota = cuotaDAO.obtenerPorCredito(idCredito)
                 .stream()
                 .filter(c -> c.getNumeroCuota() == numeroCuota)
-                .findFirst()
-                .orElse(null);
+                .findFirst();
 
-        if (cuota == null || cuota.isPagada()) return false;
+        if (optCuota.isEmpty()) return false;
+        Cuota cuota = optCuota.get();
 
-        // Marcar la cuota como pagada
+        if (cuota.isPagada() || monto < cuota.getValor()) return false;
+
+        // Marcar pagada
         cuota.pagarCuota(new Date());
         cuotaDAO.actualizar(cuota);
 
-        // Reducir el saldo pendiente del crédito
-        credito.pagarCuota(monto);
-        creditoDAO.actualizar(credito);
+        // Actualizar saldo
+        double nuevoSaldo = credito.getSaldoPendiente() - cuota.getValor();
+        credito.setSaldoPendiente(Math.max(nuevoSaldo, 0));
 
-        return true;
+        // Verificar estado
+        boolean todasPagadas = cuotaDAO.obtenerPorCredito(idCredito)
+                .stream()
+                .allMatch(Cuota::isPagada);
+
+        credito.setEstado(todasPagadas ? "CANCELADO" : "ACTIVO");
+        if (todasPagadas) credito.setSaldoPendiente(0);
+
+        return creditoDAO.actualizar(credito);
     }
 
     /**
@@ -98,9 +112,26 @@ public class CreditoController {
      */
     public boolean cancelarCredito(int idCredito) {
         Credito credito = creditoDAO.obtenerPorId(idCredito);
-        if (credito == null || credito.tieneSaldoPendiente()) return false;
+        if (credito == null) return false;
+
+        boolean todasPagadas = cuotaDAO.obtenerPorCredito(idCredito)
+                .stream()
+                .allMatch(Cuota::isPagada);
+
+        if (credito.tieneSaldoPendiente() || !todasPagadas) {
+            return false;
+        }
 
         credito.setEstado("CANCELADO");
+        credito.setSaldoPendiente(0);
         return creditoDAO.actualizar(credito);
+    }
+
+    // ==== Métodos privados auxiliares ====
+
+    private boolean clienteTieneCreditoActivo(int idCliente) {
+        return creditoDAO.obtenerPorCliente(idCliente)
+                .stream()
+                .anyMatch(c -> c.tieneSaldoPendiente() && "ACTIVO".equalsIgnoreCase(c.getEstado()));
     }
 }

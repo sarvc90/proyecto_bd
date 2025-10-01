@@ -7,26 +7,29 @@ import java.util.List;
 
 /**
  * DAO para la entidad DetalleVenta.
- * Maneja operaciones CRUD sobre los detalles de una venta (en memoria por ahora).
- *
- * @author Sistema
- * @version 1.1
  */
 public class DetalleVentaDAO {
-    // ==================== ATRIBUTOS ====================
-    private List<DetalleVenta> detalles;
+    private final List<DetalleVenta> detalles;
+    private static int idCounter = 1;
+    private static DetalleVentaDAO instance;
 
-    // ==================== CONSTRUCTOR ====================
-
-    public DetalleVentaDAO() {
+    private DetalleVentaDAO() {
         this.detalles = new ArrayList<>();
         cargarDatosPrueba();
     }
 
-    // ==================== CRUD ====================
+    public static DetalleVentaDAO getInstance() {
+        if (instance == null) {
+            instance = new DetalleVentaDAO();
+        }
+        return instance;
+    }
 
     public boolean agregar(DetalleVenta detalle) {
         if (detalle != null && detalle.validarDetalle()) {
+            if (detalle.getIdDetalle() <= 0) {
+                detalle.setIdDetalle(idCounter++);
+            }
             return detalles.add(detalle);
         }
         return false;
@@ -44,6 +47,8 @@ public class DetalleVentaDAO {
     }
 
     public boolean actualizar(DetalleVenta detalle) {
+        if (detalle == null || detalle.getIdDetalle() <= 0) return false;
+
         for (int i = 0; i < detalles.size(); i++) {
             if (detalles.get(i).getIdDetalle() == detalle.getIdDetalle()) {
                 detalles.set(i, detalle);
@@ -57,8 +62,6 @@ public class DetalleVentaDAO {
         return detalles.removeIf(d -> d.getIdDetalle() == idDetalle);
     }
 
-    // ==================== MÉTODOS EXTRA ====================
-
     public List<DetalleVenta> obtenerPorVenta(int idVenta) {
         List<DetalleVenta> resultado = new ArrayList<>();
         for (DetalleVenta d : detalles) {
@@ -70,36 +73,26 @@ public class DetalleVentaDAO {
     }
 
     public double calcularSubtotalVenta(int idVenta) {
-        double subtotal = 0;
-        for (DetalleVenta d : detalles) {
-            if (d.getIdVenta() == idVenta) {
-                subtotal += d.getSubtotal();
-            }
-        }
-        return subtotal;
+        return detalles.stream()
+                .filter(d -> d.getIdVenta() == idVenta)
+                .mapToDouble(DetalleVenta::getSubtotal)
+                .sum();
     }
 
-    // ==================== DATOS DE PRUEBA ====================
-
     private void cargarDatosPrueba() {
-        // Usamos el constructor con (idProducto, cantidad, precioUnitario, iva)
-        DetalleVenta d1 = new DetalleVenta(1, 2, 500, 0.12); // producto 1, 2 unidades, $500 c/u
-        d1.setIdDetalle(1);
-        d1.setIdVenta(1);
+        DetalleVenta d1 = new DetalleVenta(1, 2, 500, 0.12);
+        d1.setIdVenta(10001);
         d1.setNombreProducto("Refrigerador LG");
+        agregar(d1);
 
-        DetalleVenta d2 = new DetalleVenta(2, 1, 300, 0.12); // producto 2, 1 unidad, $300 c/u
-        d2.setIdDetalle(2);
-        d2.setIdVenta(1);
+        DetalleVenta d2 = new DetalleVenta(2, 1, 300, 0.12);
+        d2.setIdVenta(10001);
         d2.setNombreProducto("Televisor Samsung");
+        agregar(d2);
 
-        DetalleVenta d3 = new DetalleVenta(3, 1, 800, 0.12); // producto 3, 1 unidad, $800 c/u
-        d3.setIdDetalle(3);
-        d3.setIdVenta(2);
+        DetalleVenta d3 = new DetalleVenta(3, 1, 800, 0.12);
+        d3.setIdVenta(10002);
         d3.setNombreProducto("Lavadora Whirlpool");
-
-        detalles.add(d1);
-        detalles.add(d2);
-        detalles.add(d3);
+        agregar(d3);
     }
 }

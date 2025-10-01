@@ -9,18 +9,29 @@ import java.util.List;
  * DAO para la entidad Cliente.
  * Maneja operaciones CRUD sobre clientes (en memoria por ahora).
  *
+ * Implementado como Singleton para mantener consistencia en toda la aplicación.
+ *
  * @author Sistema
- * @version 1.0
+ * @version 1.1
  */
 public class ClienteDAO {
     // ==================== ATRIBUTOS ====================
     private List<Cliente> clientes;
+    private static int idCounter = 1; // Contador para IDs en memoria
+    private static ClienteDAO instance; // instancia única
 
     // ==================== CONSTRUCTOR ====================
-
-    public ClienteDAO() {
+    private ClienteDAO() {
         this.clientes = new ArrayList<>();
         cargarDatosPrueba();
+    }
+
+    // ==================== SINGLETON ====================
+    public static synchronized ClienteDAO getInstance() {
+        if (instance == null) {
+            instance = new ClienteDAO();
+        }
+        return instance;
     }
 
     // ==================== CRUD ====================
@@ -30,6 +41,10 @@ public class ClienteDAO {
      */
     public boolean agregar(Cliente cliente) {
         if (cliente != null && cliente.validarDatosObligatorios()) {
+            // Asignar ID si no tiene
+            if (cliente.getIdCliente() == 0) {
+                cliente.setIdCliente(idCounter++);
+            }
             return clientes.add(cliente);
         }
         return false;
@@ -88,12 +103,18 @@ public class ClienteDAO {
      * Cargar datos de prueba para testeo
      */
     private void cargarDatosPrueba() {
-        clientes.add(new Cliente(1, "1234567890", "Carlos", "Pérez",
-                "Calle 123", "3101112233", "carlos@mail.com",
-                null, true, 1000, 200));
-        clientes.add(new Cliente(2, "1098765432", "Ana", "Gómez",
-                "Carrera 45", "3204445566", "ana@mail.com",
-                null, true, 2000, 0));
+        // Los IDs se asignan automáticamente al agregar
+        Cliente c1 = new Cliente("1234567890", "Carlos", "Pérez",
+                "Calle 123", "3101112233", "carlos@mail.com");
+        c1.setLimiteCredito(1000);
+        c1.setSaldoPendiente(200);
+        agregar(c1);
+
+        Cliente c2 = new Cliente("1098765432", "Ana", "Gómez",
+                "Carrera 45", "3204445566", "ana@mail.com");
+        c2.setLimiteCredito(2000);
+        c2.setSaldoPendiente(0);
+        agregar(c2);
     }
 
     /**

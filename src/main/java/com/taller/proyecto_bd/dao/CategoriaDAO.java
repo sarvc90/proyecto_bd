@@ -9,18 +9,29 @@ import java.util.List;
  * DAO para la entidad Categoria.
  * Maneja operaciones CRUD y jerarquía de categorías (en memoria por ahora).
  *
+ * Implementado como Singleton para mantener consistencia en toda la app.
+ *
  * @author Sistema
- * @version 1.0
+ * @version 1.1
  */
 public class CategoriaDAO {
     // ==================== ATRIBUTOS ====================
     private List<Categoria> categorias;
+    private static int idCounter = 1; // Contador para IDs en memoria
+    private static CategoriaDAO instance; // instancia única
 
     // ==================== CONSTRUCTOR ====================
-
-    public CategoriaDAO() {
+    private CategoriaDAO() {
         this.categorias = new ArrayList<>();
         cargarDatosPrueba();
+    }
+
+    // ==================== SINGLETON ====================
+    public static synchronized CategoriaDAO getInstance() {
+        if (instance == null) {
+            instance = new CategoriaDAO();
+        }
+        return instance;
     }
 
     // ==================== CRUD ====================
@@ -30,6 +41,10 @@ public class CategoriaDAO {
      */
     public boolean agregar(Categoria categoria) {
         if (categoria != null && categoria.validarDatosObligatorios() && categoria.validarJerarquia()) {
+            // Asignar ID si no tiene
+            if (categoria.getIdCategoria() == 0) {
+                categoria.setIdCategoria(idCounter++);
+            }
             return categorias.add(categoria);
         }
         return false;
@@ -92,17 +107,21 @@ public class CategoriaDAO {
      * Cargar datos de prueba
      */
     private void cargarDatosPrueba() {
-        categorias.add(new Categoria(1, "CAT001", "Electrodomésticos",
-                "Categoría principal de electrodomésticos", true, null,
-                1, null, "Electrodomésticos", 0));
+        // Los IDs se asignan automáticamente al agregar
+        Categoria c1 = new Categoria("CAT001", "Electrodomésticos",
+                "Categoría principal de electrodomésticos", null, 1);
+        c1.setActivo(true);
+        agregar(c1);
 
-        categorias.add(new Categoria(2, "CAT002", "Refrigeradores",
-                "Subcategoría de refrigeradores", true, null,
-                2, 1, "Electrodomésticos > Refrigeradores", 0));
+        Categoria c2 = new Categoria("CAT002", "Refrigeradores",
+                "Subcategoría de refrigeradores", c1.getIdCategoria(), 2);
+        c2.setActivo(true);
+        agregar(c2);
 
-        categorias.add(new Categoria(3, "CAT003", "Televisores",
-                "Subcategoría de televisores", true, null,
-                2, 1, "Electrodomésticos > Televisores", 0));
+        Categoria c3 = new Categoria("CAT003", "Televisores",
+                "Subcategoría de televisores", c1.getIdCategoria(), 2);
+        c3.setActivo(true);
+        agregar(c3);
     }
 
     /**

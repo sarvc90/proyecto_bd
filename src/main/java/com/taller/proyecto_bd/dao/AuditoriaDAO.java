@@ -1,33 +1,46 @@
 package com.taller.proyecto_bd.dao;
 
 import com.taller.proyecto_bd.models.Auditoria;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * DAO para la entidad Auditoria.
  * Maneja operaciones CRUD sobre registros de auditoría (en memoria por ahora).
  *
+ * Implementado como Singleton para mantener una sola lista de auditorías.
+ *
  * @author Sistema
- * @version 1.0
+ * @version 1.1
  */
 public class AuditoriaDAO {
     // ==================== ATRIBUTOS ====================
     private List<Auditoria> auditorias;
+    private static int idCounter = 1; // Contador para IDs en memoria
+    private static AuditoriaDAO instance; // instancia única
 
     // ==================== CONSTRUCTOR ====================
-
-    public AuditoriaDAO() {
+    private AuditoriaDAO() {
         this.auditorias = new ArrayList<>();
         cargarDatosPrueba();
+    }
+
+    // ==================== SINGLETON ====================
+    public static synchronized AuditoriaDAO getInstance() {
+        if (instance == null) {
+            instance = new AuditoriaDAO();
+        }
+        return instance;
     }
 
     // ==================== CRUD ====================
 
     public boolean agregar(Auditoria auditoria) {
         if (auditoria != null) {
+            // Asignar ID si no tiene
+            if (auditoria.getIdAuditoria() == 0) {
+                auditoria.setIdAuditoria(idCounter++);
+            }
             return auditorias.add(auditoria);
         }
         return false;
@@ -101,27 +114,22 @@ public class AuditoriaDAO {
     }
 
     // ==================== DATOS DE PRUEBA ====================
-
     private void cargarDatosPrueba() {
+        // Los IDs se asignan automáticamente al agregar
         Auditoria a1 = new Auditoria(1, "LOGIN", "Usuario", "Ingreso al sistema", "192.168.0.1");
-        a1.setIdAuditoria(1);
         a1.setNombreUsuario("Admin General");
+        agregar(a1);
 
         Auditoria a2 = new Auditoria(2, "CREAR_VENTA", "Venta", "Venta V001 creada", "192.168.0.2");
-        a2.setIdAuditoria(2);
         a2.setNombreUsuario("Carlos Pérez");
+        agregar(a2);
 
         Auditoria a3 = new Auditoria(3, "ANULAR", "Credito", "Crédito 3 anulado por falta de pago", "192.168.0.3");
-        a3.setIdAuditoria(3);
         a3.setNombreUsuario("Laura Gómez");
+        agregar(a3);
 
         Auditoria a4 = new Auditoria(2, "LOGIN_FALLIDO", "Usuario", "Intento de login con clave errada", "192.168.0.2");
-        a4.setIdAuditoria(4);
         a4.setNombreUsuario("Carlos Pérez");
-
-        auditorias.add(a1);
-        auditorias.add(a2);
-        auditorias.add(a3);
-        auditorias.add(a4);
+        agregar(a4);
     }
 }

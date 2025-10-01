@@ -10,23 +10,29 @@ import java.util.List;
  * Maneja login, roles, activación/bloqueo y coordinación con DAO.
  *
  * @author Sistema
- * @version 1.0
+ * @version 1.2 - Corregido manejo de usuarios bloqueados
  */
 public class UsuarioController {
-    private UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private UsuarioDAO usuarioDAO = UsuarioDAO.getInstance();
 
     /**
      * Intentar login de un usuario
+     * Retorna null si las credenciales son incorrectas o si el usuario está bloqueado
      */
     public Usuario login(String username, String password) {
         Usuario user = usuarioDAO.login(username, password);
-        if (user != null) {
-            if (!user.isActivo()) {
-                throw new IllegalStateException("La cuenta está bloqueada.");
-            }
-            return user;
+
+        // Si no existe el usuario o credenciales incorrectas
+        if (user == null) {
+            return null;
         }
-        return null;
+
+        // Si el usuario existe pero está bloqueado
+        if (!user.isActivo()) {
+            return null; // CORREGIDO: retornar null en lugar de lanzar excepción
+        }
+
+        return user;
     }
 
     /**
@@ -43,12 +49,27 @@ public class UsuarioController {
      * Bloquear un usuario (desactivar su cuenta)
      */
     public boolean bloquearUsuario(int idUsuario) {
-        Usuario u = usuarioDAO.obtenerPorId(idUsuario);
-        if (u != null && u.isActivo()) {
-            u.bloquear();
-            return usuarioDAO.actualizar(u);
+        try {
+            Usuario u = usuarioDAO.obtenerPorId(idUsuario);
+            if (u == null) {
+                System.out.println("Usuario no encontrado ID: " + idUsuario);
+                return false;
+            }
+
+            u.setActivo(false);
+            boolean resultado = usuarioDAO.actualizar(u);
+
+            if (resultado) {
+                System.out.println("✓ Usuario " + u.getUsername() + " bloqueado exitosamente");
+            } else {
+                System.out.println("✗ Error al bloquear usuario " + u.getUsername());
+            }
+
+            return resultado;
+        } catch (Exception e) {
+            System.out.println("Error en bloquearUsuario: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     /**
@@ -56,11 +77,13 @@ public class UsuarioController {
      */
     public boolean activarUsuario(int idUsuario) {
         Usuario u = usuarioDAO.obtenerPorId(idUsuario);
-        if (u != null && !u.isActivo()) {
-            u.activar();
-            return usuarioDAO.actualizar(u);
+        if (u == null) {
+            return false;
         }
-        return false;
+
+        // CORREGIDO: activar sin importar el estado actual
+        u.setActivo(true);
+        return usuarioDAO.actualizar(u);
     }
 
     /**
