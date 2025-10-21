@@ -14,7 +14,8 @@ import java.sql.SQLException;
 public class ConexionBD {
 
     // ==================== CONFIGURACIÓN ====================
-    private static final String URL = "jdbc:sqlserver://localhost\\\\SQLEXPRESS:1433;databaseName=ElectrodomesticosDB;encrypt=false;"; 
+    private static final String URL = "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=ElectrodomesticosDB;encrypt=false;";
+
     private static final String USER = "sa"; 
     private static final String PASSWORD = "bases123";  
 

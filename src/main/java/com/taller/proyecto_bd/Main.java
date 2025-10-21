@@ -38,15 +38,17 @@ public class Main {
         System.out.println();
 
         // Ejecutar todas las pruebas
-        probarModelos();
-        probarDAOs();
-        probarControladores();
-        probarServicios();
-        probarUtilidades();
-        probarFlujoCompleto();
+        //probarModelos();
+       // probarDAOs();
+        //probarControladores();
+        //probarServicios();
+        //probarUtilidades();
+        //probarFlujoCompleto();
+
+        ConexionBD.obtenerConexion();
 
         // Resumen final
-        mostrarResumen();
+        //mostrarResumen();
     }
 
     // ==================== PRUEBAS DE MODELOS ====================
