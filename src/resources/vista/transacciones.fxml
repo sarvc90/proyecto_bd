@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.taller.proyecto_bd.ui.transacciones.TransaccionesController"
+            prefWidth="950" prefHeight="600"
+            stylesheets="@../css/styles.css"
+            styleClass="contenedor-entidades">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="encabezado-seccion">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Label text="Transacciones - Registro de Ventas" styleClass="titulo-seccion"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Nueva venta">
+                    <content>
+                        <BorderPane prefHeight="540" prefWidth="920">
+                            <left>
+                                <VBox spacing="12" prefWidth="320" styleClass="panel-formulario">
+                                    <Label text="Datos del cliente y vendedor" styleClass="subtitulo-seccion"/>
+                                    <ComboBox fx:id="cbVentaCliente" promptText="Seleccione cliente"/>
+                                    <ComboBox fx:id="cbVentaVendedor" promptText="Seleccione vendedor"/>
+                                    <Label text="Tipo de pago" styleClass="subtitulo-seccion"/>
+                                    <ToggleGroup fx:id="grupoTipoPago"/>
+                                    <HBox spacing="10">
+                                        <RadioButton fx:id="rbContado" text="Contado" toggleGroup="$grupoTipoPago" selected="true" onAction="#seleccionarContado"/>
+                                        <RadioButton fx:id="rbCredito" text="Crédito" toggleGroup="$grupoTipoPago" onAction="#seleccionarCredito"/>
+                                    </HBox>
+                                    <VBox fx:id="boxCredito" spacing="8" visible="false" managed="false">
+                                        <TextField fx:id="txtCuotaInicial" promptText="Cuota inicial (30% mínimo)"/>
+                                        <ComboBox fx:id="cbPlazoMeses" promptText="Plazo (meses)"/>
+                                        <TextField fx:id="txtInteres" promptText="Interés (%)"/>
+                                    </VBox>
+                                    <Label fx:id="lblVentaMensaje" styleClass="mensaje-estado"/>
+                                </VBox>
+                            </left>
+
+                            <center>
+                                <VBox spacing="12" style="-fx-padding: 0 15 0 15;">
+                                    <HBox spacing="10">
+                                        <ComboBox fx:id="cbProductoVenta" promptText="Producto a agregar" prefWidth="320"/>
+                                        <TextField fx:id="txtCantidadProducto" promptText="Cantidad" prefWidth="120"/>
+                                        <Button text="Agregar" onAction="#agregarProducto" styleClass="btn-primario"/>
+                                        <Button text="Quitar seleccionado" onAction="#quitarDetalle" styleClass="btn-plano"/>
+                                    </HBox>
+                                    <TableView fx:id="tablaDetalles" prefHeight="320">
+                                        <columns>
+                                            <TableColumn fx:id="colDetalleProducto" text="Producto" prefWidth="220"/>
+                                            <TableColumn fx:id="colDetalleCantidad" text="Cantidad" prefWidth="90"/>
+                                            <TableColumn fx:id="colDetallePrecio" text="Precio" prefWidth="100"/>
+                                            <TableColumn fx:id="colDetalleSubtotal" text="Subtotal" prefWidth="110"/>
+                                            <TableColumn fx:id="colDetalleIVA" text="IVA" prefWidth="100"/>
+                                            <TableColumn fx:id="colDetalleTotal" text="Total" prefWidth="110"/>
+                                        </columns>
+                                    </TableView>
+                                    <HBox spacing="20" alignment="CENTER_RIGHT">
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <VBox alignment="CENTER_RIGHT">
+                                            <Label text="Subtotal:"/>
+                                            <Label text="IVA:"/>
+                                            <Label text="Total:"/>
+                                        </VBox>
+                                        <VBox alignment="CENTER_RIGHT">
+                                            <Label fx:id="lblSubtotal" text="$0.00"/>
+                                            <Label fx:id="lblIVA" text="$0.00"/>
+                                            <Label fx:id="lblTotal" text="$0.00" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                                        </VBox>
+                                    </HBox>
+                                    <HBox spacing="12" alignment="CENTER_RIGHT">
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Button text="Registrar venta" onAction="#registrarVenta" styleClass="btn-primario"/>
+                                        <Button text="Limpiar" onAction="#limpiarVenta" styleClass="btn-plano"/>
+                                    </HBox>
+                                </VBox>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </Tab>
+
+                <Tab text="Historial y facturas">
+                    <content>
+                        <BorderPane prefHeight="540" prefWidth="920">
+                            <center>
+                                <TableView fx:id="tablaVentas" prefHeight="320">
+                                    <columns>
+                                        <TableColumn fx:id="colVentaCodigo" text="Código" prefWidth="120"/>
+                                        <TableColumn fx:id="colVentaCliente" text="Cliente" prefWidth="180"/>
+                                        <TableColumn fx:id="colVentaVendedor" text="Vendedor" prefWidth="160"/>
+                                        <TableColumn fx:id="colVentaFecha" text="Fecha" prefWidth="130"/>
+                                        <TableColumn fx:id="colVentaTipo" text="Tipo" prefWidth="90"/>
+                                        <TableColumn fx:id="colVentaTotal" text="Total" prefWidth="100"/>
+                                    </columns>
+                                </TableView>
+                            </center>
+                            <right>
+                                <VBox spacing="10" prefWidth="320" styleClass="panel-formulario">
+                                    <Label text="Detalle de factura" styleClass="subtitulo-seccion"/>
+                                    <TextArea fx:id="txtFactura" editable="false" wrapText="true" prefHeight="280"/>
+                                    <Button text="Generar factura" onAction="#generarFacturaSeleccionada" styleClass="btn-secundario"/>
+                                    <Label fx:id="lblHistorialMensaje" styleClass="mensaje-estado"/>
+                                </VBox>
+                            </right>
+                        </BorderPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+
+</BorderPane>
