@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+            prefHeight="750.0" prefWidth="1200.0" 
+            stylesheets="@styles.css" 
+            xmlns="http://javafx.com/javafx/19" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.taller.proyecto_bd.controllers.ConsultasReportesController">
+   
+   <!-- ==================== ENCABEZADO ==================== -->
+   <top>
+      <VBox style="-fx-background-color: #f39c12; -fx-padding: 15;">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <Label text="📊" textFill="white">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <VBox>
+                     <children>
+                        <Label styleClass="panel-title" text="Consultas y Reportes" textFill="white">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label text="Consultas multitabla y reportes con cálculos" textFill="#ecf0f1">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  
+                  <Region HBox.hgrow="ALWAYS" />
+                  
+                  <Button mnemonicParsing="false" onAction="#cerrarVentana" 
+                          styleClass="btn-secondary" text="✕ Cerrar">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </top>
+   
+   <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+   <center>
+      <HBox spacing="10.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </padding>
+         <children>
+            <!-- ==================== PANEL IZQUIERDO: CONSULTAS ==================== -->
+            <VBox spacing="10.0" prefWidth="280.0">
+               <children>
+                  <Label styleClass="panel-title" text="📋 Consultas Multitabla" textFill="#2c3e50">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  
+                  <Separator />
+                  
+                  <!-- Consulta 1 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="1. Productos por Categoría" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Lista productos con su categoría y stock" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#consultaProductosCategoria" 
+                               styleClass="btn-primary" text="Ejecutar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Consulta 2 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="2. Clientes con Crédito Activo" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Clientes con saldo pendiente y su límite" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#consultaClientesCredito" 
+                               styleClass="btn-primary" text="Ejecutar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Consulta 3 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="3. Ventas con Detalle" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Ventas con cliente, usuario y productos" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#consultaVentasDetalle" 
+                               styleClass="btn-primary" text="Ejecutar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Consulta 4 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="4. Productos con Bajo Stock" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Productos que necesitan reabastecimiento" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#consultaProductosBajoStock" 
+                               styleClass="btn-warning" text="Ejecutar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Consulta 5 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="5. Créditos Activos" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Créditos activos con cliente y saldo" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#consultaCreditosActivos" 
+                               styleClass="btn-primary" text="Ejecutar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <Separator />
+                  
+                  <!-- Reportes -->
+                  <Label styleClass="panel-title" text="📄 Reportes con Cálculos" textFill="#2c3e50">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  
+                  <Separator />
+                  
+                  <!-- Reporte 1 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="1. Resumen de Ventas" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Total ventas, IVA y utilidades" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#reporteResumenVentas" 
+                               styleClass="btn-success" text="Generar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Reporte 2 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="2. Inventario Valorizado" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Valor total del inventario por categoría" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#reporteInventarioValorizado" 
+                               styleClass="btn-success" text="Generar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Reporte 3 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="3. Estado de Cartera" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Análisis de créditos y saldos" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#reporteEstadoCartera" 
+                               styleClass="btn-success" text="Generar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Reporte 4 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="4. Top Productos Vendidos" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="Productos más vendidos con totales" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#reporteTopProductos" 
+                               styleClass="btn-success" text="Generar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Reporte 5 -->
+                  <VBox spacing="5.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <children>
+                        <Label text="5. Análisis de IVA" textFill="#2c3e50">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Label>
+                        <Label text="IVA recaudado por período" wrapText="true" textFill="#7f8c8d">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#reporteAnalisisIVA" 
+                               styleClass="btn-success" text="Generar" maxWidth="Infinity">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            
+            <!-- ==================== PANEL DERECHO: RESULTADOS ==================== -->
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <!-- Título del resultado -->
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label fx:id="lblTituloResultado" styleClass="panel-title" text="Seleccione una consulta o reporte">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnExportar" mnemonicParsing="false" 
+                               onAction="#exportarResultados" styleClass="btn-primary" 
+                               text="📄 Exportar" disable="true">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+                  
+                  <Separator />
+                  
+                  <!-- Área de resultados con tabla -->
+                  <TableView fx:id="tablaResultados" VBox.vgrow="ALWAYS">
+                     <placeholder>
+                        <Label text="Seleccione una consulta o reporte para ver los resultados" textFill="#7f8c8d">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+                     </placeholder>
+                  </TableView>
+                  
+                  <!-- Panel de resumen con cálculos -->
+                  <VBox fx:id="panelResumen" spacing="10.0" styleClass="card" visible="false">
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                     <children>
+                        <Label text="📊 Resumen y Cálculos" styleClass="panel-title">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font>
+                        </Label>
+                        <Separator />
+                        <TextArea fx:id="txtResumen" editable="false" prefHeight="100.0" 
+                                 wrapText="true" style="-fx-background-color: #f8f9fa;">
+                           <font>
+                              <Font family="Monospaced" size="11.0" />
+                           </font>
+                        </TextArea>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </center>
+</BorderPane>

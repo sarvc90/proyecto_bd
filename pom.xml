@@ -9,12 +9,14 @@
     <version>1.0-SNAPSHOT</version>
     <name>proyecto_bd</name>
 
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <junit.version>5.10.2</junit.version>
         <javafx.version>21</javafx.version>
+        <javafx.platform>win</javafx.platform>
     </properties>
 
     <dependencies>
@@ -25,11 +27,13 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
         </dependency>
 
         <!-- MySQL Connector -->
@@ -69,6 +73,11 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <!-- Compilador -->
             <plugin>
@@ -86,7 +95,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.taller.proyecto_bd/com.taller.proyecto_bd.HelloApplication</mainClass>
+                    <mainClass>com.taller.proyecto_bd.HelloApplication</mainClass>
                 </configuration>
             </plugin>
 

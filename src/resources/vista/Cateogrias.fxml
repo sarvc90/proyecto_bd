@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+            prefHeight="650.0" prefWidth="1000.0" 
+            stylesheets="@styles.css" 
+            xmlns="http://javafx.com/javafx/19" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.taller.proyecto_bd.controllers.CategoriasController">
+   
+   <!-- ==================== ENCABEZADO ==================== -->
+   <top>
+      <VBox style="-fx-background-color: #9b59b6; -fx-padding: 15;">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <Label text="📂" textFill="white">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <VBox>
+                     <children>
+                        <Label styleClass="panel-title" text="Gestión de Categorías" textFill="white">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label text="Organice el catálogo de productos por categorías" textFill="#ecf0f1">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  
+                  <Region HBox.hgrow="ALWAYS" />
+                  
+                  <Button mnemonicParsing="false" onAction="#cerrarVentana" 
+                          styleClass="btn-secondary" text="✕ Cerrar">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </top>
+   
+   <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+   <center>
+      <SplitPane dividerPositions="0.35" BorderPane.alignment="CENTER">
+         
+         <!-- ==================== PANEL IZQUIERDO: FORMULARIO ==================== -->
+         <AnchorPane minWidth="320.0" prefWidth="350.0">
+            <children>
+               <ScrollPane fitToWidth="true" AnchorPane.bottomAnchor="0.0" 
+                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" 
+                          AnchorPane.topAnchor="0.0">
+                  <content>
+                     <VBox spacing="15.0" style="-fx-background-color: white;">
+                        <padding>
+                           <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                        </padding>
+                        <children>
+                           <!-- Título del formulario -->
+                           <Label styleClass="panel-title" text="Datos de la Categoría">
+                              <font>
+                                 <Font name="System Bold" size="16.0" />
+                              </font>
+                           </Label>
+                           
+                           <Separator />
+                           
+                           <!-- Campo: Código -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Código *">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <TextField fx:id="txtCodigo" promptText="Ej: CAT001" styleClass="text-field-custom">
+                                    <font>
+                                       <Font size="12.0" />
+                                    </font>
+                                 </TextField>
+                              </children>
+                           </VBox>
+                           
+                           <!-- Campo: Nombre -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Nombre *">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <TextField fx:id="txtNombre" promptText="Nombre de la categoría" styleClass="text-field-custom">
+                                    <font>
+                                       <Font size="12.0" />
+                                    </font>
+                                 </TextField>
+                              </children>
+                           </VBox>
+                           
+                           <!-- Campo: Descripción -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Descripción">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <TextArea fx:id="txtDescripcion" prefHeight="80.0" 
+                                          promptText="Descripción de la categoría..." wrapText="true">
+                                    <font>
+                                       <Font size="12.0" />
+                                    </font>
+                                 </TextArea>
+                              </children>
+                           </VBox>
+                           
+                           <!-- Campo: Nivel -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Nivel Jerárquico">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <ComboBox fx:id="cmbNivel" prefWidth="280.0" promptText="Seleccione el nivel">
+                                    <items>
+                                       <FXCollections fx:factory="observableArrayList">
+                                          <String fx:value="1 - Categoría Principal" />
+                                          <String fx:value="2 - Subcategoría Nivel 1" />
+                                          <String fx:value="3 - Subcategoría Nivel 2" />
+                                       </FXCollections>
+                                    </items>
+                                 </ComboBox>
+                              </children>
+                           </VBox>
+                           
+                           <!-- Campo: Categoría Padre -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Categoría Padre (Opcional)">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <ComboBox fx:id="cmbCategoriaPadre" prefWidth="280.0" 
+                                          promptText="Ninguna (Categoría principal)">
+                                 </ComboBox>
+                              </children>
+                           </VBox>
+                           
+                           <!-- CheckBox Activo -->
+                           <CheckBox fx:id="chkActivo" selected="true" text="Categoría activa" styleClass="checkbox-custom">
+                              <font>
+                                 <Font size="12.0" />
+                              </font>
+                           </CheckBox>
+                           
+                           <!-- Info de productos -->
+                           <HBox alignment="CENTER_LEFT" spacing="10.0" 
+                                style="-fx-background-color: #f0f3f4; -fx-padding: 10; -fx-background-radius: 5;">
+                              <children>
+                                 <Label text="Productos en esta categoría:" textFill="#7f8c8d">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <Label fx:id="lblCantidadProductos" text="0" textFill="#2c3e50">
+                                    <font>
+                                       <Font name="System Bold" size="12.0" />
+                                    </font>
+                                 </Label>
+                              </children>
+                           </HBox>
+                           
+                           <Separator />
+                           
+                           <!-- Botones de acción -->
+                           <HBox alignment="CENTER" spacing="10.0">
+                              <children>
+                                 <Button fx:id="btnNuevo" mnemonicParsing="false" 
+                                        onAction="#nuevo" prefWidth="85.0" 
+                                        styleClass="btn-primary" text="Nuevo">
+                                    <font>
+                                       <Font size="11.0" />
+                                    </font>
+                                 </Button>
+                                 
+                                 <Button fx:id="btnGuardar" mnemonicParsing="false" 
+                                        onAction="#guardar" prefWidth="85.0" 
+                                        styleClass="btn-success" text="Guardar">
+                                    <font>
+                                       <Font size="11.0" />
+                                    </font>
+                                 </Button>
+                                 
+                                 <Button fx:id="btnEliminar" mnemonicParsing="false" 
+                                        onAction="#eliminar" prefWidth="85.0" 
+                                        styleClass="btn-danger" text="Eliminar">
+                                    <font>
+                                       <Font size="11.0" />
+                                    </font>
+                                 </Button>
+                              </children>
+                           </HBox>
+                           
+                           <!-- Mensaje de información -->
+                           <Label fx:id="lblMensaje" alignment="CENTER" textAlignment="CENTER" 
+                                 visible="false" wrapText="true" styleClass="success-label">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </VBox>
+                  </content>
+               </ScrollPane>
+            </children>
+         </AnchorPane>
+         
+         <!-- ==================== PANEL DERECHO: TABLA ==================== -->
+         <AnchorPane minWidth="550.0">
+            <children>
+               <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" 
+                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" 
+                     AnchorPane.topAnchor="0.0">
+                  <padding>
+                     <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                  </padding>
+                  <children>
+                     <!-- Barra de búsqueda y filtros -->
+                     <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <children>
+                           <Label text="Buscar:">
+                              <font>
+                                 <Font name="System Bold" size="12.0" />
+                              </font>
+                           </Label>
+                           <TextField fx:id="txtBuscar" promptText="Buscar por código o nombre..." 
+                                     HBox.hgrow="ALWAYS" styleClass="text-field-custom">
+                              <font>
+                                 <Font size="12.0" />
+                              </font>
+                           </TextField>
+                           <Button mnemonicParsing="false" onAction="#buscar" 
+                                  styleClass="btn-primary" text="Buscar">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Button>
+                           <Button mnemonicParsing="false" onAction="#limpiarBusqueda" 
+                                  styleClass="btn-secondary" text="Limpiar">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Button>
+                        </children>
+                     </HBox>
+                     
+                     <!-- Tabla de categorías -->
+                     <TableView fx:id="tablaCategorias" VBox.vgrow="ALWAYS">
+                        <columns>
+                           <TableColumn fx:id="colCodigo" prefWidth="90.0" text="Código" />
+                           <TableColumn fx:id="colNombre" prefWidth="180.0" text="Nombre" />
+                           <TableColumn fx:id="colDescripcion" prefWidth="200.0" text="Descripción" />
+                           <TableColumn fx:id="colNivel" prefWidth="140.0" text="Nivel" />
+                           <TableColumn fx:id="colProductos" prefWidth="90.0" text="Productos" />
+                           <TableColumn fx:id="colActivo" prefWidth="80.0" text="Estado" />
+                        </columns>
+                     </TableView>
+                     
+                     <!-- Barra de información -->
+                     <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <children>
+                           <Label text="Total de categorías:">
+                              <font>
+                                 <Font name="System Bold" size="11.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="lblTotalCategorias" text="0">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                           
+                           <Separator orientation="VERTICAL" />
+                           
+                           <Label text="Categorías activas:">
+                              <font>
+                                 <Font name="System Bold" size="11.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="lblCategoriasActivas" text="0" textFill="#27ae60">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                           
+                           <Separator orientation="VERTICAL" />
+                           
+                           <Label text="Principales:">
+                              <font>
+                                 <Font name="System Bold" size="11.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="lblPrincipales" text="0" textFill="#3498db">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                           
+                           <Separator orientation="VERTICAL" />
+                           
+                           <Label text="Subcategorías:">
+                              <font>
+                                 <Font name="System Bold" size="11.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="lblSubcategorias" text="0" textFill="#9b59b6">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </HBox>
+                  </children>
+               </VBox>
+            </children>
+         </AnchorPane>
+      </SplitPane>
+   </center>
+</BorderPane>

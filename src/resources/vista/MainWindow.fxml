@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+            prefHeight="700.0" prefWidth="1200.0" 
+            stylesheets="@styles.css" 
+            xmlns="http://javafx.com/javafx/19" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.taller.proyecto_bd.controllers.MainWindowController">
+   
+   <!-- ==================== BARRA DE MENÚ SUPERIOR ==================== -->
+   <top>
+      <VBox>
+         <!-- MenuBar -->
+         <MenuBar styleClass="menu-bar">
+            <menus>
+               <!-- Menú: Entidades -->
+               <Menu fx:id="menuEntidades" mnemonicParsing="false" text="Entidades">
+                  <items>
+                     <MenuItem fx:id="menuItemCategorias" mnemonicParsing="false" 
+                               onAction="#abrirCategorias" text="Categorías" />
+                     <MenuItem fx:id="menuItemProductos" mnemonicParsing="false" 
+                               onAction="#abrirProductos" text="Productos" />
+                     <MenuItem fx:id="menuItemClientes" mnemonicParsing="false" 
+                               onAction="#abrirClientes" text="Clientes" />
+                     <MenuItem fx:id="menuItemInventario" mnemonicParsing="false" 
+                               onAction="#abrirInventario" text="Inventario" />
+                     <SeparatorMenuItem />
+                     <MenuItem fx:id="menuItemUsuarios" mnemonicParsing="false" 
+                               onAction="#abrirUsuarios" text="Usuarios (Admin)" />
+                  </items>
+               </Menu>
+               
+               <!-- Menú: Transacciones -->
+               <Menu fx:id="menuTransacciones" mnemonicParsing="false" text="Transacciones">
+                  <items>
+                     <MenuItem fx:id="menuItemNuevaVenta" mnemonicParsing="false" 
+                               onAction="#nuevaVenta" text="Nueva Venta" />
+                     <MenuItem fx:id="menuItemVentas" mnemonicParsing="false" 
+                               onAction="#abrirVentas" text="Gestionar Ventas" />
+                     <SeparatorMenuItem />
+                     <MenuItem fx:id="menuItemCreditos" mnemonicParsing="false" 
+                               onAction="#abrirCreditos" text="Créditos" />
+                     <MenuItem fx:id="menuItemCuotas" mnemonicParsing="false" 
+                               onAction="#abrirCuotas" text="Gestionar Cuotas" />
+                  </items>
+               </Menu>
+               
+               <!-- Menú: Consultas y Reportes -->
+               <Menu fx:id="menuConsultasReportes" mnemonicParsing="false" text="Consultas y Reportes">
+                  <items>
+                     <!-- Consultas -->
+                     <Menu text="Consultas">
+                        <items>
+                           <MenuItem mnemonicParsing="false" onAction="#consultaProductosCategoria" 
+                                     text="Productos por Categoría" />
+                           <MenuItem mnemonicParsing="false" onAction="#consultaClientesCredito" 
+                                     text="Clientes con Crédito Activo" />
+                           <MenuItem mnemonicParsing="false" onAction="#consultaVentasMes" 
+                                     text="Ventas por Mes" />
+                           <MenuItem mnemonicParsing="false" onAction="#consultaProductosBajoStock" 
+                                     text="Productos con Bajo Stock" />
+                           <MenuItem mnemonicParsing="false" onAction="#consultaClientesMorosos" 
+                                     text="Clientes Morosos" />
+                        </items>
+                     </Menu>
+                     <SeparatorMenuItem />
+                     <!-- Reportes -->
+                     <Menu text="Reportes">
+                        <items>
+                           <MenuItem mnemonicParsing="false" onAction="#reporteFacturaVenta" 
+                                     text="Factura de Venta" />
+                           <MenuItem mnemonicParsing="false" onAction="#reporteVentasMes" 
+                                     text="Ventas del Mes" />
+                           <MenuItem mnemonicParsing="false" onAction="#reporteIVATrimestre" 
+                                     text="IVA por Trimestre" />
+                           <MenuItem mnemonicParsing="false" onAction="#reporteInventarioCategoria" 
+                                     text="Inventario por Categoría" />
+                           <MenuItem mnemonicParsing="false" onAction="#reporteClientesMorosos" 
+                                     text="Reporte de Morosos" />
+                        </items>
+                     </Menu>
+                  </items>
+               </Menu>
+               
+               <!-- Menú: Utilidades -->
+               <Menu fx:id="menuUtilidades" mnemonicParsing="false" text="Utilidades">
+                  <items>
+                     <MenuItem fx:id="menuItemCalculadora" mnemonicParsing="false" 
+                               onAction="#abrirCalculadora" text="Calculadora" />
+                     <MenuItem fx:id="menuItemCalendario" mnemonicParsing="false" 
+                               onAction="#abrirCalendario" text="Calendario" />
+                     <SeparatorMenuItem />
+                     <MenuItem fx:id="menuItemBitacora" mnemonicParsing="false" 
+                               onAction="#abrirBitacora" text="Bitácora (Auditoría)" />
+                  </items>
+               </Menu>
+               
+               <!-- Menú: Ayuda -->
+               <Menu mnemonicParsing="false" text="Ayuda">
+                  <items>
+                     <MenuItem mnemonicParsing="false" onAction="#abrirAcercaDe" 
+                               text="Acerca de" />
+                     <MenuItem mnemonicParsing="false" onAction="#abrirManual" 
+                               text="Manual de Usuario" />
+                  </items>
+               </Menu>
+            </menus>
+         </MenuBar>
+         
+         <!-- Barra de información del usuario -->
+         <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #34495e; -fx-padding: 8;">
+            <children>
+               <Label text="Usuario:" textFill="white">
+                  <font>
+                     <Font name="System Bold" size="12.0" />
+                  </font>
+               </Label>
+               <Label fx:id="lblUsuarioActual" text="Admin" textFill="white">
+                  <font>
+                     <Font size="12.0" />
+                  </font>
+               </Label>
+               
+               <Separator orientation="VERTICAL" />
+               
+               <Label text="Rol:" textFill="white">
+                  <font>
+                     <Font name="System Bold" size="12.0" />
+                  </font>
+               </Label>
+               <Label fx:id="lblRolActual" text="Administrador" textFill="white">
+                  <font>
+                     <Font size="12.0" />
+                  </font>
+               </Label>
+               
+               <Region HBox.hgrow="ALWAYS" />
+               
+               <Label fx:id="lblFechaHora" text="29/10/2025 10:30 AM" textFill="white">
+                  <font>
+                     <Font size="12.0" />
+                  </font>
+               </Label>
+               
+               <Button mnemonicParsing="false" onAction="#cerrarSesion" 
+                       styleClass="btn-danger" text="Cerrar Sesión">
+                  <font>
+                     <Font size="11.0" />
+                  </font>
+               </Button>
+            </children>
+         </HBox>
+      </VBox>
+   </top>
+   
+   <!-- ==================== PANEL LATERAL IZQUIERDO ==================== -->
+   <left>
+      <VBox prefWidth="220.0" spacing="10.0" style="-fx-background-color: #ecf0f1; -fx-padding: 15;" 
+            BorderPane.alignment="CENTER">
+         <children>
+            <!-- Título del panel lateral -->
+            <Label styleClass="panel-title" text="Accesos Rápidos">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            
+            <Separator />
+            
+            <!-- Botones de acceso rápido -->
+            <Button fx:id="btnNuevaVenta" maxWidth="1.7976931348623157E308" 
+                    mnemonicParsing="false" onAction="#nuevaVenta" 
+                    prefHeight="40.0" styleClass="btn-success" text="Nueva Venta">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+            
+            <Button fx:id="btnBuscarCliente" maxWidth="1.7976931348623157E308" 
+                    mnemonicParsing="false" onAction="#buscarCliente" 
+                    prefHeight="35.0" styleClass="btn-primary" text="Buscar Cliente">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Button>
+            
+            <Button fx:id="btnBuscarProducto" maxWidth="1.7976931348623157E308" 
+                    mnemonicParsing="false" onAction="#buscarProducto" 
+                    prefHeight="35.0" styleClass="btn-primary" text="Buscar Producto">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Button>
+            
+            <Separator />
+            
+            <Label text="Estadísticas Rápidas">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            
+            <!-- Cards de estadísticas -->
+            <VBox spacing="8.0" styleClass="card">
+               <children>
+                  <Label text="Ventas Hoy" textFill="#7f8c8d">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblVentasHoy" text="$ 0.00" textFill="#2c3e50">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            
+            <VBox spacing="8.0" styleClass="card">
+               <children>
+                  <Label text="Productos en Stock" textFill="#7f8c8d">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblProductosStock" text="0" textFill="#2c3e50">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            
+            <VBox spacing="8.0" styleClass="card">
+               <children>
+                  <Label text="Créditos Activos" textFill="#7f8c8d">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblCreditosActivos" text="0" textFill="#2c3e50">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </left>
+   
+   <!-- ==================== ÁREA CENTRAL DE CONTENIDO ==================== -->
+   <center>
+      <StackPane fx:id="contenedorPrincipal" style="-fx-background-color: white;">
+         <!-- Aquí se cargarán dinámicamente las diferentes vistas -->
+         <VBox alignment="CENTER" spacing="20.0">
+            <children>
+               <Label text="🏠" textFill="#3498db">
+                  <font>
+                     <Font size="72.0" />
+                  </font>
+               </Label>
+               <Label text="Sistema de Gestión de Electrodomésticos" textFill="#2c3e50">
+                  <font>
+                     <Font name="System Bold" size="24.0" />
+                  </font>
+               </Label>
+               <Label text="Seleccione una opción del menú para comenzar" textFill="#7f8c8d">
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+               </Label>
+               
+               <HBox alignment="CENTER" spacing="15.0">
+                  <VBox.margin>
+                     <Insets top="30.0" />
+                  </VBox.margin>
+                  <children>
+                     <VBox alignment="CENTER" spacing="10.0" styleClass="card" 
+                           style="-fx-cursor: hand;" onMouseClicked="#abrirProductos">
+                        <padding>
+                           <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                        </padding>
+                        <children>
+                           <Label text="📦" textFill="#3498db">
+                              <font>
+                                 <Font size="48.0" />
+                              </font>
+                           </Label>
+                           <Label text="Productos" textFill="#2c3e50">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </VBox>
+                     
+                     <VBox alignment="CENTER" spacing="10.0" styleClass="card" 
+                           style="-fx-cursor: hand;" onMouseClicked="#abrirClientes">
+                        <padding>
+                           <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                        </padding>
+                        <children>
+                           <Label text="👥" textFill="#27ae60">
+                              <font>
+                                 <Font size="48.0" />
+                              </font>
+                           </Label>
+                           <Label text="Clientes" textFill="#2c3e50">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </VBox>
+                     
+                     <VBox alignment="CENTER" spacing="10.0" styleClass="card" 
+                           style="-fx-cursor: hand;" onMouseClicked="#nuevaVenta">
+                        <padding>
+                           <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                        </padding>
+                        <children>
+                           <Label text="🛒" textFill="#e74c3c">
+                              <font>
+                                 <Font size="48.0" />
+                              </font>
+                           </Label>
+                           <Label text="Ventas" textFill="#2c3e50">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </VBox>
+                     
+                     <VBox alignment="CENTER" spacing="10.0" styleClass="card" 
+                           style="-fx-cursor: hand;" onMouseClicked="#reporteFacturaVenta">
+                        <padding>
+                           <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                        </padding>
+                        <children>
+                           <Label text="📊" textFill="#f39c12">
+                              <font>
+                                 <Font size="48.0" />
+                              </font>
+                           </Label>
+                           <Label text="Reportes" textFill="#2c3e50">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                        </children>
+                     </VBox>
+                  </children>
+               </HBox>
+            </children>
+         </VBox>
+      </StackPane>
+   </center>
+   
+   <!-- ==================== BARRA DE ESTADO INFERIOR ==================== -->
+   <bottom>
+      <HBox alignment="CENTER_LEFT" spacing="10.0" 
+            style="-fx-background-color: #ecf0f1; -fx-padding: 8;" 
+            BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="lblEstado" text="Listo" textFill="#7f8c8d">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
+            
+            <Region HBox.hgrow="ALWAYS" />
+            
+            <Label text="Universidad del Quindío - Bases de Datos I" textFill="#95a5a6">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>

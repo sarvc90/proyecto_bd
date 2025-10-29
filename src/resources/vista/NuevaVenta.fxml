@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+            prefHeight="750.0" prefWidth="1200.0" 
+            stylesheets="@styles.css" 
+            xmlns="http://javafx.com/javafx/19" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.taller.proyecto_bd.controllers.NuevaVentaController">
+   
+   <!-- ==================== ENCABEZADO ==================== -->
+   <top>
+      <VBox style="-fx-background-color: #e74c3c; -fx-padding: 15;">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="15.0">
+               <children>
+                  <Label text="🛒" textFill="white">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <VBox>
+                     <children>
+                        <Label styleClass="panel-title" text="Nueva Venta" textFill="white">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label text="Registre ventas de contado o a crédito" textFill="#ecf0f1">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  
+                  <Region HBox.hgrow="ALWAYS" />
+                  
+                  <VBox alignment="CENTER_RIGHT">
+                     <children>
+                        <Label text="Código de Venta:" textFill="white">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblCodigoVenta" text="V-2025-001" textFill="white">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  
+                  <Button mnemonicParsing="false" onAction="#cerrarVentana" 
+                          styleClass="btn-secondary" text="✕ Cerrar">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </top>
+   
+   <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+   <center>
+      <VBox spacing="10.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </padding>
+         <children>
+            <!-- ==================== SECCIÓN 1: INFORMACIÓN DEL CLIENTE ==================== -->
+            <VBox spacing="10.0" styleClass="card">
+               <padding>
+                  <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+               </padding>
+               <children>
+                  <Label styleClass="panel-title" text="1. Información del Cliente">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  
+                  <HBox spacing="10.0" alignment="CENTER_LEFT">
+                     <children>
+                        <Label text="Buscar Cliente:" minWidth="100.0">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="txtBuscarCliente" promptText="Cédula o nombre del cliente" 
+                                  prefWidth="250.0" styleClass="text-field-custom">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </TextField>
+                        <Button mnemonicParsing="false" onAction="#buscarCliente" 
+                               styleClass="btn-primary" text="Buscar">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#nuevoCliente" 
+                               styleClass="btn-success" text="+ Nuevo Cliente">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+                  
+                  <!-- Info del cliente seleccionado -->
+                  <HBox spacing="20.0" style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <VBox spacing="3.0">
+                           <children>
+                              <Label text="Cliente:" textFill="#7f8c8d">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lblClienteNombre" text="No seleccionado" textFill="#2c3e50">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <Separator orientation="VERTICAL" />
+                        <VBox spacing="3.0">
+                           <children>
+                              <Label text="Cédula:" textFill="#7f8c8d">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lblClienteCedula" text="-" textFill="#2c3e50">
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <Separator orientation="VERTICAL" />
+                        <VBox spacing="3.0">
+                           <children>
+                              <Label text="Límite de Crédito:" textFill="#7f8c8d">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lblClienteLimite" text="$ 0.00" textFill="#27ae60">
+                                 <font>
+                                    <Font name="System Bold" size="11.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <Separator orientation="VERTICAL" />
+                        <VBox spacing="3.0">
+                           <children>
+                              <Label text="Crédito Disponible:" textFill="#7f8c8d">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lblClienteDisponible" text="$ 0.00" textFill="#3498db">
+                                 <font>
+                                    <Font name="System Bold" size="11.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- ==================== SECCIÓN 2: AGREGAR PRODUCTOS ==================== -->
+            <VBox spacing="10.0" styleClass="card">
+               <padding>
+                  <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+               </padding>
+               <children>
+                  <Label styleClass="panel-title" text="2. Agregar Productos">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  
+                  <HBox spacing="10.0" alignment="CENTER_LEFT">
+                     <children>
+                        <Label text="Producto:" minWidth="80.0">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="cmbProducto" prefWidth="300.0" promptText="Seleccione un producto" />
+                        
+                        <Label text="Cantidad:" minWidth="70.0">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Spinner fx:id="spnCantidad" prefWidth="80.0" editable="true" />
+                        
+                        <Button mnemonicParsing="false" onAction="#agregarProducto" 
+                               styleClass="btn-success" text="➕ Agregar">
+                           <font>
+                              <Font name="System Bold" size="11.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+                  
+                  <!-- Tabla de productos en el carrito -->
+                  <TableView fx:id="tablaCarrito" prefHeight="200.0">
+                     <columns>
+                        <TableColumn fx:id="colProductoCodigo" prefWidth="80.0" text="Código" />
+                        <TableColumn fx:id="colProductoNombre" prefWidth="250.0" text="Producto" />
+                        <TableColumn fx:id="colProductoCantidad" prefWidth="80.0" text="Cantidad" />
+                        <TableColumn fx:id="colProductoPrecio" prefWidth="100.0" text="Precio Unit." />
+                        <TableColumn fx:id="colProductoSubtotal" prefWidth="100.0" text="Subtotal" />
+                        <TableColumn fx:id="colProductoIVA" prefWidth="100.0" text="IVA" />
+                        <TableColumn fx:id="colProductoTotal" prefWidth="120.0" text="Total" />
+                        <TableColumn fx:id="colAcciones" prefWidth="80.0" text="Acciones" />
+                     </columns>
+                  </TableView>
+               </children>
+            </VBox>
+            
+            <!-- ==================== SECCIÓN 3: TOTALES Y FORMA DE PAGO ==================== -->
+            <HBox spacing="10.0">
+               <children>
+                  <!-- Panel de forma de pago -->
+                  <VBox spacing="10.0" styleClass="card" HBox.hgrow="ALWAYS">
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                     <children>
+                        <Label styleClass="panel-title" text="3. Forma de Pago">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        
+                        <RadioButton fx:id="rbContado" selected="true" text="Contado" 
+                                    styleClass="radio-button">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                           <toggleGroup>
+                              <ToggleGroup fx:id="grupoPago" />
+                           </toggleGroup>
+                        </RadioButton>
+                        
+                        <RadioButton fx:id="rbCredito" text="Crédito" toggleGroup="$grupoPago" 
+                                    styleClass="radio-button">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </RadioButton>
+                        
+                        <!-- Opciones de crédito -->
+                        <VBox fx:id="panelCredito" spacing="10.0" disable="true" 
+                             style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;">
+                           <children>
+                              <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Label text="Cuota Inicial (30%):" minWidth="130.0">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="lblCuotaInicial" text="$ 0.00" textFill="#27ae60">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              
+                              <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Label text="Plazo:" minWidth="130.0">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </Label>
+                                    <ComboBox fx:id="cmbPlazo" prefWidth="150.0">
+                                       <items>
+                                          <FXCollections fx:factory="observableArrayList">
+                                             <String fx:value="12 meses" />
+                                             <String fx:value="18 meses" />
+                                             <String fx:value="24 meses" />
+                                          </FXCollections>
+                                       </items>
+                                    </ComboBox>
+                                 </children>
+                              </HBox>
+                              
+                              <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Label text="Interés (5%):" minWidth="130.0">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="lblInteres" text="$ 0.00" textFill="#e74c3c">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              
+                              <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Label text="Valor Cuota:" minWidth="130.0">
+                                       <font>
+                                          <Font size="11.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="lblValorCuota" text="$ 0.00" textFill="#3498db">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Panel de totales -->
+                  <VBox spacing="10.0" styleClass="card" prefWidth="350.0">
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                     <children>
+                        <Label styleClass="panel-title" text="Totales">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="Subtotal:" minWidth="100.0">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Label>
+                              <Region HBox.hgrow="ALWAYS" />
+                              <Label fx:id="lblSubtotal" text="$ 0.00" textFill="#2c3e50">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="IVA (12%):" minWidth="100.0">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Label>
+                              <Region HBox.hgrow="ALWAYS" />
+                              <Label fx:id="lblIVA" text="$ 0.00" textFill="#2c3e50">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        
+                        <Separator />
+                        
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="TOTAL:" minWidth="100.0">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Region HBox.hgrow="ALWAYS" />
+                              <Label fx:id="lblTotal" text="$ 0.00" textFill="#e74c3c">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        
+                        <Separator />
+                        
+                        <!-- Botones de acción -->
+                        <HBox spacing="10.0" alignment="CENTER">
+                           <children>
+                              <Button fx:id="btnNuevaVenta" mnemonicParsing="false" 
+                                     onAction="#nuevaVenta" prefWidth="100.0" 
+                                     styleClass="btn-warning" text="Nueva">
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Button>
+                              
+                              <Button fx:id="btnGuardarVenta" mnemonicParsing="false" 
+                                     onAction="#guardarVenta" prefWidth="150.0" 
+                                     styleClass="btn-success" text="💾 Guardar Venta">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            
+            <!-- Mensaje -->
+            <Label fx:id="lblMensaje" alignment="CENTER" textAlignment="CENTER" 
+                  visible="false" wrapText="true" styleClass="success-label">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
