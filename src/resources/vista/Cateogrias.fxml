@@ -10,7 +10,7 @@
             stylesheets="@styles.css" 
             xmlns="http://javafx.com/javafx/19" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="com.taller.proyecto_bd.controllers.CategoriasController">
+            fx:controller="com.taller.proyecto_bd.ui.CategoriasController">
    
    <!-- ==================== ENCABEZADO ==================== -->
    <top>

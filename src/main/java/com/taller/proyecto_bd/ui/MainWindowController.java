@@ -166,7 +166,7 @@ public class MainWindowController {
     private void abrirCategorias() {
         actualizarEstado("Abriendo gestión de categorías...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Categorias.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Cateogrias.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();
@@ -183,7 +183,7 @@ public class MainWindowController {
     private void abrirProductos() {
         actualizarEstado("Abriendo gestión de productos...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Productos.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Productos.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();
@@ -200,7 +200,7 @@ public class MainWindowController {
     private void abrirClientes() {
         actualizarEstado("Abriendo gestión de clientes...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Clientes.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Clientes.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();
@@ -228,7 +228,7 @@ public class MainWindowController {
         }
         actualizarEstado("Abriendo gestión de usuarios...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Usuarios.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Usuarios.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();
@@ -247,7 +247,7 @@ public class MainWindowController {
     private void nuevaVenta() {
         actualizarEstado("Iniciando nueva venta...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/NuevaVenta.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/NuevaVenta.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();
@@ -460,7 +460,7 @@ public class MainWindowController {
      */
     private void volverALogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/login.fxml"));
             Parent root = loader.load();
             
             Stage stage = new Stage();

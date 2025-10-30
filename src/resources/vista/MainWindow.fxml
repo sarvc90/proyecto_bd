@@ -10,7 +10,7 @@
             stylesheets="@styles.css" 
             xmlns="http://javafx.com/javafx/19" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="com.taller.proyecto_bd.controllers.MainWindowController">
+            fx:controller="com.taller.proyecto_bd.ui.MainWindowController">
    
    <!-- ==================== BARRA DE MENÚ SUPERIOR ==================== -->
    <top>
@@ -213,7 +213,7 @@
                         <Font size="11.0" />
                      </font>
                   </Label>
-                  <Label fx:id="lblVentasHoy" text="$ 0.00" textFill="#2c3e50">
+                  <Label fx:id="lblVentasHoy" text="\$ 0.00" textFill="#2c3e50">
                      <font>
                         <Font name="System Bold" size="16.0" />
                      </font>

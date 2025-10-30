@@ -10,13 +10,17 @@ import com.taller.proyecto_bd.models.SessionManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Optional;
 
 /**
  * Controlador para la pantalla de inicio de sesión
@@ -181,7 +185,7 @@ public class LoginController {
      */
     private void abrirVentanaPrincipal(Usuario usuario) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainWindow.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/MainWindow.fxml"));
             Parent root = loader.load();
 
             // Obtener el controlador de la ventana principal y pasarle el usuario
@@ -205,11 +209,140 @@ public class LoginController {
     }
 
     /**
+     * Abre un cuadro de diálogo para registrar un nuevo usuario.
+     */
+    @FXML
+    private void mostrarRegistro(ActionEvent event) {
+        Dialog<Usuario> dialogo = new Dialog<>();
+        dialogo.setTitle("Registrar usuario");
+        dialogo.setHeaderText("Crea una cuenta para ingresar al sistema");
+        dialogo.initOwner(btnIngresar.getScene().getWindow());
+
+        ButtonType registrarButtonType = new ButtonType("Registrar", ButtonBar.ButtonData.OK_DONE);
+        dialogo.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, registrarButtonType);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 20));
+
+        TextField nombreField = new TextField();
+        nombreField.setPromptText("Nombre completo");
+
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Usuario");
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Contraseña");
+
+        PasswordField confirmarField = new PasswordField();
+        confirmarField.setPromptText("Confirmar contraseña");
+
+        ComboBox<String> rolCombo = new ComboBox<>();
+        rolCombo.getItems().addAll("VENDEDOR", "ADMIN", "GERENTE");
+        rolCombo.getSelectionModel().selectFirst();
+
+        TextField emailField = new TextField();
+        emailField.setPromptText("correo@ejemplo.com");
+
+        TextField telefonoField = new TextField();
+        telefonoField.setPromptText("Teléfono");
+
+        CheckBox activoCheck = new CheckBox("Usuario activo");
+        activoCheck.setSelected(true);
+
+        grid.add(new Label("Nombre completo:"), 0, 0);
+        grid.add(nombreField, 1, 0);
+        grid.add(new Label("Usuario:"), 0, 1);
+        grid.add(usernameField, 1, 1);
+        grid.add(new Label("Contraseña:"), 0, 2);
+        grid.add(passwordField, 1, 2);
+        grid.add(new Label("Confirmar contraseña:"), 0, 3);
+        grid.add(confirmarField, 1, 3);
+        grid.add(new Label("Rol:"), 0, 4);
+        grid.add(rolCombo, 1, 4);
+        grid.add(new Label("Email:"), 0, 5);
+        grid.add(emailField, 1, 5);
+        grid.add(new Label("Teléfono:"), 0, 6);
+        grid.add(telefonoField, 1, 6);
+        grid.add(activoCheck, 1, 7);
+
+        dialogo.getDialogPane().setContent(grid);
+
+        Node registrarButton = dialogo.getDialogPane().lookupButton(registrarButtonType);
+        registrarButton.setDisable(true);
+
+        Runnable validarCampos = () -> {
+            boolean invalido = nombreField.getText().trim().isEmpty() ||
+                    usernameField.getText().trim().isEmpty() ||
+                    passwordField.getText().isEmpty() ||
+                    confirmarField.getText().isEmpty() ||
+                    !passwordField.getText().equals(confirmarField.getText());
+            registrarButton.setDisable(invalido);
+        };
+
+        nombreField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        usernameField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        passwordField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        confirmarField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+
+        validarCampos.run();
+
+        registrarButton.addEventFilter(ActionEvent.ACTION, e -> {
+            String username = usernameField.getText().trim();
+            if (usuarioDAO.obtenerPorUsername(username) != null) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Usuario duplicado",
+                        "El nombre de usuario ya existe. Elige uno diferente.");
+                e.consume();
+            }
+        });
+
+        dialogo.setResultConverter(dialogButton -> {
+            if (dialogButton == registrarButtonType) {
+                Usuario nuevo = new Usuario();
+                nuevo.setNombreCompleto(nombreField.getText().trim());
+                nuevo.setUsername(usernameField.getText().trim());
+                nuevo.setPassword(passwordField.getText());
+                nuevo.setRol(rolCombo.getValue());
+                nuevo.setEmail(emailField.getText().trim());
+                nuevo.setTelefono(telefonoField.getText().trim());
+                nuevo.setActivo(activoCheck.isSelected());
+                return nuevo;
+            }
+            return null;
+        });
+
+        Optional<Usuario> resultado = dialogo.showAndWait();
+        resultado.ifPresent(usuario -> {
+            boolean agregado = usuarioDAO.agregar(usuario);
+            if (agregado) {
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro exitoso",
+                        "Usuario registrado correctamente. Ahora puedes iniciar sesión.");
+                txtUsuario.setText(usuario.getUsername());
+                txtPassword.clear();
+                txtPassword.requestFocus();
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Registro fallido",
+                        "No fue posible registrar el usuario. Intenta nuevamente.");
+            }
+        });
+    }
+
+    /**
      * Muestra un mensaje de error
      */
     private void mostrarError(String mensaje) {
         lblError.setText(mensaje);
         lblError.setVisible(true);
+    }
+
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.initOwner(btnIngresar.getScene().getWindow());
+        alerta.showAndWait();
     }
 
     /**

@@ -10,7 +10,7 @@
             stylesheets="@styles.css" 
             xmlns="http://javafx.com/javafx/19" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="com.taller.proyecto_bd.controllers.ClientesController">
+            fx:controller="com.taller.proyecto_bd.ui.ClientesController">
    
    <!-- ==================== ENCABEZADO ==================== -->
    <top>
@@ -198,7 +198,7 @@
                                  </Label>
                                  <HBox spacing="10.0">
                                     <children>
-                                       <Label text="$">
+                                       <Label text="\$">
                                           <font>
                                              <Font size="14.0" />
                                           </font>
@@ -223,7 +223,7 @@
                                  </Label>
                                  <HBox spacing="10.0">
                                     <children>
-                                       <Label text="$">
+                                       <Label text="\$">
                                           <font>
                                              <Font size="14.0" />
                                           </font>
@@ -247,7 +247,7 @@
                                        <Font name="System Bold" size="12.0" />
                                     </font>
                                  </Label>
-                                 <Label fx:id="lblCreditoDisponible" text="$ 0.00" textFill="#27ae60">
+                                 <Label fx:id="lblCreditoDisponible" text="\$ 0.00" textFill="#27ae60">
                                     <font>
                                        <Font name="System Bold" size="14.0" />
                                     </font>
@@ -406,7 +406,7 @@
                                  <Font name="System Bold" size="11.0" />
                               </font>
                            </Label>
-                           <Label fx:id="lblTotalCartera" text="$ 0.00" textFill="#3498db">
+                           <Label fx:id="lblTotalCartera" text="\$ 0.00" textFill="#3498db">
                               <font>
                                  <Font size="11.0" />
                               </font>
