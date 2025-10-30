@@ -22,6 +22,7 @@ public class DetalleVenta {
     // Atributos auxiliares
     private String nombreProducto;  // Para joins
     private String categoriaProducto; // Para joins
+    private Producto producto;      // Objeto completo del producto (para UI)
 
     // ==================== CONSTRUCTORES ====================
 
@@ -70,6 +71,7 @@ public class DetalleVenta {
     public Date getFechaRegistro() { return fechaRegistro; }
     public String getNombreProducto() { return nombreProducto; }
     public String getCategoriaProducto() { return categoriaProducto; }
+    public Producto getProducto() { return producto; }
 
     // ==================== SETTERS ====================
 
@@ -84,6 +86,13 @@ public class DetalleVenta {
     public void setFechaRegistro(Date fechaRegistro) { this.fechaRegistro = fechaRegistro; }
     public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
     public void setCategoriaProducto(String categoriaProducto) { this.categoriaProducto = categoriaProducto; }
+    public void setProducto(Producto producto) {
+        this.producto = producto;
+        if (producto != null) {
+            this.idProducto = producto.getIdProducto();
+            this.nombreProducto = producto.getNombre();
+        }
+    }
 
     // ==================== MÉTODOS DE NEGOCIO ====================
 

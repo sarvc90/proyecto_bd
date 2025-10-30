@@ -3,8 +3,10 @@ package com.taller.proyecto_bd.ui;
 
 import com.taller.proyecto_bd.dao.UsuarioDAO;
 import com.taller.proyecto_bd.dao.AuditoriaDAO;
+import com.taller.proyecto_bd.dao.ClienteDAO;
 import com.taller.proyecto_bd.models.Usuario;
 import com.taller.proyecto_bd.models.Auditoria;
+import com.taller.proyecto_bd.models.Cliente;
 import com.taller.proyecto_bd.models.SessionManager;
 
 import javafx.event.ActionEvent;
@@ -16,10 +18,13 @@ import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -217,6 +222,7 @@ public class LoginController {
         dialogo.setTitle("Registrar usuario");
         dialogo.setHeaderText("Crea una cuenta para ingresar al sistema");
         dialogo.initOwner(btnIngresar.getScene().getWindow());
+        dialogo.setResizable(true);
 
         ButtonType registrarButtonType = new ButtonType("Registrar", ButtonBar.ButtonData.OK_DONE);
         dialogo.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, registrarButtonType);
@@ -233,51 +239,110 @@ public class LoginController {
         usernameField.setPromptText("Usuario");
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Contraseña");
+        passwordField.setPromptText("Contrasena");
 
         PasswordField confirmarField = new PasswordField();
-        confirmarField.setPromptText("Confirmar contraseña");
+        confirmarField.setPromptText("Confirmar contrasena");
 
         ComboBox<String> rolCombo = new ComboBox<>();
-        rolCombo.getItems().addAll("VENDEDOR", "ADMIN", "GERENTE");
+        rolCombo.getItems().addAll("VENDEDOR", "ADMIN", "GERENTE", "CLIENTE");
         rolCombo.getSelectionModel().selectFirst();
 
         TextField emailField = new TextField();
         emailField.setPromptText("correo@ejemplo.com");
 
         TextField telefonoField = new TextField();
-        telefonoField.setPromptText("Teléfono");
+        telefonoField.setPromptText("Telefono");
 
         CheckBox activoCheck = new CheckBox("Usuario activo");
         activoCheck.setSelected(true);
 
-        grid.add(new Label("Nombre completo:"), 0, 0);
+        TextField cedulaField = new TextField();
+        cedulaField.setPromptText("Documento de identidad");
+
+        TextField apellidoClienteField = new TextField();
+        apellidoClienteField.setPromptText("Apellidos del cliente");
+
+        TextField direccionField = new TextField();
+        direccionField.setPromptText("Direccion del cliente");
+
+        TextField limiteCreditoField = new TextField();
+        limiteCreditoField.setPromptText("0.00");
+        limiteCreditoField.setText("0");
+
+        Label nombreLabel = new Label("Nombre completo:");
+        Label usuarioLabel = new Label("Usuario:");
+        Label contrasenaLabel = new Label("Contrasena:");
+        Label confirmarLabel = new Label("Confirmar contrasena:");
+        Label rolLabel = new Label("Rol:");
+        Label emailLabel = new Label("Email:");
+        Label telefonoLabel = new Label("Telefono:");
+        Label cedulaLabel = new Label("Cedula:");
+        Label apellidoLabel = new Label("Apellido:");
+        Label direccionLabel = new Label("Direccion:");
+        Label limiteLabel = new Label("Limite credito:");
+
+        grid.add(nombreLabel, 0, 0);
         grid.add(nombreField, 1, 0);
-        grid.add(new Label("Usuario:"), 0, 1);
+        grid.add(usuarioLabel, 0, 1);
         grid.add(usernameField, 1, 1);
-        grid.add(new Label("Contraseña:"), 0, 2);
+        grid.add(contrasenaLabel, 0, 2);
         grid.add(passwordField, 1, 2);
-        grid.add(new Label("Confirmar contraseña:"), 0, 3);
+        grid.add(confirmarLabel, 0, 3);
         grid.add(confirmarField, 1, 3);
-        grid.add(new Label("Rol:"), 0, 4);
+        grid.add(rolLabel, 0, 4);
         grid.add(rolCombo, 1, 4);
-        grid.add(new Label("Email:"), 0, 5);
+        grid.add(emailLabel, 0, 5);
         grid.add(emailField, 1, 5);
-        grid.add(new Label("Teléfono:"), 0, 6);
+        grid.add(telefonoLabel, 0, 6);
         grid.add(telefonoField, 1, 6);
         grid.add(activoCheck, 1, 7);
+        grid.add(cedulaLabel, 0, 8);
+        grid.add(cedulaField, 1, 8);
+        grid.add(apellidoLabel, 0, 9);
+        grid.add(apellidoClienteField, 1, 9);
+        grid.add(direccionLabel, 0, 10);
+        grid.add(direccionField, 1, 10);
+        grid.add(limiteLabel, 0, 11);
+        grid.add(limiteCreditoField, 1, 11);
+
+        final Cliente[] clienteSeleccionado = new Cliente[1];
+
+        List<Node> camposCliente = Arrays.asList(
+                cedulaLabel, cedulaField,
+                apellidoLabel, apellidoClienteField,
+                direccionLabel, direccionField,
+                limiteLabel, limiteCreditoField
+        );
+        camposCliente.forEach(node -> {
+            node.setVisible(false);
+            node.setManaged(false);
+        });
 
         dialogo.getDialogPane().setContent(grid);
+        dialogo.getDialogPane().setPrefSize(420, 520);
+        dialogo.getDialogPane().setMinWidth(Region.USE_PREF_SIZE);
+        dialogo.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 
         Node registrarButton = dialogo.getDialogPane().lookupButton(registrarButtonType);
         registrarButton.setDisable(true);
 
         Runnable validarCampos = () -> {
+            boolean esCliente = "CLIENTE".equals(rolCombo.getValue());
             boolean invalido = nombreField.getText().trim().isEmpty() ||
                     usernameField.getText().trim().isEmpty() ||
                     passwordField.getText().isEmpty() ||
                     confirmarField.getText().isEmpty() ||
                     !passwordField.getText().equals(confirmarField.getText());
+
+            if (esCliente) {
+                boolean limiteValido = esNumeroValido(limiteCreditoField.getText().trim());
+                invalido = invalido ||
+                        cedulaField.getText().trim().isEmpty() ||
+                        apellidoClienteField.getText().trim().isEmpty() ||
+                        telefonoField.getText().trim().isEmpty() ||
+                        !limiteValido;
+            }
             registrarButton.setDisable(invalido);
         };
 
@@ -285,6 +350,19 @@ public class LoginController {
         usernameField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
         passwordField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
         confirmarField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        telefonoField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        cedulaField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        apellidoClienteField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+        limiteCreditoField.textProperty().addListener((obs, oldVal, newVal) -> validarCampos.run());
+
+        rolCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            boolean esCliente = "CLIENTE".equals(newVal);
+            camposCliente.forEach(node -> {
+                node.setManaged(esCliente);
+                node.setVisible(esCliente);
+            });
+            validarCampos.run();
+        });
 
         validarCampos.run();
 
@@ -302,30 +380,100 @@ public class LoginController {
                 Usuario nuevo = new Usuario();
                 nuevo.setNombreCompleto(nombreField.getText().trim());
                 nuevo.setUsername(usernameField.getText().trim());
+                // El setPassword encripta automáticamente, así que pasamos la contraseña plana
                 nuevo.setPassword(passwordField.getText());
                 nuevo.setRol(rolCombo.getValue());
                 nuevo.setEmail(emailField.getText().trim());
                 nuevo.setTelefono(telefonoField.getText().trim());
                 nuevo.setActivo(activoCheck.isSelected());
+
+                if ("CLIENTE".equals(rolCombo.getValue())) {
+                    Cliente clienteNuevo = new Cliente();
+                    clienteNuevo.setCedula(cedulaField.getText().trim());
+                    clienteNuevo.setNombre(nombreField.getText().trim());
+                    clienteNuevo.setApellido(apellidoClienteField.getText().trim());
+                    clienteNuevo.setDireccion(direccionField.getText().trim());
+                    clienteNuevo.setTelefono(telefonoField.getText().trim());
+                    clienteNuevo.setEmail(emailField.getText().trim());
+                    clienteNuevo.setLimiteCredito(parsearDouble(limiteCreditoField.getText().trim(), 0));
+                    // El saldoPendiente ya se inicializa en 0 en el constructor de Cliente
+                    clienteNuevo.setActivo(activoCheck.isSelected());
+                    clienteSeleccionado[0] = clienteNuevo;
+                } else {
+                    clienteSeleccionado[0] = null;
+                }
                 return nuevo;
             }
+            clienteSeleccionado[0] = null;
             return null;
         });
 
         Optional<Usuario> resultado = dialogo.showAndWait();
         resultado.ifPresent(usuario -> {
+            System.out.println("DEBUG: Intentando registrar usuario: " + usuario.getUsername() + " con rol: " + usuario.getRol());
             boolean agregado = usuarioDAO.agregar(usuario);
+            System.out.println("DEBUG: Usuario agregado: " + agregado);
+
             if (agregado) {
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro exitoso",
-                        "Usuario registrado correctamente. Ahora puedes iniciar sesión.");
-                txtUsuario.setText(usuario.getUsername());
-                txtPassword.clear();
-                txtPassword.requestFocus();
+                boolean clienteRegistrado = true;
+                if ("CLIENTE".equals(usuario.getRol())) {
+                    Cliente clienteNuevo = clienteSeleccionado[0];
+                    System.out.println("DEBUG: Cliente creado: " + (clienteNuevo != null));
+                    if (clienteNuevo != null) {
+                        System.out.println("DEBUG: Datos del cliente - Cedula: " + clienteNuevo.getCedula() +
+                                         ", Nombre: " + clienteNuevo.getNombre() +
+                                         ", Apellido: " + clienteNuevo.getApellido());
+                        ClienteDAO clienteDAO = ClienteDAO.getInstance();
+                        clienteRegistrado = clienteDAO.agregar(clienteNuevo);
+                        System.out.println("DEBUG: Cliente registrado: " + clienteRegistrado);
+                    } else {
+                        System.out.println("DEBUG: Cliente es null, no se puede registrar");
+                        clienteRegistrado = false;
+                    }
+                    if (!clienteRegistrado) {
+                        System.out.println("DEBUG: Eliminando usuario debido a fallo en registro de cliente");
+                        usuarioDAO.eliminar(usuario.getIdUsuario());
+                    }
+                }
+
+                if (clienteRegistrado) {
+                    mostrarAlerta(Alert.AlertType.INFORMATION, "Registro exitoso",
+                            "Usuario registrado correctamente. Ahora puedes iniciar sesion.");
+                    txtUsuario.setText(usuario.getUsername());
+                    txtPassword.clear();
+                    txtPassword.requestFocus();
+                } else {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Registro incompleto",
+                            "No fue posible guardar los datos del cliente. Intenta nuevamente.");
+                }
             } else {
                 mostrarAlerta(Alert.AlertType.ERROR, "Registro fallido",
                         "No fue posible registrar el usuario. Intenta nuevamente.");
             }
         });
+    }
+
+    private boolean esNumeroValido(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return true;
+        }
+        try {
+            double valor = Double.parseDouble(texto.trim());
+            return valor >= 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private double parsearDouble(String texto, double valorPorDefecto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return valorPorDefecto;
+        }
+        try {
+            return Double.parseDouble(texto.trim());
+        } catch (NumberFormatException e) {
+            return valorPorDefecto;
+        }
     }
 
     /**

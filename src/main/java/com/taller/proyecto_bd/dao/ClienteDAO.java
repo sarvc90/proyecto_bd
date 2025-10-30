@@ -39,6 +39,7 @@ public class ClienteDAO {
      */
     public boolean agregar(Cliente cliente) {
         if (cliente == null || !cliente.validarDatosObligatorios()) {
+            System.err.println("Error: Cliente nulo o datos obligatorios faltantes");
             return false;
         }
 
@@ -47,6 +48,7 @@ public class ClienteDAO {
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
+                System.err.println("Error: No se pudo obtener conexión a la base de datos");
                 return false;
             }
 
@@ -54,9 +56,26 @@ public class ClienteDAO {
                 stmt.setString(1, cliente.getCedula());
                 stmt.setString(2, cliente.getNombre());
                 stmt.setString(3, cliente.getApellido());
-                stmt.setString(4, cliente.getDireccion());
-                stmt.setString(5, cliente.getTelefono());
-                stmt.setString(6, cliente.getEmail());
+
+                // Manejar campos que pueden ser NULL
+                if (cliente.getDireccion() != null && !cliente.getDireccion().trim().isEmpty()) {
+                    stmt.setString(4, cliente.getDireccion());
+                } else {
+                    stmt.setNull(4, java.sql.Types.VARCHAR);
+                }
+
+                if (cliente.getTelefono() != null && !cliente.getTelefono().trim().isEmpty()) {
+                    stmt.setString(5, cliente.getTelefono());
+                } else {
+                    stmt.setNull(5, java.sql.Types.VARCHAR);
+                }
+
+                if (cliente.getEmail() != null && !cliente.getEmail().trim().isEmpty()) {
+                    stmt.setString(6, cliente.getEmail());
+                } else {
+                    stmt.setNull(6, java.sql.Types.VARCHAR);
+                }
+
                 stmt.setBoolean(7, cliente.isActivo());
                 stmt.setDouble(8, cliente.getLimiteCredito());
                 stmt.setDouble(9, cliente.getSaldoPendiente());
@@ -73,6 +92,7 @@ public class ClienteDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al insertar cliente: " + e.getMessage());
+            e.printStackTrace(); // Imprimir stack trace completo para debugging
         }
         return false;
     }

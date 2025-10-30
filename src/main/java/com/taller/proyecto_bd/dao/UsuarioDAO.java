@@ -33,6 +33,7 @@ public class UsuarioDAO {
 
     public boolean agregar(Usuario usuario) {
         if (usuario == null || usuario.getUsername() == null) {
+            System.err.println("Error: Usuario nulo o username faltante");
             return false;
         }
 
@@ -41,6 +42,7 @@ public class UsuarioDAO {
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
+                System.err.println("Error: No se pudo obtener conexión a la base de datos");
                 return false;
             }
 
@@ -49,8 +51,20 @@ public class UsuarioDAO {
                 stmt.setString(2, usuario.getUsername());
                 stmt.setString(3, usuario.getPassword());
                 stmt.setString(4, usuario.getRol());
-                stmt.setString(5, usuario.getEmail());
-                stmt.setString(6, usuario.getTelefono());
+
+                // Manejar campos que pueden ser NULL
+                if (usuario.getEmail() != null && !usuario.getEmail().trim().isEmpty()) {
+                    stmt.setString(5, usuario.getEmail());
+                } else {
+                    stmt.setNull(5, java.sql.Types.VARCHAR);
+                }
+
+                if (usuario.getTelefono() != null && !usuario.getTelefono().trim().isEmpty()) {
+                    stmt.setString(6, usuario.getTelefono());
+                } else {
+                    stmt.setNull(6, java.sql.Types.VARCHAR);
+                }
+
                 stmt.setBoolean(7, usuario.isActivo());
 
                 int filas = stmt.executeUpdate();
@@ -66,6 +80,7 @@ public class UsuarioDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al insertar usuario: " + e.getMessage());
+            e.printStackTrace(); // Imprimir stack trace completo para debugging
         }
         return false;
     }

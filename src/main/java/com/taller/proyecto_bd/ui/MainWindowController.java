@@ -105,27 +105,47 @@ public class MainWindowController {
             // No hay restricciones
             return;
         }
-        
+
         // VENDEDOR: No puede acceder a Usuarios ni Bitácora
         if (SessionManager.esVendedor()) {
             menuItemUsuarios.setDisable(true);
             menuItemBitacora.setDisable(true);
             return;
         }
-        
+
         // GERENTE: Solo puede acceder a Consultas y Reportes
         if (SessionManager.esGerente()) {
             // Deshabilitar todo excepto consultas y reportes
             menuEntidades.setDisable(true);
             menuTransacciones.setDisable(true);
             menuUtilidades.setDisable(true);
-            
+
             // Deshabilitar botones de acceso rápido
             btnNuevaVenta.setDisable(true);
             btnBuscarCliente.setDisable(true);
             btnBuscarProducto.setDisable(true);
-            
+
             actualizarEstado("Usuario de solo consulta");
+            return;
+        }
+
+        // CLIENTE: Solo puede acceder a Nueva Compra
+        if (SessionManager.esCliente()) {
+            // Deshabilitar todos los menús
+            menuEntidades.setDisable(true);
+            menuTransacciones.setDisable(true);
+            menuConsultasReportes.setDisable(true);
+            menuUtilidades.setDisable(true);
+
+            // Deshabilitar botones de acceso rápido
+            btnNuevaVenta.setDisable(true);
+            btnBuscarCliente.setDisable(true);
+            btnBuscarProducto.setDisable(true);
+
+            actualizarEstado("Modo Cliente - Solo compras");
+
+            // Abrir automáticamente la interfaz de Nueva Compra
+            nuevaCompra();
         }
     }
 
@@ -249,7 +269,7 @@ public class MainWindowController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/NuevaVenta.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = new Stage();
             stage.setTitle("Nueva Venta");
             stage.setScene(new Scene(root));
@@ -257,6 +277,47 @@ public class MainWindowController {
             stage.show();
         } catch (IOException e) {
             mostrarError("Error al abrir nueva venta: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Abre la interfaz de nueva compra para clientes
+     */
+    private void nuevaCompra() {
+        actualizarEstado("Iniciando nueva compra...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/NuevaCompra.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Compra - " + SessionManager.getUsuarioActual().getNombreCompleto());
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+
+            // Si es cliente, configurar el comportamiento especial
+            if (SessionManager.esCliente()) {
+                // Usar Platform.runLater para asegurar que la ventana principal esté completamente cargada
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        Stage mainStage = (Stage) lblUsuarioActual.getScene().getWindow();
+
+                        // Al cerrar la ventana de compra, también cerrar la principal
+                        stage.setOnCloseRequest(event -> {
+                            mainStage.close();
+                        });
+
+                        // Ocultar la ventana principal mientras el cliente compra
+                        mainStage.hide();
+                    } catch (Exception e) {
+                        System.err.println("Error al ocultar ventana principal: " + e.getMessage());
+                    }
+                });
+            }
+
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("Error al abrir nueva compra: " + e.getMessage());
             e.printStackTrace();
         }
     }

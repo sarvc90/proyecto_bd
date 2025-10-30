@@ -96,6 +96,15 @@ public class SessionManager {
         String rol = usuarioActual.getRol();
         return "GERENTE".equalsIgnoreCase(rol);
     }
+
+    /**
+     * Verifica si el usuario actual es cliente (Nivel 4 - Solo compras)
+     */
+    public static boolean esCliente() {
+        if (usuarioActual == null) return false;
+        String rol = usuarioActual.getRol();
+        return "CLIENTE".equalsIgnoreCase(rol);
+    }
     
     /**
      * Alias para compatibilidad - Nivel 2
