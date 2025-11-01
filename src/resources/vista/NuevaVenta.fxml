@@ -292,15 +292,7 @@
                                           <Font size="11.0" />
                                        </font>
                                     </Label>
-                                    <ComboBox fx:id="cmbPlazo" prefWidth="150.0">
-                                       <items>
-                                          <FXCollections fx:factory="observableArrayList">
-                                             <String fx:value="12 meses" />
-                                             <String fx:value="18 meses" />
-                                             <String fx:value="24 meses" />
-                                          </FXCollections>
-                                       </items>
-                                    </ComboBox>
+                                    <ComboBox fx:id="cmbPlazo" prefWidth="150.0" promptText="Seleccione plazo" />
                                  </children>
                               </HBox>
                               

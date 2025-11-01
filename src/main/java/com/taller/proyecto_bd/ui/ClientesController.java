@@ -147,10 +147,10 @@ public class ClientesController {
     }
     
     /**
-     * Carga todos los clientes en la tabla
+     * Carga solo los clientes activos en la tabla
      */
     private void cargarClientes() {
-        List<Cliente> clientes = clienteDAO.obtenerTodos();
+        List<Cliente> clientes = clienteDAO.obtenerActivos();
         listaClientes.clear();
         listaClientes.addAll(clientes);
         actualizarEstadisticas();
@@ -317,7 +317,7 @@ public class ClientesController {
     }
     
     /**
-     * Elimina el cliente seleccionado
+     * Elimina el cliente seleccionado (eliminación lógica - cambia estado a inactivo)
      */
     @FXML
     private void eliminar() {
@@ -325,30 +325,33 @@ public class ClientesController {
             mostrarMensajeError("Debe seleccionar un cliente para eliminar");
             return;
         }
-        
+
         // Validar que no tenga saldo pendiente
         if (clienteSeleccionado.getSaldoPendiente() > 0) {
             mostrarMensajeError("No se puede eliminar un cliente con saldo pendiente");
             return;
         }
-        
+
         Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
         confirmacion.setTitle("Confirmar eliminación");
-        confirmacion.setHeaderText("¿Está seguro que desea eliminar este cliente?");
-        confirmacion.setContentText(clienteSeleccionado.getNombreCompleto() + " - " + clienteSeleccionado.getCedula());
-        
+        confirmacion.setHeaderText("¿Está seguro que desea inactivar este cliente?");
+        confirmacion.setContentText(clienteSeleccionado.getNombreCompleto() + " - " + clienteSeleccionado.getCedula() + "\n\n" +
+                                   "El cliente será marcado como inactivo.");
+
         Optional<ButtonType> resultado = confirmacion.showAndWait();
-        
+
         if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
-            boolean exito = clienteDAO.eliminar(clienteSeleccionado.getIdCliente());
-            
+            // Cambiar estado a inactivo (eliminación lógica)
+            clienteSeleccionado.setActivo(false);
+            boolean exito = clienteDAO.actualizar(clienteSeleccionado);
+
             if (exito) {
-                mostrarMensajeExito("Cliente eliminado exitosamente");
+                mostrarMensajeExito("Cliente inactivado exitosamente");
                 cargarClientes();
                 limpiarCampos();
                 clienteSeleccionado = null;
             } else {
-                mostrarMensajeError("Error al eliminar el cliente");
+                mostrarMensajeError("Error al inactivar el cliente");
             }
         }
     }

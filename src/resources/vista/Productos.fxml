@@ -152,11 +152,7 @@
                                        <Font name="System Bold" size="11.0" />
                                     </font>
                                  </Label>
-                                 <ComboBox fx:id="cmbCategoria" prefWidth="320.0" promptText="Seleccione una categoría">
-                                    <styleClass>
-                                       <String fx:value="combo-box" />
-                                    </styleClass>
-                                 </ComboBox>
+                                 <ComboBox fx:id="cmbCategoria" prefWidth="320.0" promptText="Seleccione una categoría" styleClass="combo-box" />
                               </children>
                            </VBox>
                            
@@ -434,7 +430,7 @@
                                  <Font name="System Bold" size="11.0" />
                               </font>
                            </Label>
-                           <Label fx:id="lblValorInventario" text="$ 0.00" textFill="#3498db">
+                           <Label fx:id="lblValorInventario" text="\$ 0.00" textFill="#3498db">
                               <font>
                                  <Font size="11.0" />
                               </font>

@@ -99,6 +99,7 @@ public class NuevaVentaController {
         configurarTabla();
         configurarProductos();
         configurarSpinner();
+        configurarPlazos();
         configurarEventos();
         generarCodigoVenta();
     }
@@ -223,11 +224,18 @@ public class NuevaVentaController {
      * Configura el Spinner de cantidad
      */
     private void configurarSpinner() {
-        SpinnerValueFactory<Integer> valueFactory = 
+        SpinnerValueFactory<Integer> valueFactory =
             new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1);
         spnCantidad.setValueFactory(valueFactory);
     }
-    
+
+    /**
+     * Configura el ComboBox de plazos de crédito
+     */
+    private void configurarPlazos() {
+        cmbPlazo.getItems().addAll("12 meses", "18 meses", "24 meses");
+    }
+
     /**
      * Configura los eventos de la interfaz
      */
