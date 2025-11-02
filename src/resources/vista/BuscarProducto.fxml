@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.BuscarProductoController"
+            stylesheets="@styles.css" prefHeight="500" prefWidth="900">
+
+    <!-- ENCABEZADO -->
+    <top>
+        <VBox spacing="10" styleClass="header-section">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <Label text="BUSCAR PRODUCTO" styleClass="title" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+            <Separator/>
+
+            <!-- BÚSQUEDA -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Buscar:">
+                    <font>
+                        <Font size="13"/>
+                    </font>
+                </Label>
+                <TextField fx:id="txtBuscar" promptText="Código, nombre, marca o modelo..." HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="13"/>
+                    </font>
+                </TextField>
+                <Button fx:id="btnBuscar" text="Buscar" onAction="#buscar" styleClass="btn-primary">
+                    <font>
+                        <Font size="13"/>
+                    </font>
+                </Button>
+            </HBox>
+
+            <Label text="Doble clic o presiona Seleccionar para elegir un producto" styleClass="hint-label">
+                <font>
+                    <Font size="11" name="System Italic"/>
+                </font>
+            </Label>
+        </VBox>
+    </top>
+
+    <!-- TABLA -->
+    <center>
+        <VBox VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="10" right="15" bottom="10" left="15"/>
+            </padding>
+
+            <TableView fx:id="tblProductos" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="50" minWidth="40"/>
+                    <TableColumn fx:id="colCodigo" text="Código" prefWidth="100" minWidth="80"/>
+                    <TableColumn fx:id="colNombre" text="Nombre" prefWidth="300" minWidth="150"/>
+                    <TableColumn fx:id="colCategoria" text="Categoría" prefWidth="150" minWidth="100"/>
+                    <TableColumn fx:id="colPrecio" text="Precio" prefWidth="120" minWidth="100"/>
+                    <TableColumn fx:id="colStock" text="Stock" prefWidth="80" minWidth="60"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- BOTONES -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="footer-section">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <Button fx:id="btnSeleccionar" text="Seleccionar" onAction="#seleccionar"
+                    styleClass="btn-success" disable="true" defaultButton="true">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Button>
+
+            <Button fx:id="btnCancelar" text="Cancelar" onAction="#cancelar"
+                    styleClass="btn-secondary" cancelButton="true">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Button>
+        </HBox>
+    </bottom>
+
+</BorderPane>

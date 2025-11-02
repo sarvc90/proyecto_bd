@@ -64,10 +64,22 @@
                <Font size="13.0" />
             </font>
             <VBox.margin>
-               <Insets bottom="20.0" />
+               <Insets bottom="10.0" />
             </VBox.margin>
          </Label>
-         
+
+         <!-- Selector de Tipo de Usuario -->
+         <VBox spacing="8.0">
+            <children>
+               <Label text="Tipo de Usuario" styleClass="field-label">
+                  <font>
+                     <Font name="System Bold" size="12.0" />
+                  </font>
+               </Label>
+               <ComboBox fx:id="cmbTipoUsuario" prefHeight="40.0" prefWidth="350.0" styleClass="text-field-custom" style="-fx-font-size: 13px;"/>
+            </children>
+         </VBox>
+
          <!-- Campo Usuario -->
          <VBox spacing="8.0">
             <children>

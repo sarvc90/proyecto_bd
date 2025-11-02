@@ -44,6 +44,29 @@
             <version>12.8.1.jre11</version> <!-- Usa jre17 o jre21 si trabajas con Java 21 -->
         </dependency>
 
+        <!-- iText para generación de PDFs -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>7.2.5</version>
+            <type>pom</type>
+        </dependency>
+
+        <!-- JFreeChart para gráficas -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+
+        <!-- JavaFX Swing para integrar JFreeChart -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
+
 
         <!-- ==================== DEPENDENCIAS DE TEST ==================== -->
 

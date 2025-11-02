@@ -6,7 +6,12 @@ import com.taller.proyecto_bd.models.SessionManager;
 import com.taller.proyecto_bd.models.Usuario;
 
 import com.taller.proyecto_bd.dao.AuditoriaDAO;
+import com.taller.proyecto_bd.dao.VentaDAO;
+import com.taller.proyecto_bd.dao.ProductoDAO;
+import com.taller.proyecto_bd.dao.CreditoDAO;
 import com.taller.proyecto_bd.models.Auditoria;
+import com.taller.proyecto_bd.models.Venta;
+import com.taller.proyecto_bd.models.Producto;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -20,8 +25,12 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -68,6 +77,9 @@ public class MainWindowController {
     private Usuario usuarioActual;
     private Timeline relojTimeline;
     private AuditoriaDAO auditoriaDAO;
+    private VentaDAO ventaDAO;
+    private ProductoDAO productoDAO;
+    private CreditoDAO creditoDAO;
 
     /**
      * Inicialización del controlador
@@ -75,6 +87,9 @@ public class MainWindowController {
     @FXML
     public void initialize() {
         auditoriaDAO = AuditoriaDAO.getInstance();
+        ventaDAO = VentaDAO.getInstance();
+        productoDAO = ProductoDAO.getInstance();
+        creditoDAO = CreditoDAO.getInstance();
         iniciarReloj();
         cargarEstadisticas();
     }
@@ -167,10 +182,86 @@ public class MainWindowController {
      * Carga las estadísticas iniciales
      */
     private void cargarEstadisticas() {
-        // TODO: Implementar con DAOs reales
-        lblVentasHoy.setText("$ 0.00");
-        lblProductosStock.setText("0");
-        lblCreditosActivos.setText("0");
+        try {
+            NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
+
+            // Calcular ventas de hoy
+            double totalVentasHoy = calcularTotalVentasHoy();
+            lblVentasHoy.setText(formatoMoneda.format(totalVentasHoy));
+
+            // Contar productos en stock
+            int totalProductos = contarProductosEnStock();
+            lblProductosStock.setText(String.valueOf(totalProductos));
+
+            // Contar créditos activos
+            int creditosActivos = contarCreditosActivos();
+            lblCreditosActivos.setText(String.valueOf(creditosActivos));
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar estadísticas: " + e.getMessage());
+            lblVentasHoy.setText("$ 0.00");
+            lblProductosStock.setText("0");
+            lblCreditosActivos.setText("0");
+        }
+    }
+
+    /**
+     * Calcula el total de ventas del día actual
+     */
+    private double calcularTotalVentasHoy() {
+        double total = 0.0;
+
+        // Obtener todas las ventas
+        List<Venta> todasLasVentas = ventaDAO.obtenerTodas();
+
+        // Crear objeto Calendar para comparar fechas
+        Calendar hoy = Calendar.getInstance();
+        hoy.set(Calendar.HOUR_OF_DAY, 0);
+        hoy.set(Calendar.MINUTE, 0);
+        hoy.set(Calendar.SECOND, 0);
+        hoy.set(Calendar.MILLISECOND, 0);
+
+        // Filtrar ventas de hoy y sumar totales
+        for (Venta venta : todasLasVentas) {
+            if (venta.getFechaVenta() != null && !venta.getEstado().equals("ANULADA")) {
+                Calendar fechaVenta = Calendar.getInstance();
+                fechaVenta.setTime(venta.getFechaVenta());
+                fechaVenta.set(Calendar.HOUR_OF_DAY, 0);
+                fechaVenta.set(Calendar.MINUTE, 0);
+                fechaVenta.set(Calendar.SECOND, 0);
+                fechaVenta.set(Calendar.MILLISECOND, 0);
+
+                if (fechaVenta.equals(hoy)) {
+                    total += venta.getTotal();
+                }
+            }
+        }
+
+        return total;
+    }
+
+    /**
+     * Cuenta el total de productos que tienen stock disponible
+     */
+    private int contarProductosEnStock() {
+        List<Producto> productos = productoDAO.obtenerActivos();
+        int contador = 0;
+
+        for (Producto producto : productos) {
+            if (producto.getStockActual() > 0) {
+                contador++;
+            }
+        }
+
+        return contador;
+    }
+
+    /**
+     * Cuenta los créditos activos en el sistema
+     */
+    private int contarCreditosActivos() {
+        List<?> creditosActivos = creditoDAO.obtenerActivos();
+        return creditosActivos.size();
     }
 
     /**
@@ -236,8 +327,19 @@ public class MainWindowController {
     @FXML
     private void abrirInventario() {
         actualizarEstado("Abriendo gestión de inventario...");
-        // TODO: Implementar
-        mostrarMensaje("En desarrollo", "Módulo de Inventario en construcción");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/GestionInventario.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Inventario");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("Error al abrir gestión de inventario: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -325,8 +427,19 @@ public class MainWindowController {
     @FXML
     private void abrirVentas() {
         actualizarEstado("Abriendo gestión de ventas...");
-        // TODO: Implementar
-        mostrarMensaje("En desarrollo", "Módulo de Ventas en construcción");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/GestionVentas.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Ventas");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("Error al abrir gestión de ventas: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -367,66 +480,77 @@ public class MainWindowController {
 
     // ==================== CONSULTAS ====================
 
+    /**
+     * Abre la ventana de Consultas y Reportes
+     */
+    @FXML
+    private void abrirConsultasReportes() {
+        actualizarEstado("Abriendo módulo de Consultas y Reportes...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Consultas.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Consultas y Reportes - Sistema de Electrodomésticos");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("Error al abrir consultas y reportes: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void consultaProductosCategoria() {
-        actualizarEstado("Ejecutando consulta: Productos por Categoría");
-        mostrarMensaje("Consulta", "Productos por Categoría - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void consultaClientesCredito() {
-        actualizarEstado("Ejecutando consulta: Clientes con Crédito Activo");
-        mostrarMensaje("Consulta", "Clientes con Crédito Activo - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void consultaVentasMes() {
-        actualizarEstado("Ejecutando consulta: Ventas por Mes");
-        mostrarMensaje("Consulta", "Ventas por Mes - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void consultaProductosBajoStock() {
-        actualizarEstado("Ejecutando consulta: Productos con Bajo Stock");
-        mostrarMensaje("Consulta", "Productos con Bajo Stock - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void consultaClientesMorosos() {
-        actualizarEstado("Ejecutando consulta: Clientes Morosos");
-        mostrarMensaje("Consulta", "Clientes Morosos - En desarrollo");
+        abrirConsultasReportes();
     }
 
     // ==================== REPORTES ====================
 
     @FXML
     private void reporteFacturaVenta() {
-        actualizarEstado("Generando reporte: Factura de Venta");
-        mostrarMensaje("Reporte", "Factura de Venta - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void reporteVentasMes() {
-        actualizarEstado("Generando reporte: Ventas del Mes");
-        mostrarMensaje("Reporte", "Ventas del Mes - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void reporteIVATrimestre() {
-        actualizarEstado("Generando reporte: IVA por Trimestre");
-        mostrarMensaje("Reporte", "IVA por Trimestre - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void reporteInventarioCategoria() {
-        actualizarEstado("Generando reporte: Inventario por Categoría");
-        mostrarMensaje("Reporte", "Inventario por Categoría - En desarrollo");
+        abrirConsultasReportes();
     }
 
     @FXML
     private void reporteClientesMorosos() {
-        actualizarEstado("Generando reporte: Clientes Morosos");
-        mostrarMensaje("Reporte", "Clientes Morosos - En desarrollo");
+        abrirConsultasReportes();
     }
 
     // ==================== UTILIDADES ====================
@@ -457,14 +581,67 @@ public class MainWindowController {
 
     @FXML
     private void buscarCliente() {
-        actualizarEstado("Buscando cliente...");
-        mostrarMensaje("Búsqueda", "Buscar Cliente - En desarrollo");
+        actualizarEstado("Abriendo búsqueda de cliente...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/BuscarCliente.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Buscar Cliente");
+            stage.setScene(new Scene(root));
+            stage.initOwner(lblUsuarioActual.getScene().getWindow());
+            stage.showAndWait();
+
+            // Obtener el cliente seleccionado
+            BuscarClienteController controller = loader.getController();
+            var clienteSeleccionado = controller.getClienteSeleccionado();
+
+            if (clienteSeleccionado != null) {
+                mostrarMensaje("Cliente Seleccionado",
+                    "Cliente: " + clienteSeleccionado.getNombre() + " " + clienteSeleccionado.getApellido() + "\n" +
+                    "Cédula: " + clienteSeleccionado.getCedula() + "\n" +
+                    "Teléfono: " + clienteSeleccionado.getTelefono());
+                actualizarEstado("Cliente seleccionado: " + clienteSeleccionado.getNombre());
+            } else {
+                actualizarEstado("Búsqueda cancelada");
+            }
+        } catch (IOException e) {
+            mostrarError("Error al abrir búsqueda de cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void buscarProducto() {
-        actualizarEstado("Buscando producto...");
-        mostrarMensaje("Búsqueda", "Buscar Producto - En desarrollo");
+        actualizarEstado("Abriendo búsqueda de producto...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/BuscarProducto.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Buscar Producto");
+            stage.setScene(new Scene(root));
+            stage.initOwner(lblUsuarioActual.getScene().getWindow());
+            stage.showAndWait();
+
+            // Obtener el producto seleccionado
+            BuscarProductoController controller = loader.getController();
+            var productoSeleccionado = controller.getProductoSeleccionado();
+
+            if (productoSeleccionado != null) {
+                mostrarMensaje("Producto Seleccionado",
+                    "Producto: " + productoSeleccionado.getNombre() + "\n" +
+                    "Código: " + productoSeleccionado.getCodigo() + "\n" +
+                    "Precio: $" + String.format("%,.2f", productoSeleccionado.getPrecioVenta()) + "\n" +
+                    "Stock: " + productoSeleccionado.getStockActual());
+                actualizarEstado("Producto seleccionado: " + productoSeleccionado.getNombre());
+            } else {
+                actualizarEstado("Búsqueda cancelada");
+            }
+        } catch (IOException e) {
+            mostrarError("Error al abrir búsqueda de producto: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ==================== AYUDA ====================

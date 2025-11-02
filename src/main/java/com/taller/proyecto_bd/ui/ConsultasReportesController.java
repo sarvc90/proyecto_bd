@@ -3,15 +3,23 @@ package com.taller.proyecto_bd.ui;
 
 import com.taller.proyecto_bd.dao.*;
 import com.taller.proyecto_bd.models.*;
+import com.taller.proyecto_bd.utils.PDFExporter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,18 +34,21 @@ public class ConsultasReportesController {
 
     @FXML private Label lblTituloResultado;
     @FXML private Button btnExportar;
+    @FXML private Button btnExportarPDF;
     @FXML private TableView<Map<String, Object>> tablaResultados;
     @FXML private VBox panelResumen;
+    @FXML private VBox panelGrafica;
     @FXML private TextArea txtResumen;
-    
+
     private ProductoDAO productoDAO;
     private ClienteDAO clienteDAO;
     private CategoriaDAO categoriaDAO;
     private VentaDAO ventaDAO;
     private DetalleVentaDAO detalleVentaDAO;
     private CreditoDAO creditoDAO;
-    
+
     private NumberFormat formatoMoneda;
+    private JFreeChart graficaActual;
     
     @FXML
     public void initialize() {
@@ -294,6 +305,19 @@ public class ConsultasReportesController {
                       "IVA (19%): " + formatoMoneda.format(totalIVA) + "\n" +
                       "TOTAL FACTURADO: " + formatoMoneda.format(totalVentas) + "\n\n" +
                       "Promedio por venta: " + formatoMoneda.format(cantidadVentas > 0 ? totalVentas/cantidadVentas : 0));
+
+        // Crear gráfica de barras
+        Map<String, Number> datosGrafica = new LinkedHashMap<>();
+        datosGrafica.put("Contado (" + ventasContado + ")", ventasContado);
+        datosGrafica.put("Crédito (" + ventasCredito + ")", ventasCredito);
+        JFreeChart grafica = PDFExporter.crearGraficaBarras(
+            "Distribución de Ventas",
+            "Tipo de Venta",
+            "Cantidad",
+            datosGrafica
+        );
+        mostrarGrafica(grafica);
+
         btnExportar.setDisable(false);
     }
     
@@ -356,6 +380,18 @@ public class ConsultasReportesController {
                       "Total de categorías: " + valorPorCategoria.size() + "\n" +
                       "Total unidades: " + totalUnidades + "\n\n" +
                       "VALOR TOTAL INVENTARIO:\n" + formatoMoneda.format(totalValor));
+
+        // Crear gráfica de pastel para distribución por categoría
+        Map<String, Number> datosGrafica = new LinkedHashMap<>();
+        for (String categoria : valorPorCategoria.keySet()) {
+            datosGrafica.put(categoria, valorPorCategoria.get(categoria));
+        }
+        JFreeChart grafica = PDFExporter.crearGraficaPastel(
+            "Distribución de Valor por Categoría",
+            datosGrafica
+        );
+        mostrarGrafica(grafica);
+
         btnExportar.setDisable(false);
     }
     
@@ -569,9 +605,82 @@ public class ConsultasReportesController {
         tablaResultados.getColumns().clear();
         tablaResultados.getItems().clear();
         panelResumen.setVisible(false);
+        if (panelGrafica != null) {
+            panelGrafica.getChildren().clear();
+            panelGrafica.setVisible(false);
+        }
         btnExportar.setDisable(true);
+        if (btnExportarPDF != null) {
+            btnExportarPDF.setDisable(true);
+        }
+        graficaActual = null;
     }
-    
+
+    /**
+     * Muestra una gráfica en el panel
+     */
+    private void mostrarGrafica(JFreeChart chart) {
+        if (panelGrafica == null) return;
+
+        graficaActual = chart;
+        panelGrafica.getChildren().clear();
+
+        SwingNode swingNode = new SwingNode();
+        SwingUtilities.invokeLater(() -> {
+            ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
+            swingNode.setContent(chartPanel);
+        });
+
+        panelGrafica.getChildren().add(swingNode);
+        panelGrafica.setVisible(true);
+
+        if (btnExportarPDF != null) {
+            btnExportarPDF.setDisable(false);
+        }
+    }
+
+    /**
+     * Exporta el reporte completo a PDF con gráfica
+     */
+    @FXML
+    private void exportarAPDF() {
+        if (tablaResultados.getItems().isEmpty()) {
+            mostrarAdvertencia("No hay datos para exportar",
+                "Debe ejecutar una consulta o reporte primero.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar Reporte PDF");
+        fileChooser.setInitialFileName("reporte_" + System.currentTimeMillis() + ".pdf");
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Archivo PDF", "*.pdf")
+        );
+
+        File file = fileChooser.showSaveDialog(tablaResultados.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                PDFExporter.exportarAPDF(
+                    file,
+                    lblTituloResultado.getText(),
+                    txtResumen.getText(),
+                    tablaResultados.getColumns(),
+                    tablaResultados.getItems(),
+                    graficaActual
+                );
+
+                mostrarExito("Exportación completada",
+                    "El reporte PDF se guardó exitosamente en:\n" + file.getAbsolutePath());
+
+            } catch (Exception e) {
+                mostrarError("Error al exportar PDF: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Exporta los resultados a CSV
      */
@@ -638,5 +747,38 @@ public class ConsultasReportesController {
     private void cerrarVentana() {
         Stage stage = (Stage) tablaResultados.getScene().getWindow();
         stage.close();
+    }
+
+    /**
+     * Muestra un mensaje de advertencia
+     */
+    private void mostrarAdvertencia(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Advertencia");
+        alert.setHeaderText(titulo);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    /**
+     * Muestra un mensaje de éxito
+     */
+    private void mostrarExito(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Éxito");
+        alert.setHeaderText(titulo);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    /**
+     * Muestra un mensaje de error
+     */
+    private void mostrarError(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }

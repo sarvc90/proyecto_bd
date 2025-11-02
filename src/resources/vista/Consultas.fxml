@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.ConsultasReportesController"
+            stylesheets="@styles.css" prefHeight="700" prefWidth="1200">
+
+    <!-- ENCABEZADO -->
+    <top>
+        <VBox spacing="15" styleClass="header-section">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Label text="CONSULTAS Y REPORTES" styleClass="title" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+            <Separator/>
+
+            <!-- MENÚ DE CONSULTAS Y REPORTES -->
+            <GridPane hgap="15" vgap="15">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50"/>
+                    <ColumnConstraints percentWidth="50"/>
+                </columnConstraints>
+
+                <!-- CONSULTAS MULTITABLA -->
+                <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="📊 CONSULTAS MULTITABLA" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                    <Button text="1. Productos por Categoría" onAction="#consultaProductosCategoria"
+                            styleClass="btn-info" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="2. Clientes con Crédito Activo" onAction="#consultaClientesCredito"
+                            styleClass="btn-info" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="3. Ventas con Detalle Completo" onAction="#consultaVentasDetalle"
+                            styleClass="btn-info" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="4. Productos con Bajo Stock ⚠️" onAction="#consultaProductosBajoStock"
+                            styleClass="btn-warning" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="5. Créditos Activos" onAction="#consultaCreditosActivos"
+                            styleClass="btn-info" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+                </VBox>
+
+                <!-- REPORTES CON CÁLCULOS -->
+                <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="📄 REPORTES CON CÁLCULOS" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                    <Button text="1. Resumen General de Ventas" onAction="#reporteResumenVentas"
+                            styleClass="btn-success" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="2. Inventario Valorizado" onAction="#reporteInventarioValorizado"
+                            styleClass="btn-success" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="3. Estado de Cartera" onAction="#reporteEstadoCartera"
+                            styleClass="btn-success" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="4. Top 10 Productos Más Vendidos" onAction="#reporteTopProductos"
+                            styleClass="btn-success" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+
+                    <Button text="5. Análisis de IVA Recaudado" onAction="#reporteAnalisisIVA"
+                            styleClass="btn-success" maxWidth="Infinity">
+                        <font><Font size="12"/></font>
+                    </Button>
+                </VBox>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <!-- RESULTADOS -->
+    <center>
+        <VBox spacing="10" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+
+            <!-- Título del resultado actual -->
+            <Label fx:id="lblTituloResultado" text="Seleccione una consulta o reporte para ver los resultados"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
+
+            <Separator/>
+
+            <!-- Tabla de resultados dinámica -->
+            <TableView fx:id="tablaResultados" VBox.vgrow="ALWAYS" prefHeight="300">
+                <placeholder>
+                    <Label text="No hay datos para mostrar. Ejecute una consulta o reporte.">
+                        <font><Font size="14"/></font>
+                    </Label>
+                </placeholder>
+            </TableView>
+
+            <Separator/>
+
+            <!-- Panel de Gráficas -->
+            <VBox fx:id="panelGrafica" spacing="10" prefHeight="450" visible="false"
+                  style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 2; -fx-padding: 10;">
+                <Label text="📊 GRÁFICA" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2196F3;"/>
+                <Separator/>
+            </VBox>
+        </VBox>
+    </center>
+
+    <!-- PANEL LATERAL DERECHO - RESUMEN -->
+    <right>
+        <VBox fx:id="panelResumen" spacing="10" prefWidth="320" visible="false"
+              styleClass="info-panel" style="-fx-background-color: #f5f5f5; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 0 2;">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <Label text="📈 RESUMEN Y CÁLCULOS" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+            <Separator/>
+
+            <TextArea fx:id="txtResumen" editable="false" wrapText="true" VBox.vgrow="ALWAYS"
+                      style="-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 12px;">
+                <font><Font name="Courier New" size="12"/></font>
+            </TextArea>
+
+            <Label text="Los cálculos se actualizan automáticamente con cada consulta."
+                   wrapText="true" styleClass="hint-label" style="-fx-font-size: 10px; -fx-font-style: italic;"/>
+        </VBox>
+    </right>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="footer-section">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button fx:id="btnExportarPDF" text="📄 Exportar a PDF" onAction="#exportarAPDF"
+                    styleClass="btn-success" disable="true">
+                <font><Font size="13"/></font>
+            </Button>
+
+            <Button fx:id="btnExportar" text="📥 Exportar a CSV" onAction="#exportarResultados"
+                    styleClass="btn-primary" disable="true">
+                <font><Font size="13"/></font>
+            </Button>
+
+            <Button text="Cerrar" onAction="#cerrarVentana" styleClass="btn-secondary">
+                <font><Font size="13"/></font>
+            </Button>
+        </HBox>
+    </bottom>
+
+</BorderPane>

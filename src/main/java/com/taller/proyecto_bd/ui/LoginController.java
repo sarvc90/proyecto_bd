@@ -33,6 +33,9 @@ import java.util.Optional;
 public class LoginController {
 
     @FXML
+    private ComboBox<String> cmbTipoUsuario;
+
+    @FXML
     private TextField txtUsuario;
 
     @FXML
@@ -48,6 +51,7 @@ public class LoginController {
     private Label lblError;
 
     private UsuarioDAO usuarioDAO;
+    private ClienteDAO clienteDAO;
     private AuditoriaDAO auditoriaDAO;
 
     /**
@@ -55,8 +59,16 @@ public class LoginController {
      */
     @FXML
     public void initialize() {
-        usuarioDAO = UsuarioDAO.getInstance(); // Usar getInstance() porque es Singleton
-        auditoriaDAO = AuditoriaDAO.getInstance(); // Usar getInstance() porque es Singleton
+        usuarioDAO = UsuarioDAO.getInstance();
+        clienteDAO = ClienteDAO.getInstance();
+        auditoriaDAO = AuditoriaDAO.getInstance();
+
+        // Configurar ComboBox de tipo de usuario
+        cmbTipoUsuario.getItems().addAll(
+            "Vendedor / Administrador / Gerente",
+            "Cliente"
+        );
+        cmbTipoUsuario.setValue("Vendedor / Administrador / Gerente");
 
         // Configurar el Enter para hacer login
         txtPassword.setOnAction(event -> handleLogin(event));
@@ -75,6 +87,7 @@ public class LoginController {
     private void handleLogin(ActionEvent event) {
         String username = txtUsuario.getText().trim();
         String password = txtPassword.getText();
+        String tipoUsuario = cmbTipoUsuario.getValue();
 
         // Validar campos vacíos
         if (username.isEmpty() || password.isEmpty()) {
@@ -87,43 +100,164 @@ public class LoginController {
         lblError.setVisible(false);
 
         try {
-            // Intentar autenticar al usuario (usa el método login del DAO)
-            Usuario usuario = usuarioDAO.login(username, password);
-
-            if (usuario != null) {
-                if (!usuario.isActivo()) {
-                    mostrarError("Usuario inactivo. Contacte al administrador.");
-                    btnIngresar.setDisable(false);
-                    return;
-                }
-
-                // Login exitoso
-                registrarAuditoria(usuario, "LOGIN", true);
-
-                // Guardar sesión
-                SessionManager.setUsuarioActual(usuario);
-
-                // Guardar usuario si se marcó recordar
-                if (chkRecordar.isSelected()) {
-                    guardarUsuario(username);
-                } else {
-                    limpiarUsuarioGuardado();
-                }
-
-                // Abrir ventana principal
-                abrirVentanaPrincipal(usuario);
-
+            if ("Cliente".equals(tipoUsuario)) {
+                // Login como Cliente
+                handleLoginCliente(username, password);
             } else {
-                // Login fallido
-                registrarAuditoriaFallida(username);
-                mostrarError("Usuario o contraseña incorrectos");
-                btnIngresar.setDisable(false);
+                // Login como Usuario del Sistema (vendedor, admin, gerente)
+                handleLoginUsuario(username, password);
             }
 
         } catch (Exception e) {
             mostrarError("Error de conexión: " + e.getMessage());
             btnIngresar.setDisable(false);
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Maneja el login de usuarios del sistema (vendedor, admin, gerente)
+     */
+    private void handleLoginUsuario(String username, String password) {
+        Usuario usuario = usuarioDAO.login(username, password);
+
+        if (usuario != null) {
+            if (!usuario.isActivo()) {
+                mostrarError("Usuario inactivo. Contacte al administrador.");
+                btnIngresar.setDisable(false);
+                return;
+            }
+
+            // Login exitoso
+            registrarAuditoria(usuario, "LOGIN", true);
+
+            // Guardar sesión
+            SessionManager.setUsuarioActual(usuario);
+
+            // Guardar usuario si se marcó recordar
+            if (chkRecordar.isSelected()) {
+                guardarUsuario(username);
+            } else {
+                limpiarUsuarioGuardado();
+            }
+
+            // Abrir ventana principal
+            abrirVentanaPrincipal(usuario);
+
+        } else {
+            // Login fallido
+            registrarAuditoriaFallida(username);
+            mostrarError("Usuario o contraseña incorrectos");
+            btnIngresar.setDisable(false);
+        }
+    }
+
+    /**
+     * Maneja el login de clientes
+     */
+    private void handleLoginCliente(String cedula, String telefono) {
+        // Buscar cliente por cédula
+        Cliente cliente = clienteDAO.obtenerPorCedula(cedula);
+
+        if (cliente != null) {
+            // Verificar teléfono como "contraseña"
+            if (telefono.equals(cliente.getTelefono())) {
+                if (!cliente.isActivo()) {
+                    mostrarError("Cliente inactivo. Contacte con la tienda.");
+                    btnIngresar.setDisable(false);
+                    return;
+                }
+
+                // Login exitoso - crear un usuario temporal para el cliente
+                Usuario usuarioCliente = crearUsuarioTemporalCliente(cliente);
+
+                // Guardar sesión
+                SessionManager.setUsuarioActual(usuarioCliente);
+
+                // Guardar cédula si se marcó recordar
+                if (chkRecordar.isSelected()) {
+                    guardarUsuario(cedula);
+                } else {
+                    limpiarUsuarioGuardado();
+                }
+
+                // Registrar auditoría
+                registrarAuditoriaCliente(cliente, "LOGIN_CLIENTE", true);
+
+                // Abrir ventana principal (con acceso limitado para clientes)
+                abrirVentanaPrincipal(usuarioCliente);
+
+            } else {
+                // Teléfono incorrecto
+                registrarAuditoriaClienteFallida(cedula);
+                mostrarError("Cédula o teléfono incorrectos");
+                btnIngresar.setDisable(false);
+            }
+        } else {
+            // Cliente no encontrado
+            registrarAuditoriaClienteFallida(cedula);
+            mostrarError("Cédula o teléfono incorrectos");
+            btnIngresar.setDisable(false);
+        }
+    }
+
+    /**
+     * Crea un objeto Usuario temporal para un cliente
+     */
+    private Usuario crearUsuarioTemporalCliente(Cliente cliente) {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(-cliente.getIdCliente()); // ID negativo para identificar clientes
+        usuario.setUsername(cliente.getCedula());
+        usuario.setNombreCompleto(cliente.getNombre() + " " + cliente.getApellido());
+        usuario.setRol("CLIENTE");
+        usuario.setEmail(cliente.getEmail());
+        usuario.setTelefono(cliente.getTelefono());
+        usuario.setActivo(cliente.isActivo());
+        return usuario;
+    }
+
+    /**
+     * Registra auditoría para clientes
+     */
+    private void registrarAuditoriaCliente(Cliente cliente, String accion, boolean exitoso) {
+        try {
+            String ip = obtenerIP();
+            String descripcion = exitoso ?
+                    "Login exitoso del cliente: " + cliente.getNombre() + " " + cliente.getApellido() :
+                    "Intento de login fallido del cliente";
+
+            Auditoria auditoria = new Auditoria(
+                    -cliente.getIdCliente(), // ID negativo para clientes
+                    accion,
+                    "Cliente",
+                    descripcion,
+                    ip
+            );
+
+            auditoria.setNombreUsuario(cliente.getNombre() + " " + cliente.getApellido());
+            auditoriaDAO.agregar(auditoria);
+        } catch (Exception e) {
+            System.err.println("Error al registrar auditoría de cliente: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Registra un intento de login fallido de cliente
+     */
+    private void registrarAuditoriaClienteFallida(String cedula) {
+        try {
+            String ip = obtenerIP();
+            Auditoria auditoria = new Auditoria(
+                    0,
+                    "LOGIN_CLIENTE_FALLIDO",
+                    "Cliente",
+                    "Intento de login fallido con cédula: " + cedula,
+                    ip
+            );
+            auditoria.setNombreUsuario(cedula);
+            auditoriaDAO.agregar(auditoria);
+        } catch (Exception e) {
+            System.err.println("Error al registrar auditoría fallida de cliente: " + e.getMessage());
         }
     }
 
