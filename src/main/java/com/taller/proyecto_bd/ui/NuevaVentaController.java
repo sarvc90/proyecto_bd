@@ -70,8 +70,8 @@ public class NuevaVentaController {
     private ProductoDAO productoDAO;
     private VentaDAO ventaDAO;
     private DetalleVentaDAO detalleVentaDAO;
-    private CreditoDAO creditoDAO;
-    
+    private CuotaDAO cuotaDAO;
+
     private Cliente clienteSeleccionado;
     private ObservableList<DetalleVenta> carrito;
     private NumberFormat formatoMoneda;
@@ -91,11 +91,11 @@ public class NuevaVentaController {
         productoDAO = ProductoDAO.getInstance();
         ventaDAO = VentaDAO.getInstance();
         detalleVentaDAO = DetalleVentaDAO.getInstance();
-        creditoDAO = CreditoDAO.getInstance();
-        
+        cuotaDAO = CuotaDAO.getInstance();
+
         carrito = FXCollections.observableArrayList();
         formatoMoneda = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
-        
+
         configurarTabla();
         configurarProductos();
         configurarSpinner();
@@ -480,16 +480,16 @@ public class NuevaVentaController {
             venta.setSubtotal(subtotal);
             venta.setIvaTotal(iva);
             venta.setTotal(total);
-            
+
+            // Configurar crédito si aplica
             if (rbCredito.isSelected()) {
-                double cuotaInicial = total * CUOTA_INICIAL_PORCENTAJE;
                 String plazoStr = cmbPlazo.getValue();
                 int plazo = Integer.parseInt(plazoStr.split(" ")[0]);
-                
-                venta.setCuotaInicial(cuotaInicial);
-                venta.setPlazoMeses(plazo);
+
+                // Usar el método helper de Venta para configurar crédito automáticamente
+                venta.configurarComoCredito(plazo);
             }
-            
+
             venta.setEstado("REGISTRADA");
             
             // Guardar venta
@@ -513,15 +513,24 @@ public class NuevaVentaController {
                 }
             }
             
-            // Si es crédito, crear el crédito
+            // Si es crédito, generar las cuotas
             if (rbCredito.isSelected()) {
-                crearCredito(venta);
-            }
-            
-            // Actualizar saldo del cliente si es crédito
-            if (rbCredito.isSelected()) {
+                boolean cuotasGeneradas = cuotaDAO.generarCuotas(
+                    venta.getIdVenta(),
+                    venta.getTotal(),
+                    venta.getPlazoMeses(),
+                    venta.getFechaVenta()
+                );
+
+                if (!cuotasGeneradas) {
+                    mostrarError("Advertencia: Error al generar las cuotas del crédito");
+                }
+
+                // Actualizar saldo del cliente
+                double saldoFinanciar = venta.getSaldoFinanciar();
+                double montoConInteres = saldoFinanciar * 1.05; // 5% de interés
                 clienteSeleccionado.setSaldoPendiente(
-                    clienteSeleccionado.getSaldoPendiente() + (total - venta.getCuotaInicial())
+                    clienteSeleccionado.getSaldoPendiente() + montoConInteres
                 );
                 clienteDAO.actualizar(clienteSeleccionado);
             }
@@ -547,28 +556,6 @@ public class NuevaVentaController {
             mostrarError("Error al guardar la venta: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-    
-    /**
-     * Crea el crédito para una venta a crédito
-     */
-    private void crearCredito(Venta venta) {
-        double total = venta.getTotal();
-        double cuotaInicial = venta.getCuotaInicial();
-        double saldoFinanciar = total - cuotaInicial;
-        double montoConInteres = saldoFinanciar * (1 + INTERES_PORCENTAJE);
-        
-        Credito credito = new Credito(
-            venta.getIdVenta(),
-            venta.getIdCliente(),
-            montoConInteres,
-            cuotaInicial,
-            venta.getPlazoMeses(),
-            INTERES_PORCENTAJE
-        );
-        
-        credito.generarCuotas();
-        creditoDAO.agregar(credito);
     }
     
     /**

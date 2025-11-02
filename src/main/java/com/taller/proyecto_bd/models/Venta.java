@@ -148,6 +148,53 @@ public class Venta {
     }
 
     /**
+     * Configura esta venta como crédito y calcula automáticamente la cuota inicial (30%)
+     * @param plazoMeses Plazo en meses (12, 18 o 24)
+     */
+    public void configurarComoCredito(int plazoMeses) {
+        if (plazoMeses != 12 && plazoMeses != 18 && plazoMeses != 24) {
+            throw new IllegalArgumentException("El plazo debe ser 12, 18 o 24 meses");
+        }
+        this.esCredito = true;
+        this.plazoMeses = plazoMeses;
+        this.cuotaInicial = this.total * 0.30; // 30% del total
+    }
+
+    /**
+     * Obtiene el saldo a financiar (70% del total)
+     */
+    public double getSaldoFinanciar() {
+        if (!esCredito) return 0.0;
+        return total - cuotaInicial; // 70%
+    }
+
+    /**
+     * Obtiene el monto total a financiar (70% + 5% de interés)
+     */
+    public double getMontoFinanciado() {
+        if (!esCredito) return 0.0;
+        double saldo = getSaldoFinanciar();
+        return saldo * 1.05; // + 5% interés
+    }
+
+    /**
+     * Obtiene el valor de cada cuota mensual
+     */
+    public double getValorCuotaMensual() {
+        if (!esCredito || plazoMeses == 0) return 0.0;
+        return getMontoFinanciado() / plazoMeses;
+    }
+
+    /**
+     * Obtiene el monto a pagar en el momento de la venta
+     * - Contado: total completo
+     * - Crédito: cuota inicial (30%)
+     */
+    public double getMontoPagarAhora() {
+        return esCredito ? cuotaInicial : total;
+    }
+
+    /**
      * Obtiene una descripción corta de la venta
      */
     public String getResumen() {
