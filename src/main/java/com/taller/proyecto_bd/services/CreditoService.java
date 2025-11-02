@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class CreditoService {
     // ==================== DEPENDENCIAS ====================
     private VentaDAO ventaDAO = VentaDAO.getInstance();
+    private CreditoDAO creditoDAO = CreditoDAO.getInstance();
     private CuotaDAO cuotaDAO = CuotaDAO.getInstance();
     private ClienteDAO clienteDAO = ClienteDAO.getInstance();
     private AuditoriaDAO auditoriaDAO = AuditoriaDAO.getInstance();
@@ -45,8 +46,14 @@ public class CreditoService {
             return false;
         }
 
+        // Obtener el crédito asociado
+        Credito credito = creditoDAO.obtenerPorId(cuota.getIdCredito());
+        if (credito == null) {
+            return false;
+        }
+
         // Obtener la venta asociada
-        Venta venta = ventaDAO.obtenerPorId(cuota.getIdCredito()); // idCredito = idVenta
+        Venta venta = ventaDAO.obtenerPorId(credito.getIdVenta());
         if (venta == null || !venta.isEsCredito()) {
             return false;
         }
@@ -56,7 +63,7 @@ public class CreditoService {
 
         if (pagoExitoso) {
             // Verificar si todas las cuotas están pagadas
-            boolean todasPagadas = cuotaDAO.obtenerPendientesPorVenta(venta.getIdVenta()).isEmpty();
+            boolean todasPagadas = cuotaDAO.obtenerPendientesPorCredito(credito.getIdCredito()).isEmpty();
 
             if (todasPagadas) {
                 // Marcar la venta como PAGADA
@@ -145,8 +152,14 @@ public class CreditoService {
             return false;
         }
 
+        // Obtener el crédito asociado a la venta
+        Credito credito = creditoDAO.obtenerPorVenta(idVenta);
+        if (credito == null) {
+            return false;
+        }
+
         // Verificar si tiene cuotas vencidas
-        List<Cuota> cuotasVencidas = cuotaDAO.obtenerPorVenta(idVenta)
+        List<Cuota> cuotasVencidas = cuotaDAO.obtenerPorCredito(credito.getIdCredito())
                 .stream()
                 .filter(cuota -> !cuota.isPagada() && cuota.estaVencida())
                 .collect(Collectors.toList());
@@ -177,7 +190,13 @@ public class CreditoService {
         List<Venta> ventasCredito = listarVentasCreditoActivas(idCliente);
 
         return ventasCredito.stream()
-                .flatMap(v -> cuotaDAO.obtenerPorVenta(v.getIdVenta()).stream())
+                .flatMap(v -> {
+                    Credito credito = creditoDAO.obtenerPorVenta(v.getIdVenta());
+                    if (credito == null) {
+                        return List.<Cuota>of().stream();
+                    }
+                    return cuotaDAO.obtenerPorCredito(credito.getIdCredito()).stream();
+                })
                 .filter(cuota -> !cuota.isPagada() && cuota.estaVencida())
                 .collect(Collectors.toList());
     }
@@ -260,7 +279,13 @@ public class CreditoService {
                 .sum();
 
         List<Cuota> cuotasPendientes = ventasCredito.stream()
-                .flatMap(v -> cuotaDAO.obtenerPendientesPorVenta(v.getIdVenta()).stream())
+                .flatMap(v -> {
+                    Credito credito = creditoDAO.obtenerPorVenta(v.getIdVenta());
+                    if (credito == null) {
+                        return List.<Cuota>of().stream();
+                    }
+                    return cuotaDAO.obtenerPendientesPorCredito(credito.getIdCredito()).stream();
+                })
                 .collect(Collectors.toList());
 
         double montoPendiente = cuotasPendientes.stream()

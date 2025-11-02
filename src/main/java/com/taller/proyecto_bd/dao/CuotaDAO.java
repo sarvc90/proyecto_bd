@@ -45,7 +45,7 @@ public class CuotaDAO {
             return false;
         }
 
-        String sql = "INSERT INTO Cuotas (numeroCuota, idVenta, valor, fechaVencimiento, fechaPago, pagada) " +
+        String sql = "INSERT INTO Cuotas (numeroCuota, idCredito, valor, fechaVencimiento, fechaPago, pagada) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -56,7 +56,7 @@ public class CuotaDAO {
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setInt(1, cuota.getNumeroCuota());
-                stmt.setInt(2, cuota.getIdCredito()); // En la base de datos, idCredito es idVenta
+                stmt.setInt(2, cuota.getIdCredito());
                 stmt.setDouble(3, cuota.getValor());
                 stmt.setTimestamp(4, new Timestamp(cuota.getFechaVencimiento().getTime()));
 
@@ -90,8 +90,8 @@ public class CuotaDAO {
      */
     public List<Cuota> obtenerTodas() {
         List<Cuota> lista = new ArrayList<>();
-        String sql = "SELECT idCuota, numeroCuota, idVenta, valor, fechaVencimiento, fechaPago, pagada " +
-                     "FROM Cuotas ORDER BY idVenta, numeroCuota";
+        String sql = "SELECT idCuota, numeroCuota, idCredito, valor, fechaVencimiento, fechaPago, pagada " +
+                     "FROM Cuotas ORDER BY idCredito, numeroCuota";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -114,7 +114,7 @@ public class CuotaDAO {
      * Buscar cuota por ID
      */
     public Cuota obtenerPorId(int idCuota) {
-        String sql = "SELECT idCuota, numeroCuota, idVenta, valor, fechaVencimiento, fechaPago, pagada " +
+        String sql = "SELECT idCuota, numeroCuota, idCredito, valor, fechaVencimiento, fechaPago, pagada " +
                      "FROM Cuotas WHERE idCuota = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -144,7 +144,7 @@ public class CuotaDAO {
             return false;
         }
 
-        String sql = "UPDATE Cuotas SET numeroCuota = ?, idVenta = ?, valor = ?, fechaVencimiento = ?, " +
+        String sql = "UPDATE Cuotas SET numeroCuota = ?, idCredito = ?, valor = ?, fechaVencimiento = ?, " +
                      "fechaPago = ?, pagada = ? WHERE idCuota = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -199,12 +199,12 @@ public class CuotaDAO {
     // ==================== MÉTODOS EXTRA ====================
 
     /**
-     * Obtener todas las cuotas de una venta/crédito específica
+     * Obtener todas las cuotas de un crédito específico
      */
-    public List<Cuota> obtenerPorVenta(int idVenta) {
+    public List<Cuota> obtenerPorCredito(int idCredito) {
         List<Cuota> lista = new ArrayList<>();
-        String sql = "SELECT idCuota, numeroCuota, idVenta, valor, fechaVencimiento, fechaPago, pagada " +
-                     "FROM Cuotas WHERE idVenta = ? ORDER BY numeroCuota";
+        String sql = "SELECT idCuota, numeroCuota, idCredito, valor, fechaVencimiento, fechaPago, pagada " +
+                     "FROM Cuotas WHERE idCredito = ? ORDER BY numeroCuota";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -212,7 +212,7 @@ public class CuotaDAO {
             }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, idVenta);
+                stmt.setInt(1, idCredito);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         lista.add(mapearCuota(rs));
@@ -220,18 +220,18 @@ public class CuotaDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener cuotas por venta: " + e.getMessage());
+            System.err.println("Error al obtener cuotas por crédito: " + e.getMessage());
         }
         return lista;
     }
 
     /**
-     * Obtener cuotas pendientes de pago de una venta
+     * Obtener cuotas pendientes de pago de un crédito
      */
-    public List<Cuota> obtenerPendientesPorVenta(int idVenta) {
+    public List<Cuota> obtenerPendientesPorCredito(int idCredito) {
         List<Cuota> lista = new ArrayList<>();
-        String sql = "SELECT idCuota, numeroCuota, idVenta, valor, fechaVencimiento, fechaPago, pagada " +
-                     "FROM Cuotas WHERE idVenta = ? AND pagada = 0 ORDER BY numeroCuota";
+        String sql = "SELECT idCuota, numeroCuota, idCredito, valor, fechaVencimiento, fechaPago, pagada " +
+                     "FROM Cuotas WHERE idCredito = ? AND pagada = 0 ORDER BY numeroCuota";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -239,7 +239,7 @@ public class CuotaDAO {
             }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, idVenta);
+                stmt.setInt(1, idCredito);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         lista.add(mapearCuota(rs));
@@ -257,7 +257,7 @@ public class CuotaDAO {
      */
     public List<Cuota> obtenerVencidas() {
         List<Cuota> lista = new ArrayList<>();
-        String sql = "SELECT idCuota, numeroCuota, idVenta, valor, fechaVencimiento, fechaPago, pagada " +
+        String sql = "SELECT idCuota, numeroCuota, idCredito, valor, fechaVencimiento, fechaPago, pagada " +
                      "FROM Cuotas WHERE pagada = 0 AND fechaVencimiento < GETDATE() ORDER BY fechaVencimiento";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -300,13 +300,13 @@ public class CuotaDAO {
     }
 
     /**
-     * Generar cuotas para una venta a crédito
+     * Generar cuotas para un crédito
      * Según requisitos:
      * - Cuota inicial 30% (ya pagada al momento de la venta)
      * - 70% restante + 5% de interés = 73.5% del total
      * - Dividido en 12, 18 o 24 meses
      */
-    public boolean generarCuotas(int idVenta, double totalVenta, int plazoMeses, Date fechaVenta) {
+    public boolean generarCuotas(int idCredito, double totalVenta, int plazoMeses, Date fechaVenta) {
         if (plazoMeses != 12 && plazoMeses != 18 && plazoMeses != 24) {
             System.err.println("Error: Plazo debe ser 12, 18 o 24 meses");
             return false;
@@ -327,7 +327,7 @@ public class CuotaDAO {
 
             Cuota cuota = new Cuota();
             cuota.setNumeroCuota(i);
-            cuota.setIdCredito(idVenta);
+            cuota.setIdCredito(idCredito);
             cuota.setValor(valorCuota);
             cuota.setFechaVencimiento(calendar.getTime());
             cuota.setPagada(false);
@@ -342,10 +342,10 @@ public class CuotaDAO {
     }
 
     /**
-     * Eliminar todas las cuotas de una venta (útil para anular un crédito)
+     * Eliminar todas las cuotas de un crédito (útil para anular un crédito)
      */
-    public boolean eliminarPorVenta(int idVenta) {
-        String sql = "DELETE FROM Cuotas WHERE idVenta = ?";
+    public boolean eliminarPorCredito(int idCredito) {
+        String sql = "DELETE FROM Cuotas WHERE idCredito = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -353,12 +353,12 @@ public class CuotaDAO {
             }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, idVenta);
+                stmt.setInt(1, idCredito);
                 stmt.executeUpdate();
                 return true;
             }
         } catch (SQLException e) {
-            System.err.println("Error al eliminar cuotas por venta: " + e.getMessage());
+            System.err.println("Error al eliminar cuotas por crédito: " + e.getMessage());
         }
         return false;
     }
@@ -375,7 +375,7 @@ public class CuotaDAO {
         return new Cuota(
                 rs.getInt("idCuota"),
                 rs.getInt("numeroCuota"),
-                rs.getInt("idVenta"), // idCredito en el modelo = idVenta en la BD
+                rs.getInt("idCredito"),
                 rs.getDouble("valor"),
                 fechaVencimiento != null ? new Date(fechaVencimiento.getTime()) : null,
                 fechaPago != null ? new Date(fechaPago.getTime()) : null,

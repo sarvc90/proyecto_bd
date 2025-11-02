@@ -340,6 +340,41 @@ public class VentaDAO {
         return obtenerPorEstado("REGISTRADA");
     }
 
+    /**
+     * Genera el siguiente código de venta basado en el año actual y el contador
+     * Formato: V-YYYY-NNN (ej: V-2025-001)
+     */
+    public String generarCodigoVenta() {
+        String año = String.valueOf(java.time.Year.now().getValue());
+        String patron = "V-" + año + "-%";
+        int siguienteNumero = 1;
+
+        String sql = "SELECT MAX(CAST(SUBSTRING(codigo, LEN(codigo) - 2, 3) AS INT)) AS maxNumero " +
+                     "FROM Ventas WHERE codigo LIKE ?";
+
+        try (Connection conn = ConexionBD.obtenerConexion()) {
+            if (conn == null) {
+                return String.format("V-%s-%03d", año, siguienteNumero);
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, patron);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        int maxNumero = rs.getInt("maxNumero");
+                        if (maxNumero > 0) {
+                            siguienteNumero = maxNumero + 1;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al generar código de venta: " + e.getMessage());
+        }
+
+        return String.format("V-%s-%03d", año, siguienteNumero);
+    }
+
     // ==================== MÉTODOS PRIVADOS ====================
 
     /**

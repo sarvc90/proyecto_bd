@@ -332,15 +332,37 @@ public class MainWindowController {
     @FXML
     private void abrirCreditos() {
         actualizarEstado("Abriendo gestión de créditos...");
-        // TODO: Implementar
-        mostrarMensaje("En desarrollo", "Módulo de Créditos en construcción");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/GestionCreditos.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Créditos");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("Error al abrir gestión de créditos: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void abrirCuotas() {
         actualizarEstado("Abriendo gestión de cuotas...");
-        // TODO: Implementar
-        mostrarMensaje("En desarrollo", "Módulo de Cuotas en construcción");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/PagarCuotas.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Cuotas - Pagos");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("Error al abrir gestión de cuotas: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ==================== CONSULTAS ====================

@@ -75,8 +75,7 @@ public class NuevaVentaController {
     private Cliente clienteSeleccionado;
     private ObservableList<DetalleVenta> carrito;
     private NumberFormat formatoMoneda;
-    private int contadorVentas = 1;
-    
+
     private static final double IVA_PORCENTAJE = 0.12; // 12%
     private static final double CUOTA_INICIAL_PORCENTAJE = 0.30; // 30%
     private static final double INTERES_PORCENTAJE = 0.05; // 5%
@@ -264,12 +263,10 @@ public class NuevaVentaController {
     }
     
     /**
-     * Genera un código único para la venta
+     * Genera un código único para la venta consultando la base de datos
      */
     private void generarCodigoVenta() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        String año = sdf.format(new Date());
-        String codigo = String.format("V-%s-%03d", año, contadorVentas++);
+        String codigo = ventaDAO.generarCodigoVenta();
         lblCodigoVenta.setText(codigo);
     }
     
@@ -513,26 +510,52 @@ public class NuevaVentaController {
                 }
             }
             
-            // Si es crédito, generar las cuotas
+            // Si es crédito, crear crédito y generar las cuotas
             if (rbCredito.isSelected()) {
-                boolean cuotasGeneradas = cuotaDAO.generarCuotas(
-                    venta.getIdVenta(),
-                    venta.getTotal(),
-                    venta.getPlazoMeses(),
-                    venta.getFechaVenta()
-                );
+                try {
+                    // Crear el registro de crédito
+                    double montoFinanciado = venta.getSaldoFinanciar(); // 70% del total
+                    Credito credito = new Credito(
+                        venta.getIdVenta(),
+                        clienteSeleccionado.getIdCliente(),
+                        montoFinanciado,
+                        venta.getCuotaInicial(),
+                        venta.getPlazoMeses(),
+                        INTERES_PORCENTAJE
+                    );
+                    credito.setSaldoPendiente(montoFinanciado * 1.05); // con interés
 
-                if (!cuotasGeneradas) {
-                    mostrarError("Advertencia: Error al generar las cuotas del crédito");
+                    // Guardar el crédito en la base de datos
+                    CreditoDAO creditoDAO = CreditoDAO.getInstance();
+                    if (!creditoDAO.agregar(credito)) {
+                        mostrarError("Error al crear el crédito");
+                        return;
+                    }
+
+                    // Ahora generar las cuotas usando el idCredito
+                    boolean cuotasGeneradas = cuotaDAO.generarCuotas(
+                        credito.getIdCredito(),  // Usar idCredito en lugar de idVenta
+                        venta.getTotal(),
+                        venta.getPlazoMeses(),
+                        venta.getFechaVenta()
+                    );
+
+                    if (!cuotasGeneradas) {
+                        mostrarError("Advertencia: Error al generar las cuotas del crédito");
+                    }
+
+                    // Actualizar saldo del cliente
+                    double saldoFinanciar = venta.getSaldoFinanciar();
+                    double montoConInteres = saldoFinanciar * 1.05; // 5% de interés
+                    clienteSeleccionado.setSaldoPendiente(
+                        clienteSeleccionado.getSaldoPendiente() + montoConInteres
+                    );
+                    clienteDAO.actualizar(clienteSeleccionado);
+                } catch (Exception e) {
+                    mostrarError("Error al procesar el crédito: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
                 }
-
-                // Actualizar saldo del cliente
-                double saldoFinanciar = venta.getSaldoFinanciar();
-                double montoConInteres = saldoFinanciar * 1.05; // 5% de interés
-                clienteSeleccionado.setSaldoPendiente(
-                    clienteSeleccionado.getSaldoPendiente() + montoConInteres
-                );
-                clienteDAO.actualizar(clienteSeleccionado);
             }
             
             mostrarExito("¡Venta guardada exitosamente! Código: " + venta.getCodigo());

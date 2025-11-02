@@ -3,7 +3,9 @@ package com.taller.proyecto_bd.controllers;
 import com.taller.proyecto_bd.dao.ClienteDAO;
 import com.taller.proyecto_bd.dao.VentaDAO;
 import com.taller.proyecto_bd.dao.CuotaDAO;
+import com.taller.proyecto_bd.dao.CreditoDAO;
 import com.taller.proyecto_bd.models.Cliente;
+import com.taller.proyecto_bd.models.Credito;
 import com.taller.proyecto_bd.models.Cuota;
 import com.taller.proyecto_bd.models.Venta;
 
@@ -16,9 +18,9 @@ import java.util.Optional;
  * Maneja operaciones relacionadas con ventas a crédito y sus cuotas.
  *
  * NOTA IMPORTANTE:
- * En este sistema, los créditos están manejados directamente por las ventas.
- * Una venta con esCredito=true ES un crédito, y las cuotas están asociadas a esa venta.
- * No existe una tabla "Creditos" separada.
+ * En este sistema, las ventas a crédito tienen una relación:
+ * Venta (esCredito=true) → Credito → Cuotas
+ * Las cuotas están asociadas al crédito mediante idCredito.
  *
  * Reglas de negocio:
  * - Cuota inicial: 30% del total
@@ -28,12 +30,13 @@ import java.util.Optional;
  * - Un cliente solo puede tener UNA venta a crédito activa
  *
  * @author Sistema
- * @version 2.0 - Adaptado al nuevo diseño sin tabla Creditos
+ * @version 2.1 - Actualizado para usar la tabla Creditos
  */
 public class CreditoController {
     private final CuotaDAO cuotaDAO = CuotaDAO.getInstance();
     private final VentaDAO ventaDAO = VentaDAO.getInstance();
     private final ClienteDAO clienteDAO = ClienteDAO.getInstance();
+    private final CreditoDAO creditoDAO = CreditoDAO.getInstance();
 
     private static final String ESTADO_REGISTRADA = "REGISTRADA";
     private static final String ESTADO_PAGADA = "PAGADA";
@@ -53,8 +56,14 @@ public class CreditoController {
             return false;
         }
 
-        // Buscar la cuota específica
-        Optional<Cuota> optCuota = cuotaDAO.obtenerPorVenta(idVenta)
+        // Obtener el crédito asociado a la venta
+        Credito credito = creditoDAO.obtenerPorVenta(idVenta);
+        if (credito == null) {
+            return false;
+        }
+
+        // Buscar la cuota específica del crédito
+        Optional<Cuota> optCuota = cuotaDAO.obtenerPorCredito(credito.getIdCredito())
                 .stream()
                 .filter(c -> c.getNumeroCuota() == numeroCuota)
                 .findFirst();
@@ -75,7 +84,7 @@ public class CreditoController {
 
         if (pagoExitoso) {
             // Verificar si todas las cuotas están pagadas
-            boolean todasPagadas = cuotaDAO.obtenerPendientesPorVenta(idVenta).isEmpty();
+            boolean todasPagadas = cuotaDAO.obtenerPendientesPorCredito(credito.getIdCredito()).isEmpty();
 
             if (todasPagadas) {
                 // Marcar la venta como PAGADA
@@ -110,9 +119,15 @@ public class CreditoController {
                 .filter(v -> ESTADO_REGISTRADA.equals(v.getEstado()))
                 .toList();
 
-        // Obtener todas las cuotas pendientes de esas ventas
+        // Obtener todas las cuotas pendientes navegando Venta → Credito → Cuotas
         return ventasCredito.stream()
-                .flatMap(v -> cuotaDAO.obtenerPendientesPorVenta(v.getIdVenta()).stream())
+                .flatMap(v -> {
+                    Credito credito = creditoDAO.obtenerPorVenta(v.getIdVenta());
+                    if (credito == null) {
+                        return List.<Cuota>of().stream();
+                    }
+                    return cuotaDAO.obtenerPendientesPorCredito(credito.getIdCredito()).stream();
+                })
                 .toList();
     }
 
@@ -145,7 +160,10 @@ public class CreditoController {
 
         // Verificar si alguna de esas ventas tiene cuotas pendientes
         return ventasCredito.stream()
-                .anyMatch(v -> !cuotaDAO.obtenerPendientesPorVenta(v.getIdVenta()).isEmpty());
+                .anyMatch(v -> {
+                    Credito credito = creditoDAO.obtenerPorVenta(v.getIdVenta());
+                    return credito != null && !cuotaDAO.obtenerPendientesPorCredito(credito.getIdCredito()).isEmpty();
+                });
     }
 
     /**
@@ -183,7 +201,12 @@ public class CreditoController {
      * @return Porcentaje de cuotas pagadas (0-100)
      */
     public double obtenerProgresoPago(int idVenta) {
-        List<Cuota> todasCuotas = cuotaDAO.obtenerPorVenta(idVenta);
+        Credito credito = creditoDAO.obtenerPorVenta(idVenta);
+        if (credito == null) {
+            return 0.0;
+        }
+
+        List<Cuota> todasCuotas = cuotaDAO.obtenerPorCredito(credito.getIdCredito());
         if (todasCuotas.isEmpty()) {
             return 0.0;
         }

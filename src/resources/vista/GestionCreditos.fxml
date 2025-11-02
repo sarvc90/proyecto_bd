@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.GestionCreditosController">
+
+    <stylesheets>
+        <URL value="@styles.css"/>
+    </stylesheets>
+
+    <!-- ENCABEZADO -->
+    <top>
+        <VBox spacing="10" styleClass="header-section">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Label text="GESTIÓN DE CRÉDITOS" styleClass="title">
+                <font>
+                    <Font size="24" style="-fx-font-weight: bold;"/>
+                </font>
+            </Label>
+
+            <Separator/>
+
+            <!-- PANEL DE FILTROS Y BÚSQUEDA -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Filtrar por Estado:">
+                    <font>
+                        <Font size="14"/>
+                    </font>
+                </Label>
+                <ComboBox fx:id="cmbFiltroEstado" prefWidth="150"/>
+
+                <Separator orientation="VERTICAL"/>
+
+                <Label text="Buscar Cliente:">
+                    <font>
+                        <Font size="14"/>
+                    </font>
+                </Label>
+                <TextField fx:id="txtBuscarCliente" promptText="Cédula o nombre..." prefWidth="250"/>
+                <Button fx:id="btnBuscarCliente" text="Buscar" onAction="#buscarPorCliente" styleClass="btn-primary"/>
+                <Button fx:id="btnActualizar" text="Actualizar" onAction="#actualizar" styleClass="btn-secondary"/>
+            </HBox>
+
+            <!-- PANEL DE ESTADÍSTICAS -->
+            <GridPane hgap="30" vgap="10" styleClass="stats-panel">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+
+                <!-- Total Créditos -->
+                <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="Total Créditos" styleClass="stats-label">
+                        <font>
+                            <Font size="12"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblTotalCreditos" text="0" styleClass="stats-value">
+                        <font>
+                            <Font size="20" style="-fx-font-weight: bold;"/>
+                        </font>
+                    </Label>
+                </VBox>
+
+                <!-- Monto Total Financiado -->
+                <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="Monto Total Financiado" styleClass="stats-label">
+                        <font>
+                            <Font size="12"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblMontoTotalFinanciado" text="&#36;0.00"  styleClass="stats-value">
+                        <font>
+                            <Font size="20" style="-fx-font-weight: bold;"/>
+                        </font>
+                    </Label>
+                </VBox>
+
+                <!-- Saldo Pendiente Total -->
+                <VBox spacing="5" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label text="Saldo Pendiente Total" styleClass="stats-label">
+                        <font>
+                            <Font size="12"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblSaldoPendienteTotal" text="&#36;0.00" styleClass="stats-value-warning">
+                        <font>
+                            <Font size="20" style="-fx-font-weight: bold;"/>
+                        </font>
+                    </Label>
+                </VBox>
+
+                <!-- Créditos Morosos -->
+                <VBox spacing="5" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                    <Label text="Créditos Morosos" styleClass="stats-label">
+                        <font>
+                            <Font size="12"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblCreditosMorosos" text="0" styleClass="stats-value-danger">
+                        <font>
+                            <Font size="20" style="-fx-font-weight: bold;"/>
+                        </font>
+                    </Label>
+                </VBox>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <!-- TABLA DE CRÉDITOS -->
+    <center>
+        <VBox spacing="10" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+
+            <TableView fx:id="tblCreditos" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colIdCredito" text="ID" prefWidth="60" minWidth="50"/>
+                    <TableColumn fx:id="colCodigoVenta" text="Código Venta" prefWidth="120" minWidth="100"/>
+                    <TableColumn fx:id="colCliente" text="Cliente" prefWidth="200" minWidth="150"/>
+                    <TableColumn fx:id="colMontoTotal" text="Monto Total" prefWidth="120" minWidth="100"/>
+                    <TableColumn fx:id="colCuotaInicial" text="Cuota Inicial" prefWidth="120" minWidth="100"/>
+                    <TableColumn fx:id="colSaldoPendiente" text="Saldo Pendiente" prefWidth="130" minWidth="100"/>
+                    <TableColumn fx:id="colPlazoMeses" text="Plazo (Meses)" prefWidth="100" minWidth="80"/>
+                    <TableColumn fx:id="colInteres" text="Interés" prefWidth="80" minWidth="70"/>
+                    <TableColumn fx:id="colEstado" text="Estado" prefWidth="100" minWidth="80"/>
+                    <TableColumn fx:id="colFechaRegistro" text="Fecha Registro" prefWidth="120" minWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- PANEL DE ACCIONES -->
+    <bottom>
+        <HBox spacing="15" alignment="CENTER_RIGHT" styleClass="footer-section">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+
+            <Button fx:id="btnVerDetalles" text="Ver Detalles" onAction="#verDetalles" styleClass="btn-info" disable="true">
+                <font>
+                    <Font size="14"/>
+                </font>
+            </Button>
+
+            <Button fx:id="btnAnularCredito" text="Anular Crédito" onAction="#anularCredito" styleClass="btn-danger" disable="true">
+                <font>
+                    <Font size="14"/>
+                </font>
+            </Button>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Doble clic en un crédito para ver sus detalles" styleClass="hint-label">
+                <font>
+                    <Font size="12" name="System Italic"/>
+                </font>
+            </Label>
+        </HBox>
+    </bottom>
+
+</BorderPane>

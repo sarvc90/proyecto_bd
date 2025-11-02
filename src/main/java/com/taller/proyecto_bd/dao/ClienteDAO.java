@@ -323,6 +323,37 @@ public class ClienteDAO {
         return lista;
     }
 
+    /**
+     * Obtener clientes que tienen créditos morosos (con cuotas vencidas no pagadas)
+     * Este método es útil para generar reportes de morosidad
+     */
+    public List<Cliente> obtenerClientesMorosos() {
+        List<Cliente> lista = new ArrayList<>();
+        String sql = "SELECT DISTINCT c.idCliente, c.cedula, c.nombre, c.apellido, c.direccion, c.telefono, c.email, " +
+                     "c.fechaRegistro, c.activo, c.limiteCredito, c.saldoPendiente " +
+                     "FROM Clientes c " +
+                     "INNER JOIN Creditos cr ON c.idCliente = cr.idCliente " +
+                     "INNER JOIN Cuotas cu ON cr.idVenta = cu.idVenta " +
+                     "WHERE cr.estado = 'ACTIVO' AND cu.pagada = 0 AND cu.fechaVencimiento < GETDATE() " +
+                     "ORDER BY c.nombre, c.apellido";
+
+        try (Connection conn = ConexionBD.obtenerConexion()) {
+            if (conn == null) {
+                return lista;
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearCliente(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener clientes morosos: " + e.getMessage());
+        }
+        return lista;
+    }
+
     private Cliente mapearCliente(ResultSet rs) throws SQLException {
         Timestamp fechaRegistro = rs.getTimestamp("fechaRegistro");
 

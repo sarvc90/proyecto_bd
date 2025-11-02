@@ -82,6 +82,13 @@ public class VentaService {
                 System.out.println(Constantes.MSG_ERROR_GENERAL + ": Plazo de meses inválido.");
                 return false;
             }
+
+            // REGLA DE NEGOCIO: A un cliente solo se le hace una venta a crédito hasta que pague
+            if (creditoDAO.clienteTieneCreditoActivo(cliente.getIdCliente())) {
+                System.out.println(Constantes.MSG_ERROR_GENERAL + ": El cliente " + cliente.getNombreCompleto() +
+                    " tiene un crédito activo pendiente. Debe pagar su crédito actual antes de solicitar uno nuevo.");
+                return false;
+            }
         }
 
         // 5. Crear objeto Venta
