@@ -53,6 +53,13 @@ public class ClienteDAO {
             }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                // Debug: imprimir valores
+                System.out.println("DEBUG ClienteDAO - Insertando cliente:");
+                System.out.println("  Cedula: " + cliente.getCedula());
+                System.out.println("  Nombre: " + cliente.getNombre());
+                System.out.println("  LimiteCredito: " + cliente.getLimiteCredito());
+                System.out.println("  SaldoPendiente: " + cliente.getSaldoPendiente());
+
                 stmt.setString(1, cliente.getCedula());
                 stmt.setString(2, cliente.getNombre());
                 stmt.setString(3, cliente.getApellido());
@@ -77,8 +84,15 @@ public class ClienteDAO {
                 }
 
                 stmt.setBoolean(7, cliente.isActivo());
-                stmt.setDouble(8, cliente.getLimiteCredito());
-                stmt.setDouble(9, cliente.getSaldoPendiente());
+                // Usar BigDecimal con escala de 2 decimales para NUMERIC(10,2)
+                java.math.BigDecimal limiteCredito = java.math.BigDecimal.valueOf(cliente.getLimiteCredito()).setScale(2, java.math.RoundingMode.HALF_UP);
+                java.math.BigDecimal saldoPendiente = java.math.BigDecimal.valueOf(cliente.getSaldoPendiente()).setScale(2, java.math.RoundingMode.HALF_UP);
+
+                System.out.println("  BigDecimal LimiteCredito: " + limiteCredito);
+                System.out.println("  BigDecimal SaldoPendiente: " + saldoPendiente);
+
+                stmt.setBigDecimal(8, limiteCredito);
+                stmt.setBigDecimal(9, saldoPendiente);
 
                 int filas = stmt.executeUpdate();
                 if (filas > 0) {
@@ -91,8 +105,20 @@ public class ClienteDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al insertar cliente: " + e.getMessage());
-            e.printStackTrace(); // Imprimir stack trace completo para debugging
+            // Detectar error de email duplicado
+            if (e.getMessage().contains("UX_Clientes_Email")) {
+                System.err.println("ERROR: Ya existe un cliente con el email: " + cliente.getEmail());
+                System.err.println("Por favor use un email diferente.");
+            }
+            // Detectar error de cédula duplicada
+            else if (e.getMessage().contains("UX_Clientes_Cedula")) {
+                System.err.println("ERROR: Ya existe un cliente con la cédula: " + cliente.getCedula());
+                System.err.println("Por favor verifique la cédula.");
+            }
+            else {
+                System.err.println("Error al insertar cliente: " + e.getMessage());
+                e.printStackTrace(); // Imprimir stack trace completo para debugging
+            }
         }
         return false;
     }
@@ -198,8 +224,9 @@ public class ClienteDAO {
                 stmt.setString(5, cliente.getTelefono());
                 stmt.setString(6, cliente.getEmail());
                 stmt.setBoolean(7, cliente.isActivo());
-                stmt.setDouble(8, cliente.getLimiteCredito());
-                stmt.setDouble(9, cliente.getSaldoPendiente());
+                // Usar BigDecimal con escala de 2 decimales para NUMERIC(10,2)
+                stmt.setBigDecimal(8, java.math.BigDecimal.valueOf(cliente.getLimiteCredito()).setScale(2, java.math.RoundingMode.HALF_UP));
+                stmt.setBigDecimal(9, java.math.BigDecimal.valueOf(cliente.getSaldoPendiente()).setScale(2, java.math.RoundingMode.HALF_UP));
                 stmt.setInt(10, cliente.getIdCliente());
 
                 return stmt.executeUpdate() > 0;

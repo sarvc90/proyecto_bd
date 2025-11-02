@@ -395,7 +395,16 @@ public class LoginController {
                     clienteNuevo.setDireccion(direccionField.getText().trim());
                     clienteNuevo.setTelefono(telefonoField.getText().trim());
                     clienteNuevo.setEmail(emailField.getText().trim());
-                    clienteNuevo.setLimiteCredito(parsearDouble(limiteCreditoField.getText().trim(), 0));
+
+                    // Validar y asignar límite de crédito
+                    double limiteCredito = parsearDouble(limiteCreditoField.getText().trim(), 0);
+                    // Validar que el límite no exceda NUMERIC(10,2) - máximo 99,999,999.99
+                    if (limiteCredito > 99999999.99) {
+                        System.err.println("ADVERTENCIA: Límite de crédito demasiado grande: " + limiteCredito + ", usando 0");
+                        limiteCredito = 0;
+                    }
+                    clienteNuevo.setLimiteCredito(limiteCredito);
+
                     // El saldoPendiente ya se inicializa en 0 en el constructor de Cliente
                     clienteNuevo.setActivo(activoCheck.isSelected());
                     clienteSeleccionado[0] = clienteNuevo;
