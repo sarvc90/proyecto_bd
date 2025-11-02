@@ -27,6 +27,8 @@ public class CategoriasController {
     @FXML private TextArea txtDescripcion;
     @FXML private ComboBox<String> cmbNivel;
     @FXML private ComboBox<Categoria> cmbCategoriaPadre;
+    @FXML private TextField txtPorcentajeIVA;
+    @FXML private TextField txtPorcentajeUtilidad;
     @FXML private CheckBox chkActivo;
     @FXML private Label lblCantidadProductos;
     
@@ -42,6 +44,8 @@ public class CategoriasController {
     @FXML private TableColumn<Categoria, String> colNombre;
     @FXML private TableColumn<Categoria, String> colDescripcion;
     @FXML private TableColumn<Categoria, String> colNivel;
+    @FXML private TableColumn<Categoria, Double> colIVA;
+    @FXML private TableColumn<Categoria, Double> colUtilidad;
     @FXML private TableColumn<Categoria, Integer> colProductos;
     @FXML private TableColumn<Categoria, Boolean> colActivo;
     
@@ -64,13 +68,25 @@ public class CategoriasController {
     public void initialize() {
         categoriaDAO = CategoriaDAO.getInstance();
         listaCategorias = FXCollections.observableArrayList();
-        
+
         configurarTabla();
+        cargarNiveles();
         cargarCategoriasPadre();
         cargarCategorias();
         configurarEventos();
         configurarPermisos();
         actualizarEstadisticas();
+    }
+
+    /**
+     * Carga los niveles en el ComboBox
+     */
+    private void cargarNiveles() {
+        cmbNivel.setItems(FXCollections.observableArrayList(
+            "1 - Categoría Principal",
+            "2 - Subcategoría Nivel 1",
+            "3 - Subcategoría Nivel 2"
+        ));
     }
     
     /**
@@ -81,12 +97,40 @@ public class CategoriasController {
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         colProductos.setCellValueFactory(new PropertyValueFactory<>("cantidadProductos"));
-        
+
         // Columna de nivel con descripción
-        colNivel.setCellValueFactory(cellData -> 
+        colNivel.setCellValueFactory(cellData ->
             new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDescripcionNivel())
         );
-        
+
+        // Columna de IVA con formato
+        colIVA.setCellValueFactory(new PropertyValueFactory<>("porcentajeIVA"));
+        colIVA.setCellFactory(col -> new TableCell<Categoria, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%.1f%%", item));
+                }
+            }
+        });
+
+        // Columna de Utilidad con formato
+        colUtilidad.setCellValueFactory(new PropertyValueFactory<>("porcentajeUtilidad"));
+        colUtilidad.setCellFactory(col -> new TableCell<Categoria, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%.1f%%", item));
+                }
+            }
+        });
+
         // Columna de estado con formato
         colActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
         colActivo.setCellFactory(col -> new TableCell<Categoria, Boolean>() {
@@ -98,12 +142,12 @@ public class CategoriasController {
                     setStyle("");
                 } else {
                     setText(item ? "Activa" : "Inactiva");
-                    setStyle(item ? "-fx-text-fill: green; -fx-font-weight: bold;" : 
+                    setStyle(item ? "-fx-text-fill: green; -fx-font-weight: bold;" :
                                    "-fx-text-fill: red; -fx-font-weight: bold;");
                 }
             }
         });
-        
+
         tablaCategorias.setItems(listaCategorias);
     }
     
@@ -199,9 +243,11 @@ public class CategoriasController {
         txtCodigo.setText(categoria.getCodigo());
         txtNombre.setText(categoria.getNombre());
         txtDescripcion.setText(categoria.getDescripcion());
+        txtPorcentajeIVA.setText(String.valueOf(categoria.getPorcentajeIVA()));
+        txtPorcentajeUtilidad.setText(String.valueOf(categoria.getPorcentajeUtilidad()));
         chkActivo.setSelected(categoria.isActivo());
         lblCantidadProductos.setText(String.valueOf(categoria.getCantidadProductos()));
-        
+
         // Seleccionar el nivel
         int nivel = categoria.getNivel();
         switch (nivel) {
@@ -218,8 +264,11 @@ public class CategoriasController {
                 cmbNivel.setValue("3 - Subcategoría Nivel 2");
                 cmbCategoriaPadre.setDisable(false);
                 break;
+            default:
+                cmbNivel.setValue("1 - Categoría Principal");
+                break;
         }
-        
+
         // Seleccionar la categoría padre si tiene
         if (categoria.getIdCategoriaPadre() != null) {
             Categoria padre = categoriaDAO.obtenerPorId(categoria.getIdCategoriaPadre());
@@ -264,12 +313,23 @@ public class CategoriasController {
             categoria.setNombre(txtNombre.getText().trim());
             categoria.setDescripcion(txtDescripcion.getText().trim());
             categoria.setActivo(chkActivo.isSelected());
-            
+
+            // Asignar porcentajes
+            try {
+                double iva = Double.parseDouble(txtPorcentajeIVA.getText().trim());
+                double utilidad = Double.parseDouble(txtPorcentajeUtilidad.getText().trim());
+                categoria.setPorcentajeIVA(iva);
+                categoria.setPorcentajeUtilidad(utilidad);
+            } catch (NumberFormatException e) {
+                mostrarMensajeError("Los porcentajes deben ser valores numéricos válidos");
+                return;
+            }
+
             // Obtener el nivel
             String nivelStr = cmbNivel.getValue();
             int nivel = Integer.parseInt(nivelStr.substring(0, 1));
             categoria.setNivel(nivel);
-            
+
             // Asignar categoría padre si no es principal
             if (nivel > 1 && cmbCategoriaPadre.getValue() != null) {
                 categoria.setIdCategoriaPadre(cmbCategoriaPadre.getValue().getIdCategoria());
@@ -382,29 +442,69 @@ public class CategoriasController {
             txtCodigo.requestFocus();
             return false;
         }
-        
+
         if (txtNombre.getText().trim().isEmpty()) {
             mostrarMensajeError("El nombre es obligatorio");
             txtNombre.requestFocus();
             return false;
         }
-        
+
         if (cmbNivel.getValue() == null) {
             mostrarMensajeError("Debe seleccionar un nivel");
             cmbNivel.requestFocus();
             return false;
         }
-        
+
+        // Validar porcentaje IVA
+        if (txtPorcentajeIVA.getText().trim().isEmpty()) {
+            mostrarMensajeError("El porcentaje de IVA es obligatorio");
+            txtPorcentajeIVA.requestFocus();
+            return false;
+        }
+
+        try {
+            double iva = Double.parseDouble(txtPorcentajeIVA.getText().trim());
+            if (iva < 0 || iva > 100) {
+                mostrarMensajeError("El porcentaje de IVA debe estar entre 0 y 100");
+                txtPorcentajeIVA.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            mostrarMensajeError("El porcentaje de IVA debe ser un número válido");
+            txtPorcentajeIVA.requestFocus();
+            return false;
+        }
+
+        // Validar porcentaje Utilidad
+        if (txtPorcentajeUtilidad.getText().trim().isEmpty()) {
+            mostrarMensajeError("El porcentaje de Utilidad es obligatorio");
+            txtPorcentajeUtilidad.requestFocus();
+            return false;
+        }
+
+        try {
+            double utilidad = Double.parseDouble(txtPorcentajeUtilidad.getText().trim());
+            if (utilidad < 0 || utilidad > 100) {
+                mostrarMensajeError("El porcentaje de Utilidad debe estar entre 0 y 100");
+                txtPorcentajeUtilidad.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            mostrarMensajeError("El porcentaje de Utilidad debe ser un número válido");
+            txtPorcentajeUtilidad.requestFocus();
+            return false;
+        }
+
         // Validar que las subcategorías tengan padre
         String nivelStr = cmbNivel.getValue();
         int nivel = Integer.parseInt(nivelStr.substring(0, 1));
-        
+
         if (nivel > 1 && cmbCategoriaPadre.getValue() == null) {
             mostrarMensajeError("Las subcategorías deben tener una categoría padre");
             cmbCategoriaPadre.requestFocus();
             return false;
         }
-        
+
         return true;
     }
     
@@ -415,6 +515,8 @@ public class CategoriasController {
         txtCodigo.clear();
         txtNombre.clear();
         txtDescripcion.clear();
+        txtPorcentajeIVA.clear();
+        txtPorcentajeUtilidad.clear();
         cmbNivel.setValue(null);
         cmbCategoriaPadre.setValue(null);
         cmbCategoriaPadre.setDisable(false);
@@ -430,6 +532,8 @@ public class CategoriasController {
         txtCodigo.setDisable(true);
         txtNombre.setDisable(true);
         txtDescripcion.setDisable(true);
+        txtPorcentajeIVA.setDisable(true);
+        txtPorcentajeUtilidad.setDisable(true);
         cmbNivel.setDisable(true);
         cmbCategoriaPadre.setDisable(true);
         chkActivo.setDisable(true);

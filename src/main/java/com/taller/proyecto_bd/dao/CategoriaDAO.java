@@ -108,20 +108,33 @@ public class CategoriaDAO {
      */
     private void cargarDatosPrueba() {
         // Los IDs se asignan automáticamente al agregar
-        Categoria c1 = new Categoria("CAT001", "Electrodomésticos",
-                "Categoría principal de electrodomésticos", null, 1);
+        Categoria c1 = new Categoria("CAT001", "Audio",
+                "Categoría principal de Audio", null, 1);
         c1.setActivo(true);
+        c1.setPorcentajeIVA(19.0);
+        c1.setPorcentajeUtilidad(25.0);
         agregar(c1);
 
-        Categoria c2 = new Categoria("CAT002", "Refrigeradores",
-                "Subcategoría de refrigeradores", c1.getIdCategoria(), 2);
+        Categoria c2 = new Categoria("CAT002", "Video",
+                "Categoría principal de Video", null, 1);
         c2.setActivo(true);
+        c2.setPorcentajeIVA(19.0);
+        c2.setPorcentajeUtilidad(30.0);
         agregar(c2);
 
-        Categoria c3 = new Categoria("CAT003", "Televisores",
-                "Subcategoría de televisores", c1.getIdCategoria(), 2);
+        Categoria c3 = new Categoria("CAT003", "Tecnología",
+                "Categoría principal de Tecnología", null, 1);
         c3.setActivo(true);
+        c3.setPorcentajeIVA(19.0);
+        c3.setPorcentajeUtilidad(35.0);
         agregar(c3);
+
+        Categoria c4 = new Categoria("CAT004", "Cocina",
+                "Categoría principal de Cocina", null, 1);
+        c4.setActivo(true);
+        c4.setPorcentajeIVA(19.0);
+        c4.setPorcentajeUtilidad(20.0);
+        agregar(c4);
     }
 
     /**

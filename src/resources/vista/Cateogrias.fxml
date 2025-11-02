@@ -135,13 +135,6 @@
                                     </font>
                                  </Label>
                                  <ComboBox fx:id="cmbNivel" prefWidth="280.0" promptText="Seleccione el nivel">
-                                    <items>
-                                       <FXCollections fx:factory="observableArrayList">
-                                          <String fx:value="1 - Categoría Principal" />
-                                          <String fx:value="2 - Subcategoría Nivel 1" />
-                                          <String fx:value="3 - Subcategoría Nivel 2" />
-                                       </FXCollections>
-                                    </items>
                                  </ComboBox>
                               </children>
                            </VBox>
@@ -154,12 +147,44 @@
                                        <Font name="System Bold" size="11.0" />
                                     </font>
                                  </Label>
-                                 <ComboBox fx:id="cmbCategoriaPadre" prefWidth="280.0" 
+                                 <ComboBox fx:id="cmbCategoriaPadre" prefWidth="280.0"
                                           promptText="Ninguna (Categoría principal)">
                                  </ComboBox>
                               </children>
                            </VBox>
-                           
+
+                           <!-- Campo: Porcentaje IVA -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Porcentaje IVA (%) *">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <TextField fx:id="txtPorcentajeIVA" promptText="Ej: 19.0" styleClass="text-field-custom">
+                                    <font>
+                                       <Font size="12.0" />
+                                    </font>
+                                 </TextField>
+                              </children>
+                           </VBox>
+
+                           <!-- Campo: Porcentaje Utilidad -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Porcentaje Utilidad (%) *">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <TextField fx:id="txtPorcentajeUtilidad" promptText="Ej: 25.0" styleClass="text-field-custom">
+                                    <font>
+                                       <Font size="12.0" />
+                                    </font>
+                                 </TextField>
+                              </children>
+                           </VBox>
+
                            <!-- CheckBox Activo -->
                            <CheckBox fx:id="chkActivo" selected="true" text="Categoría activa" styleClass="checkbox-custom">
                               <font>
@@ -271,12 +296,14 @@
                      <!-- Tabla de categorías -->
                      <TableView fx:id="tablaCategorias" VBox.vgrow="ALWAYS">
                         <columns>
-                           <TableColumn fx:id="colCodigo" prefWidth="90.0" text="Código" />
-                           <TableColumn fx:id="colNombre" prefWidth="180.0" text="Nombre" />
-                           <TableColumn fx:id="colDescripcion" prefWidth="200.0" text="Descripción" />
-                           <TableColumn fx:id="colNivel" prefWidth="140.0" text="Nivel" />
-                           <TableColumn fx:id="colProductos" prefWidth="90.0" text="Productos" />
-                           <TableColumn fx:id="colActivo" prefWidth="80.0" text="Estado" />
+                           <TableColumn fx:id="colCodigo" prefWidth="80.0" text="Código" />
+                           <TableColumn fx:id="colNombre" prefWidth="150.0" text="Nombre" />
+                           <TableColumn fx:id="colDescripcion" prefWidth="150.0" text="Descripción" />
+                           <TableColumn fx:id="colNivel" prefWidth="120.0" text="Nivel" />
+                           <TableColumn fx:id="colIVA" prefWidth="70.0" text="IVA %" />
+                           <TableColumn fx:id="colUtilidad" prefWidth="80.0" text="Util. %" />
+                           <TableColumn fx:id="colProductos" prefWidth="70.0" text="Prods." />
+                           <TableColumn fx:id="colActivo" prefWidth="70.0" text="Estado" />
                         </columns>
                      </TableView>
                      

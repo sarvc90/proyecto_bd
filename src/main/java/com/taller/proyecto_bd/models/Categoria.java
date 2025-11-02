@@ -20,6 +20,8 @@ public class Categoria {
     private Integer idCategoriaPadre; // Para categorías jerárquicas
     private String rutaCompleta; // Ruta jerárquica completa
     private int cantidadProductos; // Contador de productos (para joins)
+    private double porcentajeIVA; // Porcentaje de IVA para productos de esta categoría
+    private double porcentajeUtilidad; // Porcentaje de utilidad para productos de esta categoría
 
     // ==================== CONSTRUCTORES ====================
 
@@ -33,6 +35,8 @@ public class Categoria {
         this.nivel = 1;
         this.cantidadProductos = 0;
         this.descripcion = ""; // Inicializar descripción como cadena vacía
+        this.porcentajeIVA = 0.0;
+        this.porcentajeUtilidad = 0.0;
     }
 
     /**
@@ -121,6 +125,14 @@ public class Categoria {
         return cantidadProductos;
     }
 
+    public double getPorcentajeIVA() {
+        return porcentajeIVA;
+    }
+
+    public double getPorcentajeUtilidad() {
+        return porcentajeUtilidad;
+    }
+
     // ==================== SETTERS ====================
 
     public void setIdCategoria(int idCategoria) {
@@ -189,6 +201,22 @@ public class Categoria {
             this.cantidadProductos = cantidadProductos;
         }
         // No hacer nada si la cantidad es negativa (mantener la actual)
+    }
+
+    public void setPorcentajeIVA(double porcentajeIVA) {
+        if (porcentajeIVA >= 0 && porcentajeIVA <= 100) {
+            this.porcentajeIVA = porcentajeIVA;
+            actualizarFechaModificacion();
+        }
+        // No hacer nada si el porcentaje no es válido (mantener el actual)
+    }
+
+    public void setPorcentajeUtilidad(double porcentajeUtilidad) {
+        if (porcentajeUtilidad >= 0 && porcentajeUtilidad <= 100) {
+            this.porcentajeUtilidad = porcentajeUtilidad;
+            actualizarFechaModificacion();
+        }
+        // No hacer nada si el porcentaje no es válido (mantener el actual)
     }
 
     // ==================== MÉTODOS DE NEGOCIO ====================
