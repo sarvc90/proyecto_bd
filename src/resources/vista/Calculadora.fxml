@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.CalculadoraViewController">
+
+    <VBox spacing="15.0" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+
+        <!-- Título -->
+        <HBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="Calculadora de Utilidades" textFill="WHITE">
+                <font>
+                    <Font name="System Bold" size="20.0"/>
+                </font>
+            </Label>
+        </HBox>
+
+        <!-- Pestañas con diferentes calculadoras -->
+        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+
+            <!-- ========================= TAB 1: CÁLCULO DE IVA ========================= -->
+            <Tab text="IVA">
+                <VBox spacing="15.0" style="-fx-padding: 20;">
+                    <Label text="Cálculo de IVA" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+                        </columnConstraints>
+
+                        <Label text="Subtotal:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtSubtotalIVA" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Porcentaje IVA:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <TextField fx:id="txtPorcentajeIVA" promptText="0.19" HBox.hgrow="ALWAYS"/>
+                            <Label text="(ej: 0.19 = 19%)"/>
+                        </HBox>
+
+                        <Label text="Valor IVA:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtResultadoIVA" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label text="Total con IVA:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtTotalConIVA" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </GridPane>
+
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button text="Calcular" onAction="#calcularIVA" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                        <Button text="Limpiar" onAction="#limpiarIVA" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- ========================= TAB 2: CUOTAS DE CRÉDITO ========================= -->
+            <Tab text="Cuotas de Crédito">
+                <VBox spacing="15.0" style="-fx-padding: 20;">
+                    <Label text="Cálculo de Cuotas de Crédito" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+                    <!-- Información de la política de crédito -->
+                    <VBox spacing="5.0" style="-fx-background-color: #e3f2fd; -fx-padding: 10; -fx-border-color: #2196f3; -fx-border-radius: 5;">
+                        <Label text="Política de Crédito:" style="-fx-font-weight: bold; -fx-text-fill: #1976d2;"/>
+                        <Label text="• Cuota inicial: 30% del precio del artículo" style="-fx-font-size: 11;"/>
+                        <Label text="• Saldo a financiar: 70% + 5% de interés" style="-fx-font-size: 11;"/>
+                        <Label text="• Plazos disponibles: 12, 18 o 24 meses" style="-fx-font-size: 11;"/>
+                        <Label text="• Solo se permite un crédito activo por cliente" style="-fx-font-size: 11;"/>
+                    </VBox>
+
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="180.0" prefWidth="180.0"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+                        </columnConstraints>
+
+                        <Label text="Precio del Artículo:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtPrecioArticulo" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Plazo (meses):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <ComboBox fx:id="cmbPlazoMeses" promptText="Seleccione plazo" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="200.0"/>
+
+                        <!-- Separador -->
+                        <Label text="" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+
+                        <Label text="Cuota Inicial (30%):" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtCuotaInicial" editable="false" style="-fx-background-color: #fff3cd;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                        <Label text="Saldo a Financiar (70%):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <TextField fx:id="txtSaldoFinanciar" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                        <Label text="Interés (5%):" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                        <TextField fx:id="txtInteresCredito" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                        <Label text="Total a Financiar:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                        <TextField fx:id="txtTotalFinanciar" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+
+                        <Label text="Valor de Cuota Mensual:" GridPane.columnIndex="0" GridPane.rowIndex="7" style="-fx-font-weight: bold; -fx-font-size: 13;"/>
+                        <TextField fx:id="txtValorCuota" editable="false" style="-fx-background-color: #d4edda; -fx-font-weight: bold;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+
+                        <Label text="Total a Pagar:" GridPane.columnIndex="0" GridPane.rowIndex="8" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtTotalPagar" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="8"/>
+                    </GridPane>
+
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button text="Calcular" onAction="#calcularCuota" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                        <Button text="Limpiar" onAction="#limpiarCuota" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- ========================= TAB 3: MARGEN DE GANANCIA ========================= -->
+            <Tab text="Margen de Ganancia">
+                <VBox spacing="15.0" style="-fx-padding: 20;">
+                    <Label text="Cálculo de Margen" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+                        </columnConstraints>
+
+                        <Label text="Costo:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCosto" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Precio de Venta:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtPrecioVenta" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Margen (%):" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtMargen" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label text="Ganancia:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtGanancia" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </GridPane>
+
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button text="Calcular" onAction="#calcularMargen" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                        <Button text="Limpiar" onAction="#limpiarMargen" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- ========================= TAB 4: DESCUENTOS ========================= -->
+            <Tab text="Descuentos">
+                <VBox spacing="15.0" style="-fx-padding: 20;">
+                    <Label text="Cálculo de Descuentos" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+                        </columnConstraints>
+
+                        <Label text="Precio Original:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtPrecioOriginal" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Descuento (%):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <TextField fx:id="txtPorcentajeDescuento" promptText="0.10" HBox.hgrow="ALWAYS"/>
+                            <Label text="(ej: 0.10 = 10%)"/>
+                        </HBox>
+
+                        <Label text="Ahorro:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtAhorro" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label text="Precio Final:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtPrecioFinal" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </GridPane>
+
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button text="Calcular" onAction="#calcularDescuento" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                        <Button text="Limpiar" onAction="#limpiarDescuento" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- ========================= TAB 5: UTILIDAD ========================= -->
+            <Tab text="Utilidad">
+                <VBox spacing="15.0" style="-fx-padding: 20;">
+                    <Label text="Cálculo de Utilidad" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+                        </columnConstraints>
+
+                        <Label text="Costo:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCostoUtilidad" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Precio de Venta:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="txtPrecioVentaUtilidad" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Porcentaje IVA:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <TextField fx:id="txtPorcentajeIVAUtilidad" promptText="0.19" HBox.hgrow="ALWAYS"/>
+                            <Label text="(ej: 0.19 = 19%)"/>
+                        </HBox>
+
+                        <Label text="Utilidad:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="txtUtilidad" editable="false" style="-fx-background-color: #ecf0f1;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </GridPane>
+
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button text="Calcular" onAction="#calcularUtilidad" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                        <Button text="Limpiar" onAction="#limpiarUtilidad" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+        </TabPane>
+
+    </VBox>
+
+</AnchorPane>

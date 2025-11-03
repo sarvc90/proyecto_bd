@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.AyudaViewController">
+
+    <VBox spacing="15.0" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+
+        <!-- Título -->
+        <HBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="Centro de Ayuda" textFill="WHITE">
+                <font>
+                    <Font name="System Bold" size="20.0"/>
+                </font>
+            </Label>
+        </HBox>
+
+        <!-- Pestañas con diferentes secciones de ayuda -->
+        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+
+            <!-- ========================= TAB 1: MANUAL DE USUARIO ========================= -->
+            <Tab text="Manual de Usuario">
+                <ScrollPane fitToWidth="true">
+                    <VBox spacing="15.0" style="-fx-padding: 20;">
+                        <Label text="Manual de Usuario" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <Separator/>
+
+                        <!-- Sección: Introducción -->
+                        <VBox spacing="8.0">
+                            <Label text="1. Introducción al Sistema" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+                            <Label wrapText="true" text="El Sistema de Gestión de Electrodomésticos es una aplicación completa para administrar ventas, inventario, clientes y créditos. Diseñado para facilitar la operación diaria de su negocio." style="-fx-font-size: 11;"/>
+                        </VBox>
+
+                        <!-- Sección: Módulos Principales -->
+                        <VBox spacing="8.0">
+                            <Label text="2. Módulos Principales" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="• Entidades: Gestión de Clientes, Productos, Categorías y Proveedores" style="-fx-font-size: 11;"/>
+                                <Label text="• Transacciones: Registro de Ventas (Contado/Crédito) y Control de Inventario" style="-fx-font-size: 11;"/>
+                                <Label text="• Créditos: Administración de Cuotas y Pagos de Clientes" style="-fx-font-size: 11;"/>
+                                <Label text="• Reportes: Generación de Informes en PDF con Gráficas" style="-fx-font-size: 11;"/>
+                                <Label text="• Consultas: Búsquedas Avanzadas Multitabla" style="-fx-font-size: 11;"/>
+                                <Label text="• Utilidades: Calculadora, Calendario, Gestión de Usuarios, Bitácora" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Sección: Navegación -->
+                        <VBox spacing="8.0">
+                            <Label text="3. Navegación Básica" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="• Use el menú superior para acceder a los diferentes módulos" style="-fx-font-size: 11;"/>
+                                <Label text="• Los botones de acción (Nuevo, Editar, Eliminar) están en la parte superior de cada formulario" style="-fx-font-size: 11;"/>
+                                <Label text="• Las tablas permiten ordenar por columna haciendo clic en el encabezado" style="-fx-font-size: 11;"/>
+                                <Label text="• Use los filtros de búsqueda para encontrar registros específicos" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Sección: Gestión de Ventas -->
+                        <VBox spacing="8.0">
+                            <Label text="4. Realizar una Venta" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="1. Seleccione 'Transacciones' → 'Nueva Venta'" style="-fx-font-size: 11;"/>
+                                <Label text="2. Busque y seleccione el cliente (por cédula o nombre)" style="-fx-font-size: 11;"/>
+                                <Label text="3. Agregue productos al carrito seleccionándolos y especificando cantidad" style="-fx-font-size: 11;"/>
+                                <Label text="4. Elija forma de pago: Contado o Crédito" style="-fx-font-size: 11;"/>
+                                <Label text="5. Si es crédito, seleccione el plazo (12, 18 o 24 meses)" style="-fx-font-size: 11;"/>
+                                <Label text="6. Verifique los totales y haga clic en 'Guardar Venta'" style="-fx-font-size: 11;"/>
+                                <Label text="7. Opcionalmente, genere la factura en PDF" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Sección: Política de Crédito -->
+                        <VBox spacing="8.0" style="-fx-background-color: #fff3cd; -fx-padding: 15; -fx-border-color: #ffc107; -fx-border-width: 2;">
+                            <Label text="⚠ Política de Crédito" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #856404;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="• Cuota inicial obligatoria: 30% del valor total" style="-fx-font-size: 11;"/>
+                                <Label text="• Saldo a financiar: 70% + 5% de interés" style="-fx-font-size: 11;"/>
+                                <Label text="• Plazos disponibles: 12, 18 o 24 meses" style="-fx-font-size: 11;"/>
+                                <Label text="• Solo se permite un crédito activo por cliente" style="-fx-font-size: 11;"/>
+                                <Label text="• El cliente debe pagar el crédito completo antes de solicitar uno nuevo" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Sección: Permisos -->
+                        <VBox spacing="8.0">
+                            <Label text="5. Permisos de Usuario" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="• Administrador: Acceso completo a todos los módulos" style="-fx-font-size: 11;"/>
+                                <Label text="• Vendedor: Acceso a ventas, consultas de clientes y productos" style="-fx-font-size: 11;"/>
+                                <Label text="• Limitaciones: Gestión de usuarios y bitácora requieren permisos de administrador" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <!-- ========================= TAB 2: TUTORIALES ========================= -->
+            <Tab text="Tutoriales">
+                <ScrollPane fitToWidth="true">
+                    <VBox spacing="15.0" style="-fx-padding: 20;">
+                        <Label text="Tutoriales Paso a Paso" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <Separator/>
+
+                        <!-- Tutorial 1 -->
+                        <VBox spacing="10.0" style="-fx-background-color: #e8f5e9; -fx-padding: 15; -fx-border-color: #4caf50; -fx-border-width: 2;">
+                            <Label text="📘 Tutorial 1: Registrar un Nuevo Cliente" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #2e7d32;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="Paso 1: En el menú principal, seleccione 'Entidades' → 'Clientes'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 2: Haga clic en el botón 'Nuevo Cliente' (icono +)" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 3: Complete los datos obligatorios:" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                                <Label text="   • Cédula (única, sin espacios)" style="-fx-font-size: 11;"/>
+                                <Label text="   • Nombre completo" style="-fx-font-size: 11;"/>
+                                <Label text="   • Teléfono (10 dígitos)" style="-fx-font-size: 11;"/>
+                                <Label text="   • Dirección completa" style="-fx-font-size: 11;"/>
+                                <Label text="   • Límite de crédito (opcional, por defecto $5,000,000)" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 4: Verifique que el estado esté en 'Activo'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 5: Haga clic en 'Guardar'" style="-fx-font-size: 11;"/>
+                                <Label text="Resultado: El cliente aparecerá en la tabla principal" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #2e7d32;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Tutorial 2 -->
+                        <VBox spacing="10.0" style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-border-color: #2196f3; -fx-border-width: 2;">
+                            <Label text="📘 Tutorial 2: Realizar una Venta a Crédito" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #1565c0;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="Paso 1: Acceda a 'Transacciones' → 'Nueva Venta'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 2: Busque el cliente escribiendo su cédula o nombre" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 3: Agregue productos al carrito:" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                                <Label text="   • Seleccione el producto del ComboBox" style="-fx-font-size: 11;"/>
+                                <Label text="   • Ajuste la cantidad con el spinner" style="-fx-font-size: 11;"/>
+                                <Label text="   • Haga clic en 'Agregar Producto'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 4: Seleccione la opción 'Crédito'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 5: Elija el plazo (12, 18 o 24 meses)" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 6: Revise la información de crédito calculada automáticamente" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 7: Haga clic en 'Guardar Venta'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 8: Cuando se le pregunte, elija 'Sí' para generar la factura PDF" style="-fx-font-size: 11;"/>
+                                <Label text="Resultado: Venta registrada, cuotas generadas y factura impresa" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #1565c0;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Tutorial 3 -->
+                        <VBox spacing="10.0" style="-fx-background-color: #fff3e0; -fx-padding: 15; -fx-border-color: #ff9800; -fx-border-width: 2;">
+                            <Label text="📘 Tutorial 3: Registrar Pago de Cuota" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #e65100;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="Paso 1: Vaya a 'Transacciones' → 'Créditos y Cuotas'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 2: Filtre por cliente o estado 'PENDIENTE'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 3: Seleccione la cuota a pagar en la tabla" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 4: Haga clic en 'Registrar Pago'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 5: Confirme el monto a pagar" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 6: Ingrese observaciones si es necesario (opcional)" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 7: Confirme el pago" style="-fx-font-size: 11;"/>
+                                <Label text="Resultado: Cuota marcada como 'PAGADA' y saldo del cliente actualizado" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #e65100;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Tutorial 4 -->
+                        <VBox spacing="10.0" style="-fx-background-color: #f3e5f5; -fx-padding: 15; -fx-border-color: #9c27b0; -fx-border-width: 2;">
+                            <Label text="📘 Tutorial 4: Generar Reporte de Ventas" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #6a1b9a;"/>
+
+                            <VBox spacing="5.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="Paso 1: Acceda a 'Reportes' → 'Ventas por Período'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 2: Seleccione el rango de fechas (desde - hasta)" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 3: Opcionalmente, filtre por tipo de pago (Contado/Crédito)" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 4: Haga clic en 'Consultar'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 5: Revise los resultados en la tabla y la gráfica" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 6: Para exportar, haga clic en 'Exportar a PDF'" style="-fx-font-size: 11;"/>
+                                <Label text="Paso 7: Elija la ubicación para guardar el archivo" style="-fx-font-size: 11;"/>
+                                <Label text="Resultado: Reporte PDF generado con tabla, gráfica y análisis" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #6a1b9a;"/>
+                            </VBox>
+                        </VBox>
+
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <!-- ========================= TAB 3: PREGUNTAS FRECUENTES ========================= -->
+            <Tab text="Preguntas Frecuentes (FAQ)">
+                <ScrollPane fitToWidth="true">
+                    <VBox spacing="15.0" style="-fx-padding: 20;">
+                        <Label text="Preguntas Frecuentes" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <Separator/>
+
+                        <Accordion fx:id="accordionFAQ">
+                            <!-- FAQ 1 -->
+                            <TitledPane text="❓ ¿Cómo recupero mi contraseña?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="Por seguridad, las contraseñas están encriptadas y no pueden recuperarse. Sin embargo, un usuario administrador puede restablecerla:" style="-fx-font-size: 11;"/>
+                                    <Label text="1. Contacte al administrador del sistema" style="-fx-font-size: 11;"/>
+                                    <Label text="2. El administrador accederá a 'Utilidades' → 'Gestión de Usuarios'" style="-fx-font-size: 11;"/>
+                                    <Label text="3. Seleccionará su usuario y hará clic en 'Editar'" style="-fx-font-size: 11;"/>
+                                    <Label text="4. Ingresará una nueva contraseña temporal" style="-fx-font-size: 11;"/>
+                                    <Label text="5. Usted podrá cambiarla después del primer inicio de sesión" style="-fx-font-size: 11;"/>
+                                </VBox>
+                            </TitledPane>
+
+                            <!-- FAQ 2 -->
+                            <TitledPane text="❓ ¿Por qué no puedo realizar una venta a crédito?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="Esto puede ocurrir por las siguientes razones:" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                                    <Label text="• El cliente ya tiene un crédito activo (solo se permite uno a la vez)" style="-fx-font-size: 11;"/>
+                                    <Label text="• El monto supera el límite de crédito disponible del cliente" style="-fx-font-size: 11;"/>
+                                    <Label text="• El cliente tiene cuotas vencidas sin pagar" style="-fx-font-size: 11;"/>
+                                    <Label text="• El cliente está marcado como inactivo" style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Solución: Verifique el estado del cliente en 'Entidades' → 'Clientes' y asegúrese de que todos los pagos estén al día." style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                                </VBox>
+                            </TitledPane>
+
+                            <!-- FAQ 3 -->
+                            <TitledPane text="❓ ¿Cómo modifico o anulo una venta?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="Por razones de auditoría y control, las ventas NO pueden modificarse una vez guardadas. Sin embargo, puede anularlas:" style="-fx-font-size: 11;"/>
+                                    <Label text="1. Vaya a 'Consultas' → 'Ventas'" style="-fx-font-size: 11;"/>
+                                    <Label text="2. Busque la venta por código o cliente" style="-fx-font-size: 11;"/>
+                                    <Label text="3. Selecciónela y haga clic en 'Anular Venta'" style="-fx-font-size: 11;"/>
+                                    <Label text="4. Ingrese el motivo de anulación" style="-fx-font-size: 11;"/>
+                                    <Label text="5. Confirme la operación" style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Nota: La anulación restaura el inventario y cancela las cuotas pendientes si era una venta a crédito. Esta acción queda registrada en la bitácora." style="-fx-font-size: 11; -fx-font-style: italic;"/>
+                                </VBox>
+                            </TitledPane>
+
+                            <!-- FAQ 4 -->
+                            <TitledPane text="❓ ¿Cómo actualizo el stock de un producto?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="El stock se actualiza automáticamente con cada venta. Sin embargo, para ajustes manuales (inventario físico, devoluciones, etc.):" style="-fx-font-size: 11;"/>
+                                    <Label text="1. Acceda a 'Entidades' → 'Productos'" style="-fx-font-size: 11;"/>
+                                    <Label text="2. Busque y seleccione el producto" style="-fx-font-size: 11;"/>
+                                    <Label text="3. Haga clic en 'Editar'" style="-fx-font-size: 11;"/>
+                                    <Label text="4. Modifique el campo 'Stock Actual'" style="-fx-font-size: 11;"/>
+                                    <Label text="5. Guarde los cambios" style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Importante: Los cambios manuales de stock quedan registrados en la bitácora con el usuario que realizó la modificación." style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+                                </VBox>
+                            </TitledPane>
+
+                            <!-- FAQ 5 -->
+                            <TitledPane text="❓ ¿Qué significa 'Stock Mínimo'?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="El Stock Mínimo es un valor de alerta que le permite saber cuándo es necesario reabastecer un producto." style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Cuando el Stock Actual de un producto cae por debajo del Stock Mínimo configurado:" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                                    <Label text="• El sistema mostrará una advertencia visual en la lista de productos" style="-fx-font-size: 11;"/>
+                                    <Label text="• Aparecerá en el reporte 'Productos con Stock Bajo'" style="-fx-font-size: 11;"/>
+                                    <Label text="• Se recomienda realizar un pedido al proveedor" style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Ejemplo: Si un producto tiene Stock Mínimo = 5 y Stock Actual = 3, el sistema alertará que debe reabastecerse." style="-fx-font-size: 11; -fx-font-style: italic;"/>
+                                </VBox>
+                            </TitledPane>
+
+                            <!-- FAQ 6 -->
+                            <TitledPane text="❓ ¿Puedo eliminar un cliente o producto?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="Por integridad referencial, NO se pueden eliminar registros que tengan transacciones asociadas. En su lugar, puede inactivarlos:" style="-fx-font-size: 11;"/>
+                                    <Label text="Para Clientes:" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                                    <Label text="• Seleccione el cliente y haga clic en 'Editar'" style="-fx-font-size: 11;"/>
+                                    <Label text="• Cambie el estado a 'Inactivo'" style="-fx-font-size: 11;"/>
+                                    <Label text="• El cliente no aparecerá en las búsquedas de nuevas ventas" style="-fx-font-size: 11;"/>
+                                    <Label text="Para Productos:" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                                    <Label text="• Seleccione el producto y haga clic en 'Editar'" style="-fx-font-size: 11;"/>
+                                    <Label text="• Cambie el estado a 'Inactivo'" style="-fx-font-size: 11;"/>
+                                    <Label text="• El producto no se mostrará en las opciones para nuevas ventas" style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Nota: Los registros inactivos se mantienen en el sistema para consultas históricas y reportes." style="-fx-font-size: 11; -fx-font-style: italic;"/>
+                                </VBox>
+                            </TitledPane>
+
+                            <!-- FAQ 7 -->
+                            <TitledPane text="❓ ¿Cómo interpreto la bitácora de auditoría?">
+                                <VBox spacing="8.0" style="-fx-padding: 10;">
+                                    <Label wrapText="true" text="La bitácora registra TODAS las acciones importantes realizadas en el sistema. Cada registro incluye:" style="-fx-font-size: 11;"/>
+                                    <Label text="• Usuario: Quién realizó la acción" style="-fx-font-size: 11;"/>
+                                    <Label text="• Acción: Qué hizo (CREAR, EDITAR, ELIMINAR, LOGIN, etc.)" style="-fx-font-size: 11;"/>
+                                    <Label text="• Tabla Afectada: Dónde se realizó el cambio" style="-fx-font-size: 11;"/>
+                                    <Label text="• Descripción: Detalles específicos de la operación" style="-fx-font-size: 11;"/>
+                                    <Label text="• Fecha y Hora: Cuándo ocurrió" style="-fx-font-size: 11;"/>
+                                    <Label text="• Dirección IP: Desde qué equipo" style="-fx-font-size: 11;"/>
+                                    <Label wrapText="true" text="Use los filtros para encontrar eventos específicos. Las acciones críticas (ELIMINAR, ANULAR) se resaltan en rojo." style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #c0392b;"/>
+                                </VBox>
+                            </TitledPane>
+
+                        </Accordion>
+
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <!-- ========================= TAB 4: ACERCA DE ========================= -->
+            <Tab text="Acerca de">
+                <ScrollPane fitToWidth="true">
+                    <VBox spacing="20.0" style="-fx-padding: 30;" alignment="CENTER">
+
+                        <!-- Logo/Nombre del Sistema -->
+                        <VBox spacing="10.0" alignment="CENTER" style="-fx-background-color: #ecf0f1; -fx-padding: 30; -fx-border-color: #3498db; -fx-border-width: 3;">
+                            <Label text="Sistema de Gestión de Electrodomésticos" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                            <Label text="Versión 1.0.0" style="-fx-font-size: 14; -fx-text-fill: #7f8c8d;"/>
+                            <Label text="© 2025 - Todos los derechos reservados" style="-fx-font-size: 11; -fx-text-fill: #95a5a6;"/>
+                        </VBox>
+
+                        <Separator/>
+
+                        <!-- Información del Sistema -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-width: 1;">
+                            <Label text="Información del Sistema" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                            <GridPane hgap="15.0" vgap="10.0">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0"/>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="300.0"/>
+                                </columnConstraints>
+
+                                <Label text="Nombre:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <Label text="Sistema de Gestión de Electrodomésticos" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                <Label text="Versión:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <Label text="1.0.0 (Build 20250111)" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                <Label text="Tecnología:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                <Label text="Java 21 + JavaFX 21 + SQL Server" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                <Label text="Base de Datos:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                <Label fx:id="lblDatabaseInfo" text="Conectado a: [nombre_bd]" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                                <Label text="Desarrollado por:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                                <Label text="Equipo de Desarrollo - Taller de BD" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                                <Label text="Licencia:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                                <Label text="Uso Académico - No Comercial" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                            </GridPane>
+                        </VBox>
+
+                        <!-- Características Principales -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #e8f5e9; -fx-border-color: #4caf50; -fx-border-width: 2;">
+                            <Label text="✨ Características Principales" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2e7d32;"/>
+
+                            <VBox spacing="8.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="✓ Gestión completa de ventas (contado y crédito)" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Control de inventario con alertas de stock bajo" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Administración de clientes y créditos" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Sistema de cuotas con cálculo automático de intereses" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Generación de reportes profesionales en PDF" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Gráficas estadísticas interactivas" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Consultas avanzadas multitabla" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Bitácora de auditoría completa" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Utilidades integradas (calculadora, calendario)" style="-fx-font-size: 11;"/>
+                                <Label text="✓ Interfaz intuitiva y responsive" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Bibliotecas Utilizadas -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #fff9e6; -fx-border-color: #ffc107; -fx-border-width: 2;">
+                            <Label text="📚 Bibliotecas y Tecnologías" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f57c00;"/>
+
+                            <VBox spacing="8.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="• JavaFX 21 - Interfaz gráfica de usuario" style="-fx-font-size: 11;"/>
+                                <Label text="• iText 7 - Generación de documentos PDF" style="-fx-font-size: 11;"/>
+                                <Label text="• JFreeChart - Gráficas y visualizaciones" style="-fx-font-size: 11;"/>
+                                <Label text="• Microsoft SQL Server - Base de datos" style="-fx-font-size: 11;"/>
+                                <Label text="• JDBC - Conectividad con base de datos" style="-fx-font-size: 11;"/>
+                                <Label text="• Maven - Gestión de dependencias" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <!-- ========================= TAB 5: SOPORTE TÉCNICO ========================= -->
+            <Tab text="Soporte Técnico">
+                <ScrollPane fitToWidth="true">
+                    <VBox spacing="20.0" style="-fx-padding: 30;">
+
+                        <Label text="Centro de Soporte Técnico" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <Separator/>
+
+                        <!-- Información de Contacto -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #e3f2fd; -fx-border-color: #2196f3; -fx-border-width: 2;">
+                            <Label text="📞 Información de Contacto" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1565c0;"/>
+
+                            <VBox spacing="10.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="Email: soporte@electrohogar.com" style="-fx-font-size: 12;"/>
+                                <Label text="Teléfono: (601) 234-5678" style="-fx-font-size: 12;"/>
+                                <Label text="WhatsApp: +57 300 123 4567" style="-fx-font-size: 12;"/>
+                                <Label text="Horario de atención: Lunes a Viernes, 8:00 AM - 6:00 PM" style="-fx-font-size: 12;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Reportar un Problema -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #ffebee; -fx-border-color: #f44336; -fx-border-width: 2;">
+                            <Label text="🐛 Reportar un Problema" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #c62828;"/>
+
+                            <Label wrapText="true" text="Si encuentra un error o problema con el sistema, por favor incluya la siguiente información en su reporte:" style="-fx-font-size: 11;"/>
+
+                            <VBox spacing="8.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="1. Descripción detallada del problema" style="-fx-font-size: 11;"/>
+                                <Label text="2. Pasos para reproducir el error" style="-fx-font-size: 11;"/>
+                                <Label text="3. Mensaje de error (si aparece alguno)" style="-fx-font-size: 11;"/>
+                                <Label text="4. Módulo o pantalla donde ocurrió" style="-fx-font-size= "11;"/>
+                                <Label text="5. Usuario y fecha/hora del incidente" style="-fx-font-size: 11;"/>
+                                <Label text="6. Captura de pantalla (si es posible)" style="-fx-font-size: 11;"/>
+                            </VBox>
+
+                            <Label wrapText="true" text="Envíe esta información a soporte@electrohogar.com y recibirá respuesta en un plazo máximo de 24 horas." style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                        </VBox>
+
+                        <!-- Recursos Adicionales -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #f3e5f5; -fx-border-color: #9c27b0; -fx-border-width: 2;">
+                            <Label text="📖 Recursos Adicionales" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #6a1b9a;"/>
+
+                            <VBox spacing="8.0" style="-fx-padding: 0 0 0 20;">
+                                <Hyperlink text="Manual de Usuario Completo (PDF)" style="-fx-font-size: 11;"/>
+                                <Hyperlink text="Videos Tutoriales en YouTube" style="-fx-font-size: 11;"/>
+                                <Hyperlink text="Base de Conocimientos en Línea" style="-fx-font-size: 11;"/>
+                                <Hyperlink text="Foro de la Comunidad" style="-fx-font-size: 11;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Actualizaciones -->
+                        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #e8f5e9; -fx-border-color: #4caf50; -fx-border-width: 2;">
+                            <Label text="🔄 Actualizaciones del Sistema" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2e7d32;"/>
+
+                            <Label wrapText="true" text="El sistema se actualiza periódicamente con mejoras y correcciones. Las actualizaciones incluyen:" style="-fx-font-size: 11;"/>
+
+                            <VBox spacing="8.0" style="-fx-padding: 0 0 0 20;">
+                                <Label text="• Correcciones de errores reportados" style="-fx-font-size: 11;"/>
+                                <Label text="• Mejoras en el rendimiento" style="-fx-font-size: 11;"/>
+                                <Label text="• Nuevas funcionalidades" style="-fx-font-size: 11;"/>
+                                <Label text="• Actualizaciones de seguridad" style="-fx-font-size: 11;"/>
+                            </VBox>
+
+                            <Label wrapText="true" text="Las actualizaciones críticas se notificarán automáticamente al iniciar sesión." style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                        </VBox>
+
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+        </TabPane>
+
+        <!-- Botón Cerrar -->
+        <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 10;">
+            <Button text="Cerrar" onAction="#cerrarVentana" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 12; -fx-padding: 8 20 8 20;"/>
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>

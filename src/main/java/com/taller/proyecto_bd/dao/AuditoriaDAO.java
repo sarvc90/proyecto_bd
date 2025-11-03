@@ -1,31 +1,27 @@
 package com.taller.proyecto_bd.dao;
 
 import com.taller.proyecto_bd.models.Auditoria;
+import com.taller.proyecto_bd.utils.ConexionBD;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * DAO para la entidad Auditoria.
- * Maneja operaciones CRUD sobre registros de auditoría (en memoria por ahora).
+ * Maneja operaciones CRUD sobre registros de auditoría en SQL Server.
  *
- * Implementado como Singleton para mantener una sola lista de auditorías.
+ * Implementado como Singleton.
  *
  * @author Sistema
- * @version 1.1
+ * @version 2.0
  */
 public class AuditoriaDAO {
-    // ==================== ATRIBUTOS ====================
-    private List<Auditoria> auditorias;
-    private static int idCounter = 1; // Contador para IDs en memoria
-    private static AuditoriaDAO instance; // instancia única
-
-    // ==================== CONSTRUCTOR ====================
-    private AuditoriaDAO() {
-        this.auditorias = new ArrayList<>();
-        cargarDatosPrueba();
-    }
-
     // ==================== SINGLETON ====================
+    private static AuditoriaDAO instance;
+
+    private AuditoriaDAO() {}
+
     public static synchronized AuditoriaDAO getInstance() {
         if (instance == null) {
             instance = new AuditoriaDAO();
@@ -35,101 +31,253 @@ public class AuditoriaDAO {
 
     // ==================== CRUD ====================
 
+    /**
+     * Registra una nueva auditoría en la base de datos
+     */
     public boolean agregar(Auditoria auditoria) {
-        if (auditoria != null) {
-            // Asignar ID si no tiene
-            if (auditoria.getIdAuditoria() == 0) {
-                auditoria.setIdAuditoria(idCounter++);
-            }
-            return auditorias.add(auditoria);
-        }
-        return false;
-    }
+        String sql = "INSERT INTO Auditorias (idUsuario, accion, tablaAfectada, descripcion, ip) " +
+                     "VALUES (?, ?, ?, ?, ?)";
 
-    public List<Auditoria> obtenerTodas() {
-        return new ArrayList<>(auditorias);
-    }
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    public Auditoria obtenerPorId(int idAuditoria) {
-        return auditorias.stream()
-                .filter(a -> a.getIdAuditoria() == idAuditoria)
-                .findFirst()
-                .orElse(null);
-    }
+            stmt.setInt(1, auditoria.getIdUsuario());
+            stmt.setString(2, auditoria.getAccion());
+            stmt.setString(3, auditoria.getTablaAfectada());
+            stmt.setString(4, auditoria.getDescripcion());
+            stmt.setString(5, auditoria.getIp());
 
-    public boolean actualizar(Auditoria auditoria) {
-        for (int i = 0; i < auditorias.size(); i++) {
-            if (auditorias.get(i).getIdAuditoria() == auditoria.getIdAuditoria()) {
-                auditorias.set(i, auditoria);
+            int affected = stmt.executeUpdate();
+
+            if (affected > 0) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    auditoria.setIdAuditoria(rs.getInt(1));
+                }
                 return true;
             }
+        } catch (SQLException e) {
+            System.err.println("Error al agregar auditoría: " + e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
 
-    public boolean eliminar(int idAuditoria) {
-        return auditorias.removeIf(a -> a.getIdAuditoria() == idAuditoria);
+    /**
+     * Obtiene todas las auditorías con información del usuario (JOIN)
+     */
+    public List<Auditoria> obtenerTodas() {
+        List<Auditoria> auditorias = new ArrayList<>();
+        String sql = "SELECT a.idAuditoria, a.idUsuario, a.accion, a.tablaAfectada, " +
+                     "a.descripcion, a.ip, a.fechaAccion, u.nombreCompleto AS nombreUsuario " +
+                     "FROM Auditorias a " +
+                     "INNER JOIN Usuarios u ON a.idUsuario = u.idUsuario " +
+                     "ORDER BY a.fechaAccion DESC";
+
+        try (Connection conn = ConexionBD.obtenerConexion();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Auditoria a = new Auditoria();
+                a.setIdAuditoria(rs.getInt("idAuditoria"));
+                a.setIdUsuario(rs.getInt("idUsuario"));
+                a.setAccion(rs.getString("accion"));
+                a.setTablaAfectada(rs.getString("tablaAfectada"));
+                a.setDescripcion(rs.getString("descripcion"));
+                a.setIp(rs.getString("ip"));
+                a.setFechaAccion(rs.getTimestamp("fechaAccion"));
+                a.setNombreUsuario(rs.getString("nombreUsuario"));
+                auditorias.add(a);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener auditorías: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return auditorias;
     }
 
-    // ==================== MÉTODOS EXTRA ====================
+    /**
+     * Obtiene una auditoría por su ID
+     */
+    public Auditoria obtenerPorId(int idAuditoria) {
+        String sql = "SELECT a.idAuditoria, a.idUsuario, a.accion, a.tablaAfectada, " +
+                     "a.descripcion, a.ip, a.fechaAccion, u.nombreCompleto AS nombreUsuario " +
+                     "FROM Auditorias a " +
+                     "INNER JOIN Usuarios u ON a.idUsuario = u.idUsuario " +
+                     "WHERE a.idAuditoria = ?";
 
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idAuditoria);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Auditoria a = new Auditoria();
+                a.setIdAuditoria(rs.getInt("idAuditoria"));
+                a.setIdUsuario(rs.getInt("idUsuario"));
+                a.setAccion(rs.getString("accion"));
+                a.setTablaAfectada(rs.getString("tablaAfectada"));
+                a.setDescripcion(rs.getString("descripcion"));
+                a.setIp(rs.getString("ip"));
+                a.setFechaAccion(rs.getTimestamp("fechaAccion"));
+                a.setNombreUsuario(rs.getString("nombreUsuario"));
+                return a;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener auditoría por ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Nota: Las auditorías generalmente no se actualizan ni eliminan (inmutables)
+    // Se mantienen los métodos por completitud pero no se recomienda usarlos
+
+    /**
+     * Obtiene auditorías de un usuario específico
+     */
     public List<Auditoria> obtenerPorUsuario(int idUsuario) {
-        List<Auditoria> resultado = new ArrayList<>();
-        for (Auditoria a : auditorias) {
-            if (a.getIdUsuario() == idUsuario) {
-                resultado.add(a);
+        List<Auditoria> auditorias = new ArrayList<>();
+        String sql = "SELECT a.idAuditoria, a.idUsuario, a.accion, a.tablaAfectada, " +
+                     "a.descripcion, a.ip, a.fechaAccion, u.nombreCompleto AS nombreUsuario " +
+                     "FROM Auditorias a " +
+                     "INNER JOIN Usuarios u ON a.idUsuario = u.idUsuario " +
+                     "WHERE a.idUsuario = ? " +
+                     "ORDER BY a.fechaAccion DESC";
+
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idUsuario);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Auditoria a = new Auditoria();
+                a.setIdAuditoria(rs.getInt("idAuditoria"));
+                a.setIdUsuario(rs.getInt("idUsuario"));
+                a.setAccion(rs.getString("accion"));
+                a.setTablaAfectada(rs.getString("tablaAfectada"));
+                a.setDescripcion(rs.getString("descripcion"));
+                a.setIp(rs.getString("ip"));
+                a.setFechaAccion(rs.getTimestamp("fechaAccion"));
+                a.setNombreUsuario(rs.getString("nombreUsuario"));
+                auditorias.add(a);
             }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener auditorías por usuario: " + e.getMessage());
+            e.printStackTrace();
         }
-        return resultado;
+        return auditorias;
     }
 
+    /**
+     * Obtiene auditorías por tipo de acción
+     */
     public List<Auditoria> obtenerPorAccion(String accion) {
-        List<Auditoria> resultado = new ArrayList<>();
-        for (Auditoria a : auditorias) {
-            if (a.getAccion() != null && a.getAccion().equalsIgnoreCase(accion)) {
-                resultado.add(a);
+        List<Auditoria> auditorias = new ArrayList<>();
+        String sql = "SELECT a.idAuditoria, a.idUsuario, a.accion, a.tablaAfectada, " +
+                     "a.descripcion, a.ip, a.fechaAccion, u.nombreCompleto AS nombreUsuario " +
+                     "FROM Auditorias a " +
+                     "INNER JOIN Usuarios u ON a.idUsuario = u.idUsuario " +
+                     "WHERE a.accion = ? " +
+                     "ORDER BY a.fechaAccion DESC";
+
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, accion);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Auditoria a = new Auditoria();
+                a.setIdAuditoria(rs.getInt("idAuditoria"));
+                a.setIdUsuario(rs.getInt("idUsuario"));
+                a.setAccion(rs.getString("accion"));
+                a.setTablaAfectada(rs.getString("tablaAfectada"));
+                a.setDescripcion(rs.getString("descripcion"));
+                a.setIp(rs.getString("ip"));
+                a.setFechaAccion(rs.getTimestamp("fechaAccion"));
+                a.setNombreUsuario(rs.getString("nombreUsuario"));
+                auditorias.add(a);
             }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener auditorías por acción: " + e.getMessage());
+            e.printStackTrace();
         }
-        return resultado;
+        return auditorias;
     }
 
-    public List<Auditoria> obtenerPorTabla(String tabla) {
-        List<Auditoria> resultado = new ArrayList<>();
-        for (Auditoria a : auditorias) {
-            if (a.getTablaAfectada() != null && a.getTablaAfectada().equalsIgnoreCase(tabla)) {
-                resultado.add(a);
-            }
-        }
-        return resultado;
-    }
-
+    /**
+     * Obtiene auditorías críticas (LOGIN_FALLIDO, ELIMINAR, ANULAR)
+     */
     public List<Auditoria> obtenerCriticas() {
-        List<Auditoria> resultado = new ArrayList<>();
-        for (Auditoria a : auditorias) {
-            if (a.esCritica()) {
-                resultado.add(a);
+        List<Auditoria> auditorias = new ArrayList<>();
+        String sql = "SELECT a.idAuditoria, a.idUsuario, a.accion, a.tablaAfectada, " +
+                     "a.descripcion, a.ip, a.fechaAccion, u.nombreCompleto AS nombreUsuario " +
+                     "FROM Auditorias a " +
+                     "INNER JOIN Usuarios u ON a.idUsuario = u.idUsuario " +
+                     "WHERE a.accion IN ('ELIMINAR', 'ANULAR', 'LOGIN_FALLIDO') " +
+                     "ORDER BY a.fechaAccion DESC";
+
+        try (Connection conn = ConexionBD.obtenerConexion();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Auditoria a = new Auditoria();
+                a.setIdAuditoria(rs.getInt("idAuditoria"));
+                a.setIdUsuario(rs.getInt("idUsuario"));
+                a.setAccion(rs.getString("accion"));
+                a.setTablaAfectada(rs.getString("tablaAfectada"));
+                a.setDescripcion(rs.getString("descripcion"));
+                a.setIp(rs.getString("ip"));
+                a.setFechaAccion(rs.getTimestamp("fechaAccion"));
+                a.setNombreUsuario(rs.getString("nombreUsuario"));
+                auditorias.add(a);
             }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener auditorías críticas: " + e.getMessage());
+            e.printStackTrace();
         }
-        return resultado;
+        return auditorias;
     }
 
-    // ==================== DATOS DE PRUEBA ====================
-    private void cargarDatosPrueba() {
-        // Los IDs se asignan automáticamente al agregar
-        Auditoria a1 = new Auditoria(1, "LOGIN", "Usuario", "Ingreso al sistema", "192.168.0.1");
-        a1.setNombreUsuario("Admin General");
-        agregar(a1);
+    /**
+     * Obtiene auditorías de las últimas N horas
+     */
+    public List<Auditoria> obtenerRecientes(int horas) {
+        List<Auditoria> auditorias = new ArrayList<>();
+        String sql = "SELECT a.idAuditoria, a.idUsuario, a.accion, a.tablaAfectada, " +
+                     "a.descripcion, a.ip, a.fechaAccion, u.nombreCompleto AS nombreUsuario " +
+                     "FROM Auditorias a " +
+                     "INNER JOIN Usuarios u ON a.idUsuario = u.idUsuario " +
+                     "WHERE a.fechaAccion >= DATEADD(HOUR, ?, SYSDATETIME()) " +
+                     "ORDER BY a.fechaAccion DESC";
 
-        Auditoria a2 = new Auditoria(2, "CREAR_VENTA", "Venta", "Venta V001 creada", "192.168.0.2");
-        a2.setNombreUsuario("Carlos Pérez");
-        agregar(a2);
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        Auditoria a3 = new Auditoria(3, "ANULAR", "Credito", "Crédito 3 anulado por falta de pago", "192.168.0.3");
-        a3.setNombreUsuario("Laura Gómez");
-        agregar(a3);
+            stmt.setInt(1, -horas);
+            ResultSet rs = stmt.executeQuery();
 
-        Auditoria a4 = new Auditoria(2, "LOGIN_FALLIDO", "Usuario", "Intento de login con clave errada", "192.168.0.2");
-        a4.setNombreUsuario("Carlos Pérez");
-        agregar(a4);
+            while (rs.next()) {
+                Auditoria a = new Auditoria();
+                a.setIdAuditoria(rs.getInt("idAuditoria"));
+                a.setIdUsuario(rs.getInt("idUsuario"));
+                a.setAccion(rs.getString("accion"));
+                a.setTablaAfectada(rs.getString("tablaAfectada"));
+                a.setDescripcion(rs.getString("descripcion"));
+                a.setIp(rs.getString("ip"));
+                a.setFechaAccion(rs.getTimestamp("fechaAccion"));
+                a.setNombreUsuario(rs.getString("nombreUsuario"));
+                auditorias.add(a);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener auditorías recientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return auditorias;
     }
 }

@@ -12,10 +12,26 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
+import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Div;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+
+import java.io.File;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -559,19 +575,18 @@ public class NuevaVentaController {
             }
             
             mostrarExito("¡Venta guardada exitosamente! Código: " + venta.getCodigo());
-            
-            // Preguntar si desea imprimir factura
+
+            // Preguntar si desea generar factura PDF
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Venta Exitosa");
             alert.setHeaderText("La venta se guardó correctamente");
-            alert.setContentText("¿Desea imprimir la factura?");
-            
+            alert.setContentText("¿Desea generar la factura en PDF?");
+
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                // TODO: Implementar impresión de factura
-                mostrarInfo("Funcionalidad de impresión en desarrollo");
+                generarFacturaPDF(venta);
             }
-            
+
             // Limpiar formulario
             nuevaVenta();
             
@@ -581,6 +596,251 @@ public class NuevaVentaController {
         }
     }
     
+    /**
+     * Genera la factura en PDF para una venta
+     */
+    private void generarFacturaPDF(Venta venta) {
+        try {
+            // Configurar el diálogo de guardado
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Guardar Factura");
+            fileChooser.setInitialFileName("Factura_" + venta.getCodigo() + ".pdf");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Archivos PDF", "*.pdf")
+            );
+
+            File archivo = fileChooser.showSaveDialog(btnGuardarVenta.getScene().getWindow());
+            if (archivo == null) {
+                return; // Usuario canceló
+            }
+
+            // Crear el documento PDF
+            PdfWriter writer = new PdfWriter(archivo);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+            document.setMargins(40, 40, 40, 40);
+
+            // Colores corporativos
+            DeviceRgb colorPrimario = new DeviceRgb(33, 150, 243); // Azul
+            DeviceRgb colorSecundario = new DeviceRgb(76, 175, 80); // Verde
+            DeviceRgb colorGris = new DeviceRgb(245, 245, 245);
+
+            // ===== ENCABEZADO DE LA EMPRESA =====
+            Paragraph nombreEmpresa = new Paragraph("ELECTRODOMÉSTICOS DEL HOGAR")
+                .setFontSize(22)
+                .setBold()
+                .setFontColor(colorPrimario)
+                .setTextAlignment(TextAlignment.CENTER);
+            document.add(nombreEmpresa);
+
+            Paragraph infoEmpresa = new Paragraph(
+                "NIT: 900.123.456-7\n" +
+                "Dirección: Calle Principal #123, Ciudad\n" +
+                "Teléfono: (601) 234-5678 | Email: ventas@electrohogar.com")
+                .setFontSize(9)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginBottom(10);
+            document.add(infoEmpresa);
+
+            // Línea separadora
+            Paragraph lineaSeparadora = new Paragraph("")
+                .setBorderBottom(new SolidBorder(colorPrimario, 2))
+                .setMarginBottom(15);
+            document.add(lineaSeparadora);
+
+            // ===== TÍTULO FACTURA =====
+            Paragraph tituloFactura = new Paragraph("FACTURA DE VENTA")
+                .setFontSize(18)
+                .setBold()
+                .setFontColor(colorSecundario)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginBottom(15);
+            document.add(tituloFactura);
+
+            // ===== INFORMACIÓN DE LA VENTA Y CLIENTE =====
+            Table infoTable = new Table(new float[]{1, 1});
+            infoTable.setWidth(UnitValue.createPercentValue(100));
+            infoTable.setMarginBottom(20);
+
+            // Columna izquierda: Datos de la factura
+            Cell cellFactura = new Cell()
+                .add(new Paragraph("DATOS DE LA FACTURA").setBold().setFontSize(11))
+                .add(new Paragraph("Código: " + venta.getCodigo()).setFontSize(10))
+                .add(new Paragraph("Fecha: " + new SimpleDateFormat("dd/MM/yyyy HH:mm").format(venta.getFechaVenta())).setFontSize(10))
+                .add(new Paragraph("Tipo: " + (venta.isEsCredito() ? "CRÉDITO" : "CONTADO")).setFontSize(10))
+                .add(new Paragraph("Estado: " + venta.getEstado()).setFontSize(10))
+                .setPadding(10)
+                .setBorder(new SolidBorder(colorGris, 1));
+
+            // Columna derecha: Datos del cliente
+            Cell cellCliente = new Cell()
+                .add(new Paragraph("DATOS DEL CLIENTE").setBold().setFontSize(11))
+                .add(new Paragraph("Nombre: " + clienteSeleccionado.getNombreCompleto()).setFontSize(10))
+                .add(new Paragraph("Cédula: " + clienteSeleccionado.getCedula()).setFontSize(10))
+                .add(new Paragraph("Teléfono: " + clienteSeleccionado.getTelefono()).setFontSize(10))
+                .add(new Paragraph("Dirección: " + clienteSeleccionado.getDireccion()).setFontSize(10))
+                .setPadding(10)
+                .setBorder(new SolidBorder(colorGris, 1));
+
+            infoTable.addCell(cellFactura);
+            infoTable.addCell(cellCliente);
+            document.add(infoTable);
+
+            // ===== TABLA DE PRODUCTOS =====
+            Paragraph tituloProductos = new Paragraph("DETALLE DE PRODUCTOS")
+                .setBold()
+                .setFontSize(12)
+                .setMarginBottom(10);
+            document.add(tituloProductos);
+
+            Table productosTable = new Table(new float[]{1, 3, 1.5f, 1.5f, 1.5f, 1.5f, 2});
+            productosTable.setWidth(UnitValue.createPercentValue(100));
+
+            // Encabezados
+            String[] headers = {"#", "Producto", "Código", "Cantidad", "Precio Unit.", "Subtotal", "Total"};
+            for (String header : headers) {
+                Cell headerCell = new Cell()
+                    .add(new Paragraph(header).setBold().setFontSize(9))
+                    .setBackgroundColor(colorPrimario)
+                    .setFontColor(new DeviceRgb(255, 255, 255))
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setPadding(6);
+                productosTable.addHeaderCell(headerCell);
+            }
+
+            // Datos de productos
+            int num = 1;
+            for (DetalleVenta detalle : carrito) {
+                Producto producto = productoDAO.obtenerPorId(detalle.getIdProducto());
+
+                productosTable.addCell(new Cell().add(new Paragraph(String.valueOf(num++)).setFontSize(9)).setPadding(5));
+                productosTable.addCell(new Cell().add(new Paragraph(detalle.getNombreProducto()).setFontSize(9)).setPadding(5));
+                productosTable.addCell(new Cell().add(new Paragraph(producto != null ? producto.getCodigo() : "-").setFontSize(9)).setPadding(5).setTextAlignment(TextAlignment.CENTER));
+                productosTable.addCell(new Cell().add(new Paragraph(String.valueOf(detalle.getCantidad())).setFontSize(9)).setPadding(5).setTextAlignment(TextAlignment.CENTER));
+                productosTable.addCell(new Cell().add(new Paragraph(formatoMoneda.format(detalle.getPrecioUnitario())).setFontSize(9)).setPadding(5).setTextAlignment(TextAlignment.RIGHT));
+                productosTable.addCell(new Cell().add(new Paragraph(formatoMoneda.format(detalle.getSubtotal())).setFontSize(9)).setPadding(5).setTextAlignment(TextAlignment.RIGHT));
+                productosTable.addCell(new Cell().add(new Paragraph(formatoMoneda.format(detalle.getTotal())).setFontSize(9)).setPadding(5).setTextAlignment(TextAlignment.RIGHT));
+            }
+
+            document.add(productosTable);
+            document.add(new Paragraph("\n"));
+
+            // ===== TOTALES =====
+            Table totalesTable = new Table(new float[]{3, 1});
+            totalesTable.setWidth(UnitValue.createPercentValue(60));
+            totalesTable.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.RIGHT);
+
+            // Subtotal
+            totalesTable.addCell(new Cell().add(new Paragraph("Subtotal:").setFontSize(10)).setBorder(null).setTextAlignment(TextAlignment.RIGHT).setPadding(3));
+            totalesTable.addCell(new Cell().add(new Paragraph(formatoMoneda.format(venta.getSubtotal())).setFontSize(10)).setBorder(null).setTextAlignment(TextAlignment.RIGHT).setPadding(3));
+
+            // IVA
+            totalesTable.addCell(new Cell().add(new Paragraph("IVA (12%):").setFontSize(10)).setBorder(null).setTextAlignment(TextAlignment.RIGHT).setPadding(3));
+            totalesTable.addCell(new Cell().add(new Paragraph(formatoMoneda.format(venta.getIvaTotal())).setFontSize(10)).setBorder(null).setTextAlignment(TextAlignment.RIGHT).setPadding(3));
+
+            // Total
+            totalesTable.addCell(new Cell().add(new Paragraph("TOTAL:").setBold().setFontSize(12)).setBackgroundColor(colorGris).setTextAlignment(TextAlignment.RIGHT).setPadding(5));
+            totalesTable.addCell(new Cell().add(new Paragraph(formatoMoneda.format(venta.getTotal())).setBold().setFontSize(12)).setBackgroundColor(colorGris).setTextAlignment(TextAlignment.RIGHT).setPadding(5));
+
+            document.add(totalesTable);
+            document.add(new Paragraph("\n"));
+
+            // ===== INFORMACIÓN DE CRÉDITO (si aplica) =====
+            if (venta.isEsCredito()) {
+                Div divCredito = new Div()
+                    .setBackgroundColor(new DeviceRgb(255, 249, 230))
+                    .setBorder(new SolidBorder(new DeviceRgb(255, 193, 7), 2))
+                    .setPadding(15)
+                    .setMarginTop(10);
+
+                Paragraph tituloCredito = new Paragraph("INFORMACIÓN DE CRÉDITO")
+                    .setBold()
+                    .setFontSize(12)
+                    .setFontColor(new DeviceRgb(255, 152, 0))
+                    .setMarginBottom(8);
+                divCredito.add(tituloCredito);
+
+                double cuotaInicial = venta.getTotal() * CUOTA_INICIAL_PORCENTAJE;
+                double saldoFinanciar = venta.getTotal() - cuotaInicial;
+                double interes = saldoFinanciar * INTERES_PORCENTAJE;
+                double totalFinanciar = saldoFinanciar + interes;
+                double valorCuota = totalFinanciar / venta.getPlazoMeses();
+
+                Paragraph infoCredito = new Paragraph(
+                    String.format("• Cuota Inicial (30%%): %s\n", formatoMoneda.format(cuotaInicial)) +
+                    String.format("• Saldo a Financiar (70%%): %s\n", formatoMoneda.format(saldoFinanciar)) +
+                    String.format("• Interés (5%%): %s\n", formatoMoneda.format(interes)) +
+                    String.format("• Total a Financiar: %s\n", formatoMoneda.format(totalFinanciar)) +
+                    String.format("• Plazo: %d meses\n", venta.getPlazoMeses()) +
+                    String.format("• Valor Cuota Mensual: %s\n", formatoMoneda.format(valorCuota)) +
+                    String.format("• Total a Pagar: %s", formatoMoneda.format(cuotaInicial + totalFinanciar))
+                ).setFontSize(10).setFixedLeading(14);
+                divCredito.add(infoCredito);
+
+                document.add(divCredito);
+            }
+
+            // ===== PIE DE PÁGINA =====
+            document.add(new Paragraph("\n\n"));
+            Paragraph lineaPie = new Paragraph("")
+                .setBorderTop(new SolidBorder(new DeviceRgb(200, 200, 200), 1))
+                .setMarginTop(20);
+            document.add(lineaPie);
+
+            Paragraph notaFinal = new Paragraph(
+                "Gracias por su compra. Esta factura es un documento válido para efectos tributarios.\n" +
+                "Para cualquier consulta o reclamo, por favor presentar esta factura.")
+                .setFontSize(8)
+                .setItalic()
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(10);
+            document.add(notaFinal);
+
+            Paragraph pieDePagina = new Paragraph(
+                "Sistema de Gestión de Electrodomésticos | Generado: " +
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) +
+                " | © 2025")
+                .setFontSize(7)
+                .setItalic()
+                .setFontColor(new DeviceRgb(150, 150, 150))
+                .setTextAlignment(TextAlignment.CENTER)
+                .setMarginTop(5);
+            document.add(pieDePagina);
+
+            document.close();
+
+            mostrarExito("Factura generada exitosamente: " + archivo.getName());
+
+            // Registrar en auditoría
+            registrarAccionAuditoria("GENERAR_FACTURA", "Venta",
+                "Generó factura PDF para venta " + venta.getCodigo());
+
+        } catch (Exception e) {
+            mostrarError("Error al generar la factura: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Registra una acción en la auditoría
+     */
+    private void registrarAccionAuditoria(String accion, String tablaAfectada, String descripcion) {
+        try {
+            AuditoriaDAO auditoriaDAO = AuditoriaDAO.getInstance();
+            String ip = java.net.InetAddress.getLocalHost().getHostAddress();
+            Auditoria auditoria = new Auditoria(
+                SessionManager.getIdUsuarioActual(),
+                accion,
+                tablaAfectada,
+                descripcion,
+                ip
+            );
+            auditoriaDAO.agregar(auditoria);
+        } catch (Exception e) {
+            System.err.println("Error al registrar acción en auditoría: " + e.getMessage());
+        }
+    }
+
     /**
      * Valida que la venta esté completa
      */

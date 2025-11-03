@@ -445,8 +445,21 @@ public class ConsultasReportesController {
                       "Total límites otorgados:\n" + formatoMoneda.format(totalLimites) + "\n\n" +
                       "Total saldos pendientes:\n" + formatoMoneda.format(totalSaldos) + "\n\n" +
                       "Total crédito disponible:\n" + formatoMoneda.format(totalDisponible) + "\n\n" +
-                      "% Cartera utilizada: " + String.format("%.1f%%", 
+                      "% Cartera utilizada: " + String.format("%.1f%%",
                         totalLimites > 0 ? (totalSaldos / totalLimites * 100) : 0));
+
+        // Crear gráfica de barras para visualizar la cartera
+        Map<String, Number> datosGrafica = new LinkedHashMap<>();
+        datosGrafica.put("Saldo Pendiente", totalSaldos);
+        datosGrafica.put("Crédito Disponible", totalDisponible);
+        JFreeChart grafica = PDFExporter.crearGraficaBarras(
+            "Estado de Cartera",
+            "Categoría",
+            "Monto ($)",
+            datosGrafica
+        );
+        mostrarGrafica(grafica);
+
         btnExportar.setDisable(false);
     }
     
@@ -503,6 +516,28 @@ public class ConsultasReportesController {
                       "Total unidades vendidas (Top 10):\n" + totalUnidades + "\n\n" +
                       "Total facturado (Top 10):\n" + formatoMoneda.format(totalVendido) + "\n\n" +
                       "Ticket promedio:\n" + formatoMoneda.format(totalUnidades > 0 ? totalVendido/totalUnidades : 0));
+
+        // Crear gráfica de barras para el Top 10
+        Map<String, Number> datosGrafica = new LinkedHashMap<>();
+        posicion = 1;
+        for (Map.Entry<Integer, Integer> entry : ranking) {
+            if (posicion > 10) break;
+            Producto p = productoDAO.obtenerPorId(entry.getKey());
+            if (p != null) {
+                String nombreCorto = p.getNombre().length() > 15 ?
+                    p.getNombre().substring(0, 15) + "..." : p.getNombre();
+                datosGrafica.put(nombreCorto, entry.getValue());
+            }
+            posicion++;
+        }
+        JFreeChart grafica = PDFExporter.crearGraficaBarras(
+            "Top 10 Productos Más Vendidos",
+            "Producto",
+            "Unidades Vendidas",
+            datosGrafica
+        );
+        mostrarGrafica(grafica);
+
         btnExportar.setDisable(false);
     }
     
@@ -555,6 +590,17 @@ public class ConsultasReportesController {
                       "Total Facturado:\n" + formatoMoneda.format(totalVentas) + "\n\n" +
                       "═══════════════════\n" +
                       "IVA a pagar a la DIAN:\n" + formatoMoneda.format(totalIVA));
+
+        // Crear gráfica de pastel para distribución IVA
+        Map<String, Number> datosGrafica = new LinkedHashMap<>();
+        datosGrafica.put("Base Imponible (Sin IVA)", totalSubtotal);
+        datosGrafica.put("IVA (19%)", totalIVA);
+        JFreeChart grafica = PDFExporter.crearGraficaPastel(
+            "Composición de Ventas (Base + IVA)",
+            datosGrafica
+        );
+        mostrarGrafica(grafica);
+
         btnExportar.setDisable(false);
     }
     

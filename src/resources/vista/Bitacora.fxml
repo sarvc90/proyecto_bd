@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.BitacoraViewController">
+
+    <VBox spacing="15.0" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+
+        <!-- Título -->
+        <HBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="Bitácora de Auditoría" textFill="WHITE">
+                <font>
+                    <Font name="System Bold" size="20.0"/>
+                </font>
+            </Label>
+        </HBox>
+
+        <!-- Filtros -->
+        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+            <Label text="Filtrar por:"/>
+
+            <ComboBox fx:id="cmbFiltroAccion" promptText="Tipo de Acción" prefWidth="150.0"/>
+
+            <TextField fx:id="txtFiltroUsuario" promptText="ID Usuario" prefWidth="100.0"/>
+
+            <ComboBox fx:id="cmbFiltroTiempo" promptText="Tiempo" prefWidth="150.0"/>
+
+            <Button text="Aplicar Filtros" onAction="#aplicarFiltros" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+            <Button text="Limpiar" onAction="#limpiarFiltros" style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+            <Button text="Ver Críticas" onAction="#verCriticas" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+            <Button text="Actualizar" onAction="#cargarTodas" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+        </HBox>
+
+        <!-- Tabla de auditorías -->
+        <TableView fx:id="tablaAuditorias" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colID" text="ID" prefWidth="50.0"/>
+                <TableColumn fx:id="colFecha" text="Fecha y Hora" prefWidth="150.0"/>
+                <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="150.0"/>
+                <TableColumn fx:id="colAccion" text="Acción" prefWidth="120.0"/>
+                <TableColumn fx:id="colTabla" text="Tabla Afectada" prefWidth="120.0"/>
+                <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="250.0"/>
+                <TableColumn fx:id="colIP" text="IP" prefWidth="120.0"/>
+            </columns>
+        </TableView>
+
+        <!-- Panel de información -->
+        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+            <Label fx:id="lblTotalRegistros" text="Total: 0 registros"/>
+            <Separator orientation="VERTICAL"/>
+            <Label fx:id="lblCriticas" text="Críticas: 0" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+        </HBox>
+
+        <!-- Detalles del registro seleccionado -->
+        <TitledPane text="Detalles del Registro Seleccionado" collapsible="true" expanded="false">
+            <VBox spacing="10.0" style="-fx-padding: 10;">
+                <GridPane hgap="10.0" vgap="10.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="120.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+                    </columnConstraints>
+
+                    <Label text="ID Auditoría:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblDetalleID" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Fecha y Hora:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblDetalleFecha" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Usuario:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblDetalleUsuario" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                    <Label text="Acción:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblDetalleAccion" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                    <Label text="Tabla Afectada:" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblDetalleTabla" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                    <Label text="IP:" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblDetalleIP" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                    <Label text="Descripción:" GridPane.columnIndex="0" GridPane.rowIndex="6" style="-fx-font-weight: bold;"
+                           GridPane.valignment="TOP"/>
+                    <TextArea fx:id="txtDetalleDescripcion" editable="false" wrapText="true" prefRowCount="3"
+                              GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                </GridPane>
+            </VBox>
+        </TitledPane>
+
+    </VBox>
+
+</AnchorPane>

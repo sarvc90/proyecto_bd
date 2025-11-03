@@ -352,11 +352,14 @@ public class MainWindowController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Usuarios.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = new Stage();
             stage.setTitle("Gestión de Usuarios (Solo Administrador)");
             stage.setScene(new Scene(root));
             stage.show();
+
+            // Registrar en auditoría
+            registrarAccion("ABRIR_GESTION_USUARIOS", "Usuario", "Abrió la gestión de usuarios del sistema");
         } catch (IOException e) {
             mostrarError("Error al abrir gestión de usuarios: " + e.getMessage());
             e.printStackTrace();
@@ -558,13 +561,41 @@ public class MainWindowController {
     @FXML
     private void abrirCalculadora() {
         actualizarEstado("Abriendo calculadora...");
-        mostrarMensaje("Utilidad", "Calculadora - En desarrollo");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Calculadora.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Calculadora de Utilidades");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Registrar en auditoría
+            registrarAccion("ABRIR_CALCULADORA", "Utilidad", "Abrió la calculadora de utilidades");
+        } catch (IOException e) {
+            mostrarError("Error al abrir calculadora: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void abrirCalendario() {
         actualizarEstado("Abriendo calendario...");
-        mostrarMensaje("Utilidad", "Calendario - En desarrollo");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Calendario.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Calendario");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Registrar en auditoría
+            registrarAccion("ABRIR_CALENDARIO", "Utilidad", "Abrió el calendario");
+        } catch (IOException e) {
+            mostrarError("Error al abrir calendario: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -574,7 +605,22 @@ public class MainWindowController {
             return;
         }
         actualizarEstado("Abriendo bitácora de auditoría...");
-        mostrarMensaje("Auditoría", "Bitácora - En desarrollo");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Bitacora.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Bitácora de Auditoría");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+
+            // Registrar en auditoría
+            registrarAccion("ABRIR_BITACORA", "Auditoria", "Abrió la bitácora de auditoría");
+        } catch (IOException e) {
+            mostrarError("Error al abrir bitácora: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ==================== BÚSQUEDAS ====================
@@ -712,6 +758,26 @@ public class MainWindowController {
             auditoriaDAO.agregar(auditoria);
         } catch (Exception e) {
             System.err.println("Error al registrar cierre de sesión: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Registra una acción genérica en la auditoría
+     */
+    private void registrarAccion(String accion, String tablaAfectada, String descripcion) {
+        try {
+            String ip = InetAddress.getLocalHost().getHostAddress();
+            Auditoria auditoria = new Auditoria(
+                usuarioActual.getIdUsuario(),
+                accion,
+                tablaAfectada,
+                descripcion,
+                ip
+            );
+            auditoria.setNombreUsuario(usuarioActual.getNombreCompleto());
+            auditoriaDAO.agregar(auditoria);
+        } catch (Exception e) {
+            System.err.println("Error al registrar acción en auditoría: " + e.getMessage());
         }
     }
 

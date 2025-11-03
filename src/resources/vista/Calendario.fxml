@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.taller.proyecto_bd.ui.CalendarioViewController">
+
+    <VBox spacing="15.0" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+
+        <!-- Título -->
+        <HBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="Calendario" textFill="WHITE">
+                <font>
+                    <Font name="System Bold" size="20.0"/>
+                </font>
+            </Label>
+        </HBox>
+
+        <!-- Controles de navegación -->
+        <HBox spacing="10.0" alignment="CENTER" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+            <Button fx:id="btnAnterior" text="◄ Mes Anterior" onAction="#mesAnterior"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <VBox alignment="CENTER">
+                <Label fx:id="lblMesAnio" text="Enero 2025" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+                <Button text="Hoy" onAction="#irHoy" style="-fx-font-size: 11;"/>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button fx:id="btnSiguiente" text="Mes Siguiente ►" onAction="#mesSiguiente"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+        </HBox>
+
+        <!-- Panel de información -->
+        <HBox spacing="15.0" style="-fx-padding: 10; -fx-background-color: #e8f5e9;">
+            <VBox spacing="5.0">
+                <Label text="Fecha Actual:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblFechaActual" text="Lunes, 3 de noviembre de 2025"/>
+            </VBox>
+            <Separator orientation="VERTICAL"/>
+            <VBox spacing="5.0">
+                <Label text="Día del Año:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblDiaAnio" text="Día 307 de 365"/>
+            </VBox>
+        </HBox>
+
+        <!-- Calendario (Grid) -->
+        <VBox VBox.vgrow="ALWAYS" style="-fx-border-color: #bdc3c7; -fx-border-width: 2;">
+            <!-- Encabezado de días de la semana -->
+            <GridPane fx:id="gridEncabezado" style="-fx-background-color: #34495e; -fx-padding: 5;">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30.0" prefHeight="30.0"/>
+                </rowConstraints>
+
+                <Label text="Domingo" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="0"/>
+                <Label text="Lunes" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="1"/>
+                <Label text="Martes" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="2"/>
+                <Label text="Miércoles" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="3"/>
+                <Label text="Jueves" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="4"/>
+                <Label text="Viernes" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="5"/>
+                <Label text="Sábado" textFill="WHITE" style="-fx-font-weight: bold;" GridPane.columnIndex="6"/>
+            </GridPane>
+
+            <!-- Grid de días del mes -->
+            <GridPane fx:id="gridCalendario" VBox.vgrow="ALWAYS" gridLinesVisible="true"
+                      style="-fx-background-color: white;">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                    <ColumnConstraints percentWidth="14.28" halignment="CENTER"/>
+                </columnConstraints>
+            </GridPane>
+        </VBox>
+
+        <!-- Panel de selección rápida -->
+        <HBox spacing="10.0" alignment="CENTER" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+            <Label text="Ir a:"/>
+            <ComboBox fx:id="cmbMes" promptText="Mes" prefWidth="130.0"/>
+            <ComboBox fx:id="cmbAnio" promptText="Año" prefWidth="100.0"/>
+            <Button text="Ir" onAction="#irFecha" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>
