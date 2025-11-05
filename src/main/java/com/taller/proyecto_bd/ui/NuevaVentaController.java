@@ -321,7 +321,38 @@ public class NuevaVentaController {
             seleccionarCliente(cliente);
         }
     }
-    
+
+    /**
+     * Abre la ventana de gestión de clientes para crear uno nuevo
+     */
+    @FXML
+    private void nuevoCliente() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                getClass().getResource("/vista/Clientes.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Gestión de Clientes");
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setMaximized(true);
+
+            // Registrar en auditoría
+            registrarAccionAuditoria("ABRIR_CLIENTES", "Cliente",
+                "Abrió ventana de clientes desde Nueva Venta");
+
+            stage.showAndWait();
+
+            // Después de cerrar la ventana de clientes, el usuario puede buscar el cliente recién creado
+
+        } catch (Exception e) {
+            mostrarError("Error al abrir la ventana de clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Muestra un diálogo para seleccionar entre varios clientes
      */
@@ -356,13 +387,6 @@ public class NuevaVentaController {
         mostrarExito("Cliente seleccionado: " + cliente.getNombreCompleto());
     }
     
-    /**
-     * Abre el formulario para crear un nuevo cliente
-     */
-    @FXML
-    private void nuevoCliente() {
-        mostrarInfo("Funcionalidad de nuevo cliente en desarrollo.\nPor ahora use el módulo de Gestión de Clientes.");
-    }
     
     /**
      * Agrega un producto al carrito

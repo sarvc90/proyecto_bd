@@ -603,7 +603,519 @@ public class ConsultasReportesController {
 
         btnExportar.setDisable(false);
     }
-    
+
+    // ==================== REPORTES SOLICITADOS ====================
+
+    /**
+     * REPORTE: Total de ventas durante un mes determinado
+     */
+    @FXML
+    private void reporteVentasMes() {
+        lblTituloResultado.setText("📄 Reporte: Ventas por Mes");
+        limpiarTabla();
+
+        // Solicitar mes y año
+        TextInputDialog dialogMes = new TextInputDialog("1");
+        dialogMes.setTitle("Seleccionar Mes");
+        dialogMes.setHeaderText("Ingrese el mes (1-12)");
+        dialogMes.setContentText("Mes:");
+
+        Optional<String> resultMes = dialogMes.showAndWait();
+        if (!resultMes.isPresent()) return;
+
+        TextInputDialog dialogAnio = new TextInputDialog(String.valueOf(java.time.Year.now().getValue()));
+        dialogAnio.setTitle("Seleccionar Año");
+        dialogAnio.setHeaderText("Ingrese el año");
+        dialogAnio.setContentText("Año:");
+
+        Optional<String> resultAnio = dialogAnio.showAndWait();
+        if (!resultAnio.isPresent()) return;
+
+        try {
+            int mes = Integer.parseInt(resultMes.get());
+            int anio = Integer.parseInt(resultAnio.get());
+
+            if (mes < 1 || mes > 12) {
+                mostrarError("El mes debe estar entre 1 y 12");
+                return;
+            }
+
+            List<Venta> todasVentas = ventaDAO.obtenerTodas();
+            ObservableList<Map<String, Object>> datos = FXCollections.observableArrayList();
+
+            double totalSubtotal = 0, totalIVA = 0, totalVentas = 0;
+            int cantidadVentas = 0;
+
+            Calendar cal = Calendar.getInstance();
+            for (Venta v : todasVentas) {
+                cal.setTime(v.getFechaVenta());
+                int ventaMes = cal.get(Calendar.MONTH) + 1;
+                int ventaAnio = cal.get(Calendar.YEAR);
+
+                if (ventaMes == mes && ventaAnio == anio) {
+                    Map<String, Object> fila = new HashMap<>();
+                    fila.put("Código", v.getCodigo());
+                    fila.put("Fecha", new java.text.SimpleDateFormat("dd/MM/yyyy").format(v.getFechaVenta()));
+                    fila.put("Cliente", v.getIdCliente());
+                    fila.put("Tipo", v.isEsCredito() ? "Crédito" : "Contado");
+                    fila.put("Subtotal", formatoMoneda.format(v.getSubtotal()));
+                    fila.put("IVA", formatoMoneda.format(v.getIvaTotal()));
+                    fila.put("Total", formatoMoneda.format(v.getTotal()));
+                    datos.add(fila);
+
+                    totalSubtotal += v.getSubtotal();
+                    totalIVA += v.getIvaTotal();
+                    totalVentas += v.getTotal();
+                    cantidadVentas++;
+                }
+            }
+
+            // Totales
+            Map<String, Object> totales = new HashMap<>();
+            totales.put("Código", "═══ TOTAL ═══");
+            totales.put("Fecha", "");
+            totales.put("Cliente", "");
+            totales.put("Tipo", cantidadVentas + " ventas");
+            totales.put("Subtotal", formatoMoneda.format(totalSubtotal));
+            totales.put("IVA", formatoMoneda.format(totalIVA));
+            totales.put("Total", formatoMoneda.format(totalVentas));
+            datos.add(totales);
+
+            String nombreMes = new java.text.DateFormatSymbols().getMonths()[mes - 1];
+            mostrarResultados(datos);
+            mostrarResumen("═══ VENTAS DE " + nombreMes.toUpperCase() + " " + anio + " ═══\n\n" +
+                          "Cantidad de ventas: " + cantidadVentas + "\n\n" +
+                          "Subtotal: " + formatoMoneda.format(totalSubtotal) + "\n" +
+                          "IVA (12%): " + formatoMoneda.format(totalIVA) + "\n" +
+                          "TOTAL: " + formatoMoneda.format(totalVentas) + "\n\n" +
+                          "Promedio por venta:\n" +
+                          formatoMoneda.format(cantidadVentas > 0 ? totalVentas / cantidadVentas : 0));
+
+            btnExportar.setDisable(false);
+            if (btnExportarPDF != null) btnExportarPDF.setDisable(false);
+
+        } catch (NumberFormatException e) {
+            mostrarError("Mes y año deben ser números válidos");
+        }
+    }
+
+    /**
+     * REPORTE: IVA a pagar a la DIAN durante un trimestre
+     */
+    @FXML
+    private void reporteIVATrimestre() {
+        lblTituloResultado.setText("📄 Reporte: IVA por Trimestre");
+        limpiarTabla();
+
+        // Solicitar trimestre y año
+        ChoiceDialog<String> dialogTrimestre = new ChoiceDialog<>("1", "1", "2", "3", "4");
+        dialogTrimestre.setTitle("Seleccionar Trimestre");
+        dialogTrimestre.setHeaderText("Seleccione el trimestre (1-4)");
+        dialogTrimestre.setContentText("Trimestre:");
+
+        Optional<String> resultTrimestre = dialogTrimestre.showAndWait();
+        if (!resultTrimestre.isPresent()) return;
+
+        TextInputDialog dialogAnio = new TextInputDialog(String.valueOf(java.time.Year.now().getValue()));
+        dialogAnio.setTitle("Seleccionar Año");
+        dialogAnio.setHeaderText("Ingrese el año");
+        dialogAnio.setContentText("Año:");
+
+        Optional<String> resultAnio = dialogAnio.showAndWait();
+        if (!resultAnio.isPresent()) return;
+
+        try {
+            int trimestre = Integer.parseInt(resultTrimestre.get());
+            int anio = Integer.parseInt(resultAnio.get());
+
+            int mesInicio = (trimestre - 1) * 3 + 1;
+            int mesFin = trimestre * 3;
+
+            List<Venta> todasVentas = ventaDAO.obtenerTodas();
+            ObservableList<Map<String, Object>> datos = FXCollections.observableArrayList();
+
+            double totalIVA = 0, totalSubtotal = 0, totalVentas = 0;
+            int cantidadVentas = 0;
+
+            // Datos por mes
+            Map<Integer, Double> ivaPorMes = new TreeMap<>();
+            Map<Integer, Integer> ventasPorMes = new TreeMap<>();
+
+            Calendar cal = Calendar.getInstance();
+            for (Venta v : todasVentas) {
+                cal.setTime(v.getFechaVenta());
+                int ventaMes = cal.get(Calendar.MONTH) + 1;
+                int ventaAnio = cal.get(Calendar.YEAR);
+
+                if (ventaAnio == anio && ventaMes >= mesInicio && ventaMes <= mesFin) {
+                    Map<String, Object> fila = new HashMap<>();
+                    fila.put("Código", v.getCodigo());
+                    fila.put("Fecha", new java.text.SimpleDateFormat("dd/MM/yyyy").format(v.getFechaVenta()));
+                    fila.put("Base Imponible", formatoMoneda.format(v.getSubtotal()));
+                    fila.put("IVA (12%)", formatoMoneda.format(v.getIvaTotal()));
+                    fila.put("Total Facturado", formatoMoneda.format(v.getTotal()));
+                    datos.add(fila);
+
+                    totalSubtotal += v.getSubtotal();
+                    totalIVA += v.getIvaTotal();
+                    totalVentas += v.getTotal();
+                    cantidadVentas++;
+
+                    ivaPorMes.put(ventaMes, ivaPorMes.getOrDefault(ventaMes, 0.0) + v.getIvaTotal());
+                    ventasPorMes.put(ventaMes, ventasPorMes.getOrDefault(ventaMes, 0) + 1);
+                }
+            }
+
+            // Totales
+            Map<String, Object> totales = new HashMap<>();
+            totales.put("Código", "═══ TOTAL ═══");
+            totales.put("Fecha", cantidadVentas + " ventas");
+            totales.put("Base Imponible", formatoMoneda.format(totalSubtotal));
+            totales.put("IVA (12%)", formatoMoneda.format(totalIVA));
+            totales.put("Total Facturado", formatoMoneda.format(totalVentas));
+            datos.add(totales);
+
+            StringBuilder resumen = new StringBuilder("═══ IVA TRIMESTRE " + trimestre + " - " + anio + " ═══\n\n");
+            resumen.append("Periodo: Meses ").append(mesInicio).append(" - ").append(mesFin).append("\n\n");
+            resumen.append("Desglose mensual:\n");
+
+            String[] nombresMeses = new java.text.DateFormatSymbols().getMonths();
+            for (Map.Entry<Integer, Double> entry : ivaPorMes.entrySet()) {
+                resumen.append("• ").append(nombresMeses[entry.getKey() - 1]).append(": ")
+                       .append(formatoMoneda.format(entry.getValue()))
+                       .append(" (").append(ventasPorMes.get(entry.getKey())).append(" ventas)\n");
+            }
+
+            resumen.append("\n═══════════════════\n");
+            resumen.append("Total ventas: ").append(cantidadVentas).append("\n");
+            resumen.append("Base Imponible: ").append(formatoMoneda.format(totalSubtotal)).append("\n\n");
+            resumen.append("IVA A PAGAR A LA DIAN:\n");
+            resumen.append(formatoMoneda.format(totalIVA));
+
+            mostrarResultados(datos);
+            mostrarResumen(resumen.toString());
+
+            // Crear gráfica de barras por mes
+            Map<String, Number> datosGrafica = new LinkedHashMap<>();
+            for (Map.Entry<Integer, Double> entry : ivaPorMes.entrySet()) {
+                datosGrafica.put(nombresMeses[entry.getKey() - 1], entry.getValue());
+            }
+            JFreeChart grafica = PDFExporter.crearGraficaBarras(
+                "IVA por Mes - Trimestre " + trimestre,
+                "Mes",
+                "IVA (COP)",
+                datosGrafica
+            );
+            mostrarGrafica(grafica);
+
+            btnExportar.setDisable(false);
+            if (btnExportarPDF != null) btnExportarPDF.setDisable(false);
+
+        } catch (NumberFormatException e) {
+            mostrarError("Datos inválidos");
+        }
+    }
+
+    /**
+     * CONSULTA: Cantidad de ventas a crédito vs contado en un periodo
+     */
+    @FXML
+    private void consultaTiposVentaPeriodo() {
+        lblTituloResultado.setText("📋 Consulta: Ventas Crédito vs Contado por Periodo");
+        limpiarTabla();
+
+        // Solicitar tipo de venta a filtrar
+        ChoiceDialog<String> dialogTipo = new ChoiceDialog<>("Ambos", "Ambos", "Solo Crédito", "Solo Contado");
+        dialogTipo.setTitle("Tipo de Venta");
+        dialogTipo.setHeaderText("Seleccione el tipo de venta a consultar");
+        dialogTipo.setContentText("Tipo:");
+
+        Optional<String> resultTipo = dialogTipo.showAndWait();
+        if (!resultTipo.isPresent()) return;
+
+        String tipoSeleccionado = resultTipo.get();
+
+        // Solicitar fechas
+        TextInputDialog dialogInicio = new TextInputDialog("01/01/2025");
+        dialogInicio.setTitle("Fecha Inicio");
+        dialogInicio.setHeaderText("Ingrese la fecha de inicio");
+        dialogInicio.setContentText("Fecha (dd/MM/yyyy):");
+
+        Optional<String> resultInicio = dialogInicio.showAndWait();
+        if (!resultInicio.isPresent()) return;
+
+        TextInputDialog dialogFin = new TextInputDialog("31/12/2025");
+        dialogFin.setTitle("Fecha Fin");
+        dialogFin.setHeaderText("Ingrese la fecha de fin");
+        dialogFin.setContentText("Fecha (dd/MM/yyyy):");
+
+        Optional<String> resultFin = dialogFin.showAndWait();
+        if (!resultFin.isPresent()) return;
+
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
+            java.util.Date fechaInicio = sdf.parse(resultInicio.get());
+            java.util.Date fechaFin = sdf.parse(resultFin.get());
+
+            List<Venta> todasVentas = ventaDAO.obtenerTodas();
+            ObservableList<Map<String, Object>> datos = FXCollections.observableArrayList();
+
+            int ventasCredito = 0, ventasContado = 0;
+            double totalCredito = 0, totalContado = 0;
+
+            for (Venta v : todasVentas) {
+                if (!v.getFechaVenta().before(fechaInicio) && !v.getFechaVenta().after(fechaFin)) {
+                    // Aplicar filtro según el tipo seleccionado
+                    boolean incluir = false;
+                    if (tipoSeleccionado.equals("Ambos")) {
+                        incluir = true;
+                    } else if (tipoSeleccionado.equals("Solo Crédito") && v.isEsCredito()) {
+                        incluir = true;
+                    } else if (tipoSeleccionado.equals("Solo Contado") && !v.isEsCredito()) {
+                        incluir = true;
+                    }
+
+                    if (incluir) {
+                        Map<String, Object> fila = new HashMap<>();
+                        fila.put("Código", v.getCodigo());
+                        fila.put("Fecha", sdf.format(v.getFechaVenta()));
+                        fila.put("Tipo", v.isEsCredito() ? "CRÉDITO" : "CONTADO");
+                        fila.put("Total", formatoMoneda.format(v.getTotal()));
+                        datos.add(fila);
+                    }
+
+                    // Contabilizar para el resumen (siempre contar todo)
+                    if (v.isEsCredito()) {
+                        ventasCredito++;
+                        totalCredito += v.getTotal();
+                    } else {
+                        ventasContado++;
+                        totalContado += v.getTotal();
+                    }
+                }
+            }
+
+            int totalVentas = ventasCredito + ventasContado;
+            double porcentajeCredito = totalVentas > 0 ? (ventasCredito * 100.0 / totalVentas) : 0;
+            double porcentajeContado = totalVentas > 0 ? (ventasContado * 100.0 / totalVentas) : 0;
+
+            mostrarResultados(datos);
+
+            // Generar resumen según el filtro seleccionado
+            String resumen = "═══ ANÁLISIS DE TIPOS DE VENTA ═══\n\n" +
+                           "Filtro: " + tipoSeleccionado + "\n" +
+                           "Periodo: " + sdf.format(fechaInicio) + " - " + sdf.format(fechaFin) + "\n\n";
+
+            if (tipoSeleccionado.equals("Ambos") || tipoSeleccionado.equals("Solo Crédito")) {
+                resumen += "VENTAS A CRÉDITO:\n" +
+                          "• Cantidad: " + ventasCredito + " (" + String.format("%.1f%%", porcentajeCredito) + ")\n" +
+                          "• Monto: " + formatoMoneda.format(totalCredito) + "\n\n";
+            }
+
+            if (tipoSeleccionado.equals("Ambos") || tipoSeleccionado.equals("Solo Contado")) {
+                resumen += "VENTAS DE CONTADO:\n" +
+                          "• Cantidad: " + ventasContado + " (" + String.format("%.1f%%", porcentajeContado) + ")\n" +
+                          "• Monto: " + formatoMoneda.format(totalContado) + "\n\n";
+            }
+
+            if (tipoSeleccionado.equals("Ambos")) {
+                resumen += "═══════════════════\n" +
+                          "Total ventas: " + totalVentas + "\n" +
+                          "Total facturado: " + formatoMoneda.format(totalCredito + totalContado);
+            }
+
+            mostrarResumen(resumen);
+
+            // Crear gráfica de pastel solo si se muestran ambos
+            if (tipoSeleccionado.equals("Ambos") && totalVentas > 0) {
+                Map<String, Number> datosGrafica = new LinkedHashMap<>();
+                datosGrafica.put("Crédito (" + ventasCredito + ")", ventasCredito);
+                datosGrafica.put("Contado (" + ventasContado + ")", ventasContado);
+                JFreeChart grafica = PDFExporter.crearGraficaPastel(
+                    "Distribución de Ventas",
+                    datosGrafica
+                );
+                mostrarGrafica(grafica);
+            }
+
+            btnExportar.setDisable(false);
+            if (btnExportarPDF != null) btnExportarPDF.setDisable(false);
+
+        } catch (java.text.ParseException e) {
+            mostrarError("Formato de fecha inválido. Use dd/MM/yyyy");
+        }
+    }
+
+    /**
+     * REPORTE: Inventario de productos por categoría con costo
+     */
+    @FXML
+    private void reporteInventarioPorCategoria() {
+        lblTituloResultado.setText("📄 Reporte: Inventario por Categoría con Costo");
+        limpiarTabla();
+
+        List<Producto> productos = productoDAO.obtenerTodos();
+        List<Categoria> categorias = categoriaDAO.obtenerTodas();
+
+        ObservableList<Map<String, Object>> datos = FXCollections.observableArrayList();
+        Map<String, Double> costoTotalPorCategoria = new HashMap<>();
+        Map<String, Integer> cantidadPorCategoria = new HashMap<>();
+
+        for (Producto p : productos) {
+            Categoria cat = categoriaDAO.obtenerPorId(p.getIdCategoria());
+            String nombreCategoria = cat != null ? cat.getNombre() : "Sin categoría";
+
+            Map<String, Object> fila = new HashMap<>();
+            fila.put("Categoría", nombreCategoria);
+            fila.put("Código", p.getCodigo());
+            fila.put("Producto", p.getNombre());
+            fila.put("Stock", String.valueOf(p.getStockActual()));
+            fila.put("Costo Unitario", formatoMoneda.format(p.getPrecioCompra()));
+            double costoTotal = p.getStockActual() * p.getPrecioCompra();
+            fila.put("Costo Total", formatoMoneda.format(costoTotal));
+            fila.put("Precio Venta", formatoMoneda.format(p.getPrecioVenta()));
+            datos.add(fila);
+
+            costoTotalPorCategoria.put(nombreCategoria,
+                costoTotalPorCategoria.getOrDefault(nombreCategoria, 0.0) + costoTotal);
+            cantidadPorCategoria.put(nombreCategoria,
+                cantidadPorCategoria.getOrDefault(nombreCategoria, 0) + p.getStockActual());
+        }
+
+        mostrarResultados(datos);
+
+        StringBuilder resumen = new StringBuilder("═══ INVENTARIO POR CATEGORÍA ═══\n\n");
+        double costoTotalGeneral = 0;
+        int stockTotalGeneral = 0;
+
+        for (Map.Entry<String, Double> entry : costoTotalPorCategoria.entrySet()) {
+            String categoria = entry.getKey();
+            double costo = entry.getValue();
+            int cantidad = cantidadPorCategoria.get(categoria);
+
+            resumen.append("• ").append(categoria).append(":\n");
+            resumen.append("  Stock: ").append(cantidad).append(" unidades\n");
+            resumen.append("  Costo: ").append(formatoMoneda.format(costo)).append("\n\n");
+
+            costoTotalGeneral += costo;
+            stockTotalGeneral += cantidad;
+        }
+
+        resumen.append("═══════════════════\n");
+        resumen.append("Stock total: ").append(stockTotalGeneral).append(" unidades\n");
+        resumen.append("COSTO TOTAL INVENTARIO:\n");
+        resumen.append(formatoMoneda.format(costoTotalGeneral));
+
+        mostrarResumen(resumen.toString());
+
+        // Crear gráfica de barras
+        Map<String, Number> datosGrafica = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> entry : costoTotalPorCategoria.entrySet()) {
+            datosGrafica.put(entry.getKey(), entry.getValue());
+        }
+        JFreeChart grafica = PDFExporter.crearGraficaBarras(
+            "Costo de Inventario por Categoría",
+            "Categoría",
+            "Costo (COP)",
+            datosGrafica
+        );
+        mostrarGrafica(grafica);
+
+        btnExportar.setDisable(false);
+        if (btnExportarPDF != null) btnExportarPDF.setDisable(false);
+    }
+
+    /**
+     * REPORTE: Clientes morosos (atrasados en sus cuotas)
+     */
+    @FXML
+    private void reporteClientesMorosos() {
+        lblTituloResultado.setText("📄 Reporte: Clientes Morosos");
+        limpiarTabla();
+
+        List<Cliente> clientes = clienteDAO.obtenerTodos();
+        List<Credito> creditos = creditoDAO.obtenerTodos();
+        CuotaDAO cuotaDAO = CuotaDAO.getInstance();
+
+        ObservableList<Map<String, Object>> datos = FXCollections.observableArrayList();
+
+        int clientesMorosos = 0;
+        double totalDeudaMorosa = 0;
+        java.util.Date hoy = new java.util.Date();
+
+        for (Cliente cliente : clientes) {
+            // Buscar créditos activos del cliente
+            for (Credito credito : creditos) {
+                if (credito.getIdCliente() == cliente.getIdCliente() && "Activo".equals(credito.getEstado())) {
+                    // Obtener cuotas del crédito
+                    List<Cuota> cuotas = cuotaDAO.obtenerPorCredito(credito.getIdCredito());
+
+                    int cuotasVencidas = 0;
+                    double montoVencido = 0;
+
+                    for (Cuota cuota : cuotas) {
+                        if (!cuota.isPagada() && cuota.getFechaVencimiento().before(hoy)) {
+                            cuotasVencidas++;
+                            montoVencido += cuota.getValor();
+                        }
+                    }
+
+                    if (cuotasVencidas > 0) {
+                        Map<String, Object> fila = new HashMap<>();
+                        fila.put("Cliente", cliente.getNombreCompleto());
+                        fila.put("Cédula", cliente.getCedula());
+                        fila.put("Teléfono", cliente.getTelefono());
+                        fila.put("Crédito", "CRD-" + credito.getIdCredito());
+                        fila.put("Cuotas Vencidas", String.valueOf(cuotasVencidas));
+                        fila.put("Monto Vencido", formatoMoneda.format(montoVencido));
+                        fila.put("Días Atraso", calcularDiasAtraso(cuotas, hoy));
+                        datos.add(fila);
+
+                        clientesMorosos++;
+                        totalDeudaMorosa += montoVencido;
+                    }
+                }
+            }
+        }
+
+        if (datos.isEmpty()) {
+            mostrarAdvertencia("Sin Morosos", "No hay clientes con cuotas vencidas actualmente");
+            return;
+        }
+
+        mostrarResultados(datos);
+        mostrarResumen("═══ CLIENTES MOROSOS ═══\n\n" +
+                      "Total clientes morosos: " + clientesMorosos + "\n\n" +
+                      "Monto total vencido:\n" +
+                      formatoMoneda.format(totalDeudaMorosa) + "\n\n" +
+                      "═══════════════════\n" +
+                      "Promedio deuda por cliente:\n" +
+                      formatoMoneda.format(clientesMorosos > 0 ? totalDeudaMorosa / clientesMorosos : 0) + "\n\n" +
+                      "ACCIÓN REQUERIDA:\n" +
+                      "Contactar a clientes para\n" +
+                      "regularizar pagos atrasados");
+
+        btnExportar.setDisable(false);
+        if (btnExportarPDF != null) btnExportarPDF.setDisable(false);
+    }
+
+    /**
+     * Calcula los días de atraso máximo de las cuotas vencidas
+     */
+    private String calcularDiasAtraso(List<Cuota> cuotas, java.util.Date hoy) {
+        long maxDiasAtraso = 0;
+        for (Cuota cuota : cuotas) {
+            if (!cuota.isPagada() && cuota.getFechaVencimiento().before(hoy)) {
+                long diff = hoy.getTime() - cuota.getFechaVencimiento().getTime();
+                long dias = diff / (1000 * 60 * 60 * 24);
+                if (dias > maxDiasAtraso) {
+                    maxDiasAtraso = dias;
+                }
+            }
+        }
+        return String.valueOf(maxDiasAtraso) + " días";
+    }
+
     // ==================== MÉTODOS AUXILIARES ====================
     
     /**

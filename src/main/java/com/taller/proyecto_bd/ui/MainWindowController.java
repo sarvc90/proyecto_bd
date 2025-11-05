@@ -490,7 +490,7 @@ public class MainWindowController {
     private void abrirConsultasReportes() {
         actualizarEstado("Abriendo módulo de Consultas y Reportes...");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Consultas.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ConsultasReportes.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
@@ -619,6 +619,29 @@ public class MainWindowController {
             registrarAccion("ABRIR_BITACORA", "Auditoria", "Abrió la bitácora de auditoría");
         } catch (IOException e) {
             mostrarError("Error al abrir bitácora: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void abrirAyuda() {
+        actualizarEstado("Abriendo centro de ayuda...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/Ayuda.fxml"));
+            System.out.println("Cargando desde: " + getClass().getResource("/vista/Ayuda.fxml"));
+
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Centro de Ayuda - Sistema de Gestión de Electrodomésticos");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.show();
+
+            // Registrar en auditoría
+            registrarAccion("ABRIR_AYUDA", "Ayuda", "Abrió el centro de ayuda del sistema");
+        } catch (IOException e) {
+            mostrarError("Error al abrir centro de ayuda: " + e.getMessage());
             e.printStackTrace();
         }
     }

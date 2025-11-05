@@ -103,10 +103,8 @@
                <!-- Menú: Ayuda -->
                <Menu mnemonicParsing="false" text="Ayuda">
                   <items>
-                     <MenuItem mnemonicParsing="false" onAction="#abrirAcercaDe" 
-                               text="Acerca de" />
-                     <MenuItem mnemonicParsing="false" onAction="#abrirManual" 
-                               text="Manual de Usuario" />
+                     <MenuItem mnemonicParsing="false" onAction="#abrirAyuda"
+                               text="Centro de Ayuda" />
                   </items>
                </Menu>
             </menus>
