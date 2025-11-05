@@ -29,9 +29,7 @@
                                onAction="#abrirClientes" text="Clientes" />
                      <MenuItem fx:id="menuItemInventario" mnemonicParsing="false" 
                                onAction="#abrirInventario" text="Inventario" />
-                     <SeparatorMenuItem />
-                     <MenuItem fx:id="menuItemUsuarios" mnemonicParsing="false" 
-                               onAction="#abrirUsuarios" text="Usuarios (Admin)" />
+                     
                   </items>
                </Menu>
                
