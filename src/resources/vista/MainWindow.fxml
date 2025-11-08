@@ -21,15 +21,17 @@
                <!-- Menú: Entidades -->
                <Menu fx:id="menuEntidades" mnemonicParsing="false" text="Entidades">
                   <items>
-                     <MenuItem fx:id="menuItemCategorias" mnemonicParsing="false" 
+                     <MenuItem fx:id="menuItemCategorias" mnemonicParsing="false"
                                onAction="#abrirCategorias" text="Categorías" />
-                     <MenuItem fx:id="menuItemProductos" mnemonicParsing="false" 
+                     <MenuItem fx:id="menuItemProductos" mnemonicParsing="false"
                                onAction="#abrirProductos" text="Productos" />
-                     <MenuItem fx:id="menuItemClientes" mnemonicParsing="false" 
+                     <MenuItem fx:id="menuItemClientes" mnemonicParsing="false"
                                onAction="#abrirClientes" text="Clientes" />
-                     <MenuItem fx:id="menuItemInventario" mnemonicParsing="false" 
+                     <MenuItem fx:id="menuItemInventario" mnemonicParsing="false"
                                onAction="#abrirInventario" text="Inventario" />
-                     
+                     <SeparatorMenuItem />
+                     <MenuItem fx:id="menuItemUsuarios" mnemonicParsing="false"
+                               onAction="#abrirUsuarios" text="Usuarios (Admin)" />
                   </items>
                </Menu>
                

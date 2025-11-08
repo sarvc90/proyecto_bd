@@ -47,6 +47,8 @@ public class ClientesController {
     @FXML
     private TextField txtSaldoPendiente;
     @FXML
+    private PasswordField txtPassword;  // Campo opcional para contraseña
+    @FXML
     private Label lblCreditoDisponible;
     @FXML
     private CheckBox chkActivo;
@@ -316,6 +318,11 @@ public class ClientesController {
             cliente.setLimiteCredito(Double.parseDouble(txtLimiteCredito.getText()));
             cliente.setActivo(chkActivo.isSelected());
 
+            // Asignar contraseña si se proporcionó (opcional)
+            if (txtPassword != null && !txtPassword.getText().trim().isEmpty()) {
+                cliente.setPassword(txtPassword.getText()); // El setter encripta automáticamente
+            }
+
             // El saldo pendiente solo se modifica en transacciones, no manualmente
             if (esNuevo) {
                 cliente.setSaldoPendiente(0.0);
@@ -489,6 +496,9 @@ public class ClientesController {
         txtEmail.clear();
         txtLimiteCredito.setText("0.00");
         txtSaldoPendiente.setText("0.00");
+        if (txtPassword != null) {
+            txtPassword.clear();  // Limpiar campo de contraseña
+        }
         lblCreditoDisponible.setText(formatoMoneda.format(0));
         chkActivo.setSelected(true);
         tablaClientes.getSelectionModel().clearSelection();

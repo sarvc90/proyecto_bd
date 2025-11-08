@@ -4,9 +4,11 @@ package com.taller.proyecto_bd.ui;
 
 import com.taller.proyecto_bd.dao.ProductoDAO;
 import com.taller.proyecto_bd.dao.CategoriaDAO;
+import com.taller.proyecto_bd.dao.InventarioDAO;
 import com.taller.proyecto_bd.models.Producto;
 import com.taller.proyecto_bd.models.SessionManager;
 import com.taller.proyecto_bd.models.Categoria;
+import com.taller.proyecto_bd.models.Inventario;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -66,6 +68,7 @@ public class ProductosController {
     // ==================== ATRIBUTOS ====================
     private ProductoDAO productoDAO;
     private CategoriaDAO categoriaDAO;
+    private InventarioDAO inventarioDAO;
     private ObservableList<Producto> listaProductos;
     private Producto productoSeleccionado;
     private NumberFormat formatoMoneda;
@@ -77,9 +80,10 @@ public class ProductosController {
     public void initialize() {
         productoDAO = ProductoDAO.getInstance();
         categoriaDAO = CategoriaDAO.getInstance();
+        inventarioDAO = InventarioDAO.getInstance();
         listaProductos = FXCollections.observableArrayList();
         formatoMoneda = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
-        
+
         configurarTabla();
         cargarCategorias();
         cargarProductos();
@@ -327,13 +331,51 @@ public class ProductosController {
             boolean exito;
             if (esNuevo) {
                 exito = productoDAO.agregar(producto);
+
+                // Si se guardó exitosamente, crear el inventario automáticamente
+                if (exito && producto.getIdProducto() > 0) {
+                    System.out.println("DEBUG: Creando inventario para producto ID: " + producto.getIdProducto());
+
+                    Inventario inventario = new Inventario();
+                    inventario.setIdProducto(producto.getIdProducto());
+                    inventario.setCantidadActual(producto.getStockActual());
+                    inventario.setStockMinimo(producto.getStockMinimo());
+                    inventario.setStockMaximo(producto.getStockMaximo());
+
+                    boolean inventarioCreado = inventarioDAO.agregar(inventario);
+                    if (inventarioCreado) {
+                        System.out.println("DEBUG: Inventario creado exitosamente para producto: " + producto.getNombre());
+                    } else {
+                        System.err.println("ADVERTENCIA: El producto se guardó pero no se pudo crear el inventario");
+                    }
+                }
             } else {
                 exito = productoDAO.actualizar(producto);
+
+                // Si se actualizó el producto, actualizar también el inventario
+                if (exito) {
+                    Inventario inventarioExistente = inventarioDAO.obtenerPorProducto(producto.getIdProducto());
+                    if (inventarioExistente != null) {
+                        inventarioExistente.setCantidadActual(producto.getStockActual());
+                        inventarioExistente.setStockMinimo(producto.getStockMinimo());
+                        inventarioExistente.setStockMaximo(producto.getStockMaximo());
+                        inventarioDAO.actualizar(inventarioExistente);
+                    } else {
+                        // Si no existe inventario, crearlo
+                        System.out.println("DEBUG: Producto sin inventario detectado. Creando inventario...");
+                        Inventario nuevoInventario = new Inventario();
+                        nuevoInventario.setIdProducto(producto.getIdProducto());
+                        nuevoInventario.setCantidadActual(producto.getStockActual());
+                        nuevoInventario.setStockMinimo(producto.getStockMinimo());
+                        nuevoInventario.setStockMaximo(producto.getStockMaximo());
+                        inventarioDAO.agregar(nuevoInventario);
+                    }
+                }
             }
-            
+
             if (exito) {
-                mostrarMensajeExito(esNuevo ? "Producto guardado exitosamente" : 
-                                             "Producto actualizado exitosamente");
+                mostrarMensajeExito(esNuevo ? "Producto e inventario guardados exitosamente" :
+                                             "Producto e inventario actualizados exitosamente");
                 cargarProductos();
                 limpiarCampos();
                 productoSeleccionado = null;
@@ -351,6 +393,7 @@ public class ProductosController {
     
     /**
      * Elimina el producto seleccionado
+     * Si el producto tiene ventas asociadas, ofrece marcarlo como inactivo en su lugar
      */
     @FXML
     private void eliminar() {
@@ -358,24 +401,60 @@ public class ProductosController {
             mostrarMensajeError("Debe seleccionar un producto para eliminar");
             return;
         }
-        
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Confirmar eliminación");
-        confirmacion.setHeaderText("¿Está seguro que desea eliminar este producto?");
-        confirmacion.setContentText(productoSeleccionado.getNombreCompleto());
-        
-        Optional<ButtonType> resultado = confirmacion.showAndWait();
-        
-        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
-            boolean exito = productoDAO.eliminar(productoSeleccionado.getIdProducto());
-            
-            if (exito) {
-                mostrarMensajeExito("Producto eliminado exitosamente");
-                cargarProductos();
-                limpiarCampos();
-                productoSeleccionado = null;
-            } else {
-                mostrarMensajeError("Error al eliminar el producto");
+
+        // Verificar si tiene ventas asociadas
+        boolean tieneVentas = productoDAO.tieneVentasAsociadas(productoSeleccionado.getIdProducto());
+
+        if (tieneVentas) {
+            // Si tiene ventas, ofrecer marcar como inactivo
+            Alert alerta = new Alert(Alert.AlertType.WARNING);
+            alerta.setTitle("No se puede eliminar");
+            alerta.setHeaderText("El producto tiene ventas asociadas");
+            alerta.setContentText("Este producto no puede ser eliminado porque ya tiene ventas registradas.\n\n" +
+                    "¿Desea marcarlo como INACTIVO en su lugar?\n\n" +
+                    "Producto: " + productoSeleccionado.getNombreCompleto());
+
+            ButtonType btnInactivar = new ButtonType("Marcar como Inactivo");
+            ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alerta.getButtonTypes().setAll(btnInactivar, btnCancelar);
+
+            Optional<ButtonType> resultado = alerta.showAndWait();
+
+            if (resultado.isPresent() && resultado.get() == btnInactivar) {
+                // Marcar como inactivo
+                productoSeleccionado.setActivo(false);
+                boolean exito = productoDAO.actualizar(productoSeleccionado);
+
+                if (exito) {
+                    mostrarMensajeExito("Producto marcado como inactivo exitosamente");
+                    cargarProductos();
+                    limpiarCampos();
+                    productoSeleccionado = null;
+                } else {
+                    mostrarMensajeError("Error al actualizar el producto");
+                }
+            }
+        } else {
+            // Si NO tiene ventas, se puede eliminar permanentemente
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmacion.setTitle("Confirmar eliminación");
+            confirmacion.setHeaderText("¿Está seguro que desea eliminar este producto?");
+            confirmacion.setContentText("Esta acción NO se puede deshacer.\n\n" +
+                    "Producto: " + productoSeleccionado.getNombreCompleto());
+
+            Optional<ButtonType> resultado = confirmacion.showAndWait();
+
+            if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+                boolean exito = productoDAO.eliminar(productoSeleccionado.getIdProducto());
+
+                if (exito) {
+                    mostrarMensajeExito("Producto eliminado exitosamente");
+                    cargarProductos();
+                    limpiarCampos();
+                    productoSeleccionado = null;
+                } else {
+                    mostrarMensajeError("Error al eliminar el producto. Verifique que no tenga dependencias.");
+                }
             }
         }
     }

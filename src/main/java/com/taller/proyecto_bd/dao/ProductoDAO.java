@@ -208,6 +208,8 @@ public class ProductoDAO {
 
     /**
      * Eliminar producto por ID
+     * IMPORTANTE: Solo se puede eliminar si el producto NO tiene ventas asociadas.
+     * Si tiene ventas, se debe marcar como inactivo en su lugar.
      */
     public boolean eliminar(int id) {
         String sql = "DELETE FROM Productos WHERE idProducto = ?";
@@ -222,7 +224,48 @@ public class ProductoDAO {
                 return stmt.executeUpdate() > 0;
             }
         } catch (SQLException e) {
-            System.err.println("Error al eliminar producto: " + e.getMessage());
+            System.err.println("========== ERROR AL ELIMINAR PRODUCTO ==========");
+            System.err.println("Mensaje: " + e.getMessage());
+            System.err.println("SQLState: " + e.getSQLState());
+            System.err.println("ErrorCode: " + e.getErrorCode());
+
+            // Detectar error de FK constraint (producto tiene ventas)
+            if (e.getMessage().contains("FK_DetalleVentas_Productos") ||
+                e.getMessage().contains("REFERENCE constraint") ||
+                e.getErrorCode() == 547) {
+                System.err.println("ERROR: No se puede eliminar el producto porque tiene ventas asociadas.");
+                System.err.println("SOLUCIÓN: Marque el producto como inactivo en su lugar.");
+            }
+
+            e.printStackTrace();
+            System.err.println("===============================================");
+        }
+        return false;
+    }
+
+    /**
+     * Verifica si un producto tiene ventas asociadas
+     * @param id ID del producto
+     * @return true si el producto tiene ventas, false si no
+     */
+    public boolean tieneVentasAsociadas(int id) {
+        String sql = "SELECT COUNT(*) AS total FROM DetalleVentas WHERE idProducto = ?";
+
+        try (Connection conn = ConexionBD.obtenerConexion()) {
+            if (conn == null) {
+                return false;
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, id);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("total") > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar ventas del producto: " + e.getMessage());
         }
         return false;
     }

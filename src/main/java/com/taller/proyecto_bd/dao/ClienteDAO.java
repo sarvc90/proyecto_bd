@@ -43,8 +43,8 @@ public class ClienteDAO {
             return false;
         }
 
-        String sql = "INSERT INTO Clientes (cedula, nombre, apellido, direccion, telefono, email, activo, limiteCredito, saldoPendiente) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Clientes (cedula, nombre, apellido, direccion, telefono, email, activo, limiteCredito, saldoPendiente, passwordHash) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -94,17 +94,34 @@ public class ClienteDAO {
                 stmt.setBigDecimal(8, limiteCredito);
                 stmt.setBigDecimal(9, saldoPendiente);
 
+                // passwordHash (puede ser NULL)
+                if (cliente.getPasswordHash() != null && !cliente.getPasswordHash().trim().isEmpty()) {
+                    stmt.setString(10, cliente.getPasswordHash());
+                } else {
+                    stmt.setNull(10, java.sql.Types.VARCHAR);
+                }
+
+                System.out.println("DEBUG ClienteDAO - Ejecutando SQL INSERT...");
                 int filas = stmt.executeUpdate();
+                System.out.println("DEBUG ClienteDAO - Filas insertadas: " + filas);
+
                 if (filas > 0) {
                     try (ResultSet rs = stmt.getGeneratedKeys()) {
                         if (rs.next()) {
                             cliente.setIdCliente(rs.getInt(1));
+                            System.out.println("DEBUG ClienteDAO - ID generado: " + cliente.getIdCliente());
                         }
                     }
+                    System.out.println("DEBUG ClienteDAO - Cliente insertado exitosamente!");
                     return true;
                 }
             }
         } catch (SQLException e) {
+            System.err.println("========== ERROR SQL EN ClienteDAO.agregar() ==========");
+            System.err.println("Mensaje: " + e.getMessage());
+            System.err.println("SQLState: " + e.getSQLState());
+            System.err.println("ErrorCode: " + e.getErrorCode());
+
             // Detectar error de email duplicado
             if (e.getMessage().contains("UX_Clientes_Email")) {
                 System.err.println("ERROR: Ya existe un cliente con el email: " + cliente.getEmail());
@@ -115,10 +132,19 @@ public class ClienteDAO {
                 System.err.println("ERROR: Ya existe un cliente con la cédula: " + cliente.getCedula());
                 System.err.println("Por favor verifique la cédula.");
             }
+            // Detectar error de columna inexistente
+            else if (e.getMessage().contains("Invalid column name") || e.getMessage().contains("passwordHash")) {
+                System.err.println("======================================================");
+                System.err.println("ERROR CRÍTICO: La columna 'passwordHash' NO EXISTE en la tabla Clientes");
+                System.err.println("SOLUCIÓN: Ejecuta el script 'db/alter_clientes_add_password.sql' en tu base de datos");
+                System.err.println("======================================================");
+            }
             else {
                 System.err.println("Error al insertar cliente: " + e.getMessage());
-                e.printStackTrace(); // Imprimir stack trace completo para debugging
             }
+
+            e.printStackTrace(); // Imprimir stack trace completo para debugging
+            System.err.println("======================================================");
         }
         return false;
     }
@@ -128,7 +154,7 @@ public class ClienteDAO {
      */
     public List<Cliente> obtenerTodos() {
         List<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente " +
+        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente, passwordHash " +
                      "FROM Clientes ORDER BY nombre, apellido";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -152,7 +178,7 @@ public class ClienteDAO {
      * Buscar cliente por ID
      */
     public Cliente obtenerPorId(int id) {
-        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente " +
+        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente, passwordHash " +
                      "FROM Clientes WHERE idCliente = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -182,7 +208,7 @@ public class ClienteDAO {
             return null;
         }
 
-        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente " +
+        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente, passwordHash " +
                      "FROM Clientes WHERE cedula = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -209,7 +235,7 @@ public class ClienteDAO {
      */
     public boolean actualizar(Cliente cliente) {
         String sql = "UPDATE Clientes SET cedula = ?, nombre = ?, apellido = ?, direccion = ?, telefono = ?, email = ?, " +
-                     "activo = ?, limiteCredito = ?, saldoPendiente = ? WHERE idCliente = ?";
+                     "activo = ?, limiteCredito = ?, saldoPendiente = ?, passwordHash = ? WHERE idCliente = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -227,7 +253,15 @@ public class ClienteDAO {
                 // Usar BigDecimal con escala de 2 decimales para NUMERIC(10,2)
                 stmt.setBigDecimal(8, java.math.BigDecimal.valueOf(cliente.getLimiteCredito()).setScale(2, java.math.RoundingMode.HALF_UP));
                 stmt.setBigDecimal(9, java.math.BigDecimal.valueOf(cliente.getSaldoPendiente()).setScale(2, java.math.RoundingMode.HALF_UP));
-                stmt.setInt(10, cliente.getIdCliente());
+
+                // passwordHash (puede ser NULL)
+                if (cliente.getPasswordHash() != null && !cliente.getPasswordHash().trim().isEmpty()) {
+                    stmt.setString(10, cliente.getPasswordHash());
+                } else {
+                    stmt.setNull(10, java.sql.Types.VARCHAR);
+                }
+
+                stmt.setInt(11, cliente.getIdCliente());
 
                 return stmt.executeUpdate() > 0;
             }
@@ -268,7 +302,7 @@ public class ClienteDAO {
      */
     public List<Cliente> obtenerActivos() {
         List<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente " +
+        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente, passwordHash " +
                      "FROM Clientes WHERE activo = 1 ORDER BY nombre, apellido";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -298,7 +332,7 @@ public class ClienteDAO {
         }
 
         String criterio = "%" + texto.trim().toLowerCase() + "%";
-        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente " +
+        String sql = "SELECT idCliente, cedula, nombre, apellido, direccion, telefono, email, fechaRegistro, activo, limiteCredito, saldoPendiente, passwordHash " +
                      "FROM Clientes WHERE LOWER(nombre) LIKE ? OR LOWER(apellido) LIKE ? OR LOWER(cedula) LIKE ? ORDER BY nombre, apellido";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
@@ -330,7 +364,7 @@ public class ClienteDAO {
     public List<Cliente> obtenerClientesMorosos() {
         List<Cliente> lista = new ArrayList<>();
         String sql = "SELECT DISTINCT c.idCliente, c.cedula, c.nombre, c.apellido, c.direccion, c.telefono, c.email, " +
-                     "c.fechaRegistro, c.activo, c.limiteCredito, c.saldoPendiente " +
+                     "c.fechaRegistro, c.activo, c.limiteCredito, c.saldoPendiente, c.passwordHash " +
                      "FROM Clientes c " +
                      "INNER JOIN Creditos cr ON c.idCliente = cr.idCliente " +
                      "INNER JOIN Cuotas cu ON cr.idVenta = cu.idVenta " +
@@ -368,7 +402,8 @@ public class ClienteDAO {
                 fechaRegistro != null ? new Date(fechaRegistro.getTime()) : null,
                 rs.getBoolean("activo"),
                 rs.getDouble("limiteCredito"),
-                rs.getDouble("saldoPendiente")
+                rs.getDouble("saldoPendiente"),
+                rs.getString("passwordHash")  // Puede ser NULL
         );
         return cliente;
     }

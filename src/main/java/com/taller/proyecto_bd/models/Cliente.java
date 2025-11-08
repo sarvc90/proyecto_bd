@@ -1,5 +1,6 @@
 package com.taller.proyecto_bd.models;
 
+import com.taller.proyecto_bd.utils.Encriptacion;
 import java.util.Date;
 
 /**
@@ -20,6 +21,7 @@ public class Cliente {
     private boolean activo;
     private double limiteCredito;
     private double saldoPendiente;
+    private String passwordHash;  // Contraseña hasheada (opcional, puede ser NULL)
 
     // ==================== CONSTRUCTORES ====================
 
@@ -53,7 +55,7 @@ public class Cliente {
     public Cliente(int idCliente, String cedula, String nombre, String apellido,
                    String direccion, String telefono, String email,
                    Date fechaRegistro, boolean activo, double limiteCredito,
-                   double saldoPendiente) {
+                   double saldoPendiente, String passwordHash) {
         this.idCliente = idCliente;
         this.cedula = cedula;
         this.nombre = nombre;
@@ -65,6 +67,7 @@ public class Cliente {
         this.activo = activo;
         this.limiteCredito = limiteCredito;
         this.saldoPendiente = saldoPendiente;
+        this.passwordHash = passwordHash;  // Puede ser NULL
     }
 
     // ==================== GETTERS ====================
@@ -111,6 +114,10 @@ public class Cliente {
 
     public double getSaldoPendiente() {
         return saldoPendiente;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
     // ==================== SETTERS ====================
@@ -173,6 +180,47 @@ public class Cliente {
         if (saldoPendiente >= 0) {
             this.saldoPendiente = saldoPendiente;
         }
+    }
+
+    /**
+     * Establece la contraseña del cliente (la encripta automáticamente)
+     * @param passwordPlana Contraseña en texto plano
+     */
+    public void setPassword(String passwordPlana) {
+        if (passwordPlana != null && !passwordPlana.trim().isEmpty()) {
+            this.passwordHash = Encriptacion.encriptarSHA256(passwordPlana);
+        } else {
+            this.passwordHash = null;  // Permite clientes sin contraseña
+        }
+    }
+
+    /**
+     * Establece el hash de contraseña directamente (para carga desde BD)
+     * @param passwordHash Hash de contraseña ya encriptado
+     */
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    /**
+     * Verifica si el cliente tiene contraseña configurada
+     * @return true si tiene contraseña, false si no
+     */
+    public boolean tienePassword() {
+        return passwordHash != null && !passwordHash.trim().isEmpty();
+    }
+
+    /**
+     * Valida la contraseña del cliente
+     * @param passwordPlana Contraseña en texto plano a validar
+     * @return true si la contraseña coincide, false si no
+     */
+    public boolean validarPassword(String passwordPlana) {
+        if (!tienePassword() || passwordPlana == null) {
+            return false;
+        }
+        String hashIngresado = Encriptacion.encriptarSHA256(passwordPlana);
+        return this.passwordHash.equalsIgnoreCase(hashIngresado);
     }
 
     // ==================== MÉTODOS ÚTILES ====================

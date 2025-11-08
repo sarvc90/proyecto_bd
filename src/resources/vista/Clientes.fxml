@@ -178,9 +178,31 @@
                                  </VBox>
                               </children>
                            </HBox>
-                           
+
+                           <!-- Campo: Contraseña (Opcional) -->
+                           <VBox spacing="5.0">
+                              <children>
+                                 <Label styleClass="field-label" text="Contraseña (Opcional)">
+                                    <font>
+                                       <Font name="System Bold" size="11.0" />
+                                    </font>
+                                 </Label>
+                                 <PasswordField fx:id="txtPassword" promptText="Dejar vacío si no desea asignar contraseña" styleClass="text-field-custom">
+                                    <font>
+                                       <Font size="12.0" />
+                                    </font>
+                                 </PasswordField>
+                                 <Label text="💡 Si asigna contraseña, el cliente podrá iniciar sesión con cédula y contraseña. Si no, usará su teléfono."
+                                        wrapText="true" textFill="#7f8c8d">
+                                    <font>
+                                       <Font size="10.0" />
+                                    </font>
+                                 </Label>
+                              </children>
+                           </VBox>
+
                            <Separator />
-                           
+
                            <!-- Sección de Crédito -->
                            <Label text="Información de Crédito" styleClass="panel-title">
                               <font>

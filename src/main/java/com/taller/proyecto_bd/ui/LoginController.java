@@ -155,13 +155,23 @@ public class LoginController {
     /**
      * Maneja el login de clientes
      */
-    private void handleLoginCliente(String cedula, String telefono) {
+    private void handleLoginCliente(String cedula, String password) {
         // Buscar cliente por cédula
         Cliente cliente = clienteDAO.obtenerPorCedula(cedula);
 
         if (cliente != null) {
-            // Verificar teléfono como "contraseña"
-            if (telefono.equals(cliente.getTelefono())) {
+            boolean autenticado = false;
+
+            // Verificar si el cliente tiene contraseña configurada
+            if (cliente.tienePassword()) {
+                // Cliente con contraseña: validar password
+                autenticado = cliente.validarPassword(password);
+            } else {
+                // Cliente SIN contraseña (creado por admin): usar teléfono como fallback
+                autenticado = password.equals(cliente.getTelefono());
+            }
+
+            if (autenticado) {
                 if (!cliente.isActivo()) {
                     mostrarError("Cliente inactivo. Contacte con la tienda.");
                     btnIngresar.setDisable(false);
@@ -188,15 +198,15 @@ public class LoginController {
                 abrirVentanaPrincipal(usuarioCliente);
 
             } else {
-                // Teléfono incorrecto
+                // Credenciales incorrectas
                 registrarAuditoriaClienteFallida(cedula);
-                mostrarError("Cédula o teléfono incorrectos");
+                mostrarError("Cédula o contraseña incorrectas");
                 btnIngresar.setDisable(false);
             }
         } else {
             // Cliente no encontrado
             registrarAuditoriaClienteFallida(cedula);
-            mostrarError("Cédula o teléfono incorrectos");
+            mostrarError("Cédula o contraseña incorrectas");
             btnIngresar.setDisable(false);
         }
     }
@@ -218,6 +228,7 @@ public class LoginController {
 
     /**
      * Registra auditoría para clientes
+     * NOTA: No se guarda en BD debido a restricción FK, solo se registra en log
      */
     private void registrarAuditoriaCliente(Cliente cliente, String accion, boolean exitoso) {
         try {
@@ -226,38 +237,26 @@ public class LoginController {
                     "Login exitoso del cliente: " + cliente.getNombre() + " " + cliente.getApellido() :
                     "Intento de login fallido del cliente";
 
-            Auditoria auditoria = new Auditoria(
-                    -cliente.getIdCliente(), // ID negativo para clientes
-                    accion,
-                    "Cliente",
-                    descripcion,
-                    ip
-            );
-
-            auditoria.setNombreUsuario(cliente.getNombre() + " " + cliente.getApellido());
-            auditoriaDAO.agregar(auditoria);
+            // Solo registrar en log del sistema, no en BD (problema con FK)
+            System.out.println(accion + " - Cliente ID: " + cliente.getIdCliente() +
+                             " - " + cliente.getNombre() + " " + cliente.getApellido() +
+                             " - IP: " + ip);
         } catch (Exception e) {
-            System.err.println("Error al registrar auditoría de cliente: " + e.getMessage());
+            System.err.println("Error al registrar log de auditoría de cliente: " + e.getMessage());
         }
     }
 
     /**
      * Registra un intento de login fallido de cliente
+     * NOTA: No se guarda en BD debido a restricción FK, solo se registra en log
      */
     private void registrarAuditoriaClienteFallida(String cedula) {
         try {
             String ip = obtenerIP();
-            Auditoria auditoria = new Auditoria(
-                    0,
-                    "LOGIN_CLIENTE_FALLIDO",
-                    "Cliente",
-                    "Intento de login fallido con cédula: " + cedula,
-                    ip
-            );
-            auditoria.setNombreUsuario(cedula);
-            auditoriaDAO.agregar(auditoria);
+            // Solo registrar en log del sistema, no en BD (problema con FK)
+            System.out.println("LOGIN_CLIENTE_FALLIDO - Cédula: " + cedula + " - IP: " + ip);
         } catch (Exception e) {
-            System.err.println("Error al registrar auditoría fallida de cliente: " + e.getMessage());
+            System.err.println("Error al registrar log de intento fallido: " + e.getMessage());
         }
     }
 
@@ -290,21 +289,15 @@ public class LoginController {
 
     /**
      * Registra un intento de login fallido
+     * NOTA: No se guarda en BD debido a restricción FK, solo se registra en log
      */
     private void registrarAuditoriaFallida(String username) {
         try {
             String ip = obtenerIP();
-            Auditoria auditoria = new Auditoria(
-                    0, // Sin ID de usuario válido
-                    "LOGIN_FALLIDO",
-                    "Usuario",
-                    "Intento de login fallido para usuario: " + username,
-                    ip
-            );
-            auditoria.setNombreUsuario(username);
-            auditoriaDAO.agregar(auditoria); // Usar agregar() en lugar de insertar()
+            // Solo registrar en log del sistema, no en BD (problema con FK)
+            System.out.println("LOGIN_FALLIDO - Usuario: " + username + " - IP: " + ip);
         } catch (Exception e) {
-            System.err.println("Error al registrar auditoría fallida: " + e.getMessage());
+            System.err.println("Error al registrar log de intento fallido: " + e.getMessage());
         }
     }
 
@@ -379,8 +372,8 @@ public class LoginController {
         confirmarField.setPromptText("Confirmar contrasena");
 
         ComboBox<String> rolCombo = new ComboBox<>();
-        rolCombo.getItems().addAll("VENDEDOR", "ADMIN", "GERENTE", "CLIENTE");
-        rolCombo.getSelectionModel().selectFirst();
+        rolCombo.getItems().addAll("CLIENTE", "VENDEDOR", "ADMIN", "GERENTE");
+        rolCombo.getSelectionModel().selectFirst(); // Ahora selecciona CLIENTE por defecto
 
         TextField emailField = new TextField();
         emailField.setPromptText("correo@ejemplo.com");
@@ -463,20 +456,26 @@ public class LoginController {
 
         Runnable validarCampos = () -> {
             boolean esCliente = "CLIENTE".equals(rolCombo.getValue());
+
+            // Validaciones comunes
             boolean invalido = nombreField.getText().trim().isEmpty() ||
-                    usernameField.getText().trim().isEmpty() ||
                     passwordField.getText().isEmpty() ||
                     confirmarField.getText().isEmpty() ||
                     !passwordField.getText().equals(confirmarField.getText());
 
             if (esCliente) {
+                // Para CLIENTE: validar campos específicos de cliente
                 boolean limiteValido = esNumeroValido(limiteCreditoField.getText().trim());
                 invalido = invalido ||
                         cedulaField.getText().trim().isEmpty() ||
                         apellidoClienteField.getText().trim().isEmpty() ||
                         telefonoField.getText().trim().isEmpty() ||
                         !limiteValido;
+            } else {
+                // Para VENDEDOR/ADMIN/GERENTE: validar campo Usuario
+                invalido = invalido || usernameField.getText().trim().isEmpty();
             }
+
             registrarButton.setDisable(invalido);
         };
 
@@ -501,27 +500,30 @@ public class LoginController {
         validarCampos.run();
 
         registrarButton.addEventFilter(ActionEvent.ACTION, e -> {
-            String username = usernameField.getText().trim();
-            if (usuarioDAO.obtenerPorUsername(username) != null) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Usuario duplicado",
-                        "El nombre de usuario ya existe. Elige uno diferente.");
-                e.consume();
+            // Solo validar username duplicado si NO es cliente
+            if (!"CLIENTE".equals(rolCombo.getValue())) {
+                String username = usernameField.getText().trim();
+                if (usuarioDAO.obtenerPorUsername(username) != null) {
+                    mostrarAlerta(Alert.AlertType.WARNING, "Usuario duplicado",
+                            "El nombre de usuario ya existe. Elige uno diferente.");
+                    e.consume();
+                }
             }
         });
 
         dialogo.setResultConverter(dialogButton -> {
-            if (dialogButton == registrarButtonType) {
-                Usuario nuevo = new Usuario();
-                nuevo.setNombreCompleto(nombreField.getText().trim());
-                nuevo.setUsername(usernameField.getText().trim());
-                // El setPassword encripta automáticamente, así que pasamos la contraseña plana
-                nuevo.setPassword(passwordField.getText());
-                nuevo.setRol(rolCombo.getValue());
-                nuevo.setEmail(emailField.getText().trim());
-                nuevo.setTelefono(telefonoField.getText().trim());
-                nuevo.setActivo(activoCheck.isSelected());
+            System.out.println("=== RESULT CONVERTER EJECUTADO ===");
+            System.out.println("Dialog button: " + dialogButton);
+            System.out.println("Registrar button type: " + registrarButtonType);
 
-                if ("CLIENTE".equals(rolCombo.getValue())) {
+            if (dialogButton == registrarButtonType) {
+                System.out.println(">>> Botón de registro clickeado!");
+                String rol = rolCombo.getValue();
+                System.out.println(">>> Rol seleccionado: " + rol);
+
+                // Si es CLIENTE, NO crear Usuario (solo Cliente)
+                if ("CLIENTE".equals(rol)) {
+                    System.out.println(">>> Creando cliente...");
                     Cliente clienteNuevo = new Cliente();
                     clienteNuevo.setCedula(cedulaField.getText().trim());
                     clienteNuevo.setNombre(nombreField.getText().trim());
@@ -532,66 +534,84 @@ public class LoginController {
 
                     // Validar y asignar límite de crédito
                     double limiteCredito = parsearDouble(limiteCreditoField.getText().trim(), 0);
-                    // Validar que el límite no exceda NUMERIC(10,2) - máximo 99,999,999.99
                     if (limiteCredito > 99999999.99) {
                         System.err.println("ADVERTENCIA: Límite de crédito demasiado grande: " + limiteCredito + ", usando 0");
                         limiteCredito = 0;
                     }
                     clienteNuevo.setLimiteCredito(limiteCredito);
-
-                    // El saldoPendiente ya se inicializa en 0 en el constructor de Cliente
                     clienteNuevo.setActivo(activoCheck.isSelected());
+
+                    // Establecer contraseña (el setter la encripta automáticamente)
+                    clienteNuevo.setPassword(passwordField.getText());
+
                     clienteSeleccionado[0] = clienteNuevo;
+                    System.out.println(">>> Cliente asignado a clienteSeleccionado[0]");
+                    return null; // No retornar Usuario para clientes
                 } else {
+                    // Para ADMIN, VENDEDOR, GERENTE: crear Usuario
+                    Usuario nuevo = new Usuario();
+                    nuevo.setNombreCompleto(nombreField.getText().trim());
+                    nuevo.setUsername(usernameField.getText().trim());
+                    nuevo.setPassword(passwordField.getText()); // El setPassword encripta automáticamente
+                    nuevo.setRol(rol);
+                    nuevo.setEmail(emailField.getText().trim());
+                    nuevo.setTelefono(telefonoField.getText().trim());
+                    nuevo.setActivo(activoCheck.isSelected());
+
                     clienteSeleccionado[0] = null;
+                    return nuevo;
                 }
-                return nuevo;
             }
-            clienteSeleccionado[0] = null;
+            // NO sobrescribir clienteSeleccionado si ya tiene un valor
+            System.out.println(">>> Botón diferente clickeado, clienteSeleccionado[0] mantiene su valor");
             return null;
         });
 
         Optional<Usuario> resultado = dialogo.showAndWait();
+
+        // Verificar si se creó un cliente (sin usuario)
+        if (clienteSeleccionado[0] != null) {
+            Cliente clienteNuevo = clienteSeleccionado[0];
+            System.out.println("DEBUG: Registrando cliente: " + clienteNuevo.getCedula());
+            System.out.println("  Nombre: " + clienteNuevo.getNombre());
+            System.out.println("  Apellido: " + clienteNuevo.getApellido());
+            System.out.println("  Telefono: " + clienteNuevo.getTelefono());
+            System.out.println("  Email: " + clienteNuevo.getEmail());
+            System.out.println("  LimiteCredito: " + clienteNuevo.getLimiteCredito());
+            System.out.println("  Tiene password: " + clienteNuevo.tienePassword());
+            System.out.println("  Validacion datos obligatorios: " + clienteNuevo.validarDatosObligatorios());
+
+            ClienteDAO clienteDAOInstance = ClienteDAO.getInstance();
+            boolean clienteRegistrado = clienteDAOInstance.agregar(clienteNuevo);
+
+            if (clienteRegistrado) {
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro exitoso",
+                        "Cliente registrado correctamente. Ahora puedes iniciar sesión con tu cédula y contraseña.");
+                txtUsuario.setText(clienteNuevo.getCedula());
+                txtPassword.clear();
+                txtPassword.requestFocus();
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Registro fallido",
+                        "No fue posible registrar el cliente. Verifica que la cédula no esté duplicada.");
+            }
+            return;
+        }
+
+        // Si no es cliente, entonces es un usuario del sistema (admin, vendedor, gerente)
         resultado.ifPresent(usuario -> {
             System.out.println("DEBUG: Intentando registrar usuario: " + usuario.getUsername() + " con rol: " + usuario.getRol());
             boolean agregado = usuarioDAO.agregar(usuario);
             System.out.println("DEBUG: Usuario agregado: " + agregado);
 
             if (agregado) {
-                boolean clienteRegistrado = true;
-                if ("CLIENTE".equals(usuario.getRol())) {
-                    Cliente clienteNuevo = clienteSeleccionado[0];
-                    System.out.println("DEBUG: Cliente creado: " + (clienteNuevo != null));
-                    if (clienteNuevo != null) {
-                        System.out.println("DEBUG: Datos del cliente - Cedula: " + clienteNuevo.getCedula() +
-                                         ", Nombre: " + clienteNuevo.getNombre() +
-                                         ", Apellido: " + clienteNuevo.getApellido());
-                        ClienteDAO clienteDAO = ClienteDAO.getInstance();
-                        clienteRegistrado = clienteDAO.agregar(clienteNuevo);
-                        System.out.println("DEBUG: Cliente registrado: " + clienteRegistrado);
-                    } else {
-                        System.out.println("DEBUG: Cliente es null, no se puede registrar");
-                        clienteRegistrado = false;
-                    }
-                    if (!clienteRegistrado) {
-                        System.out.println("DEBUG: Eliminando usuario debido a fallo en registro de cliente");
-                        usuarioDAO.eliminar(usuario.getIdUsuario());
-                    }
-                }
-
-                if (clienteRegistrado) {
-                    mostrarAlerta(Alert.AlertType.INFORMATION, "Registro exitoso",
-                            "Usuario registrado correctamente. Ahora puedes iniciar sesion.");
-                    txtUsuario.setText(usuario.getUsername());
-                    txtPassword.clear();
-                    txtPassword.requestFocus();
-                } else {
-                    mostrarAlerta(Alert.AlertType.ERROR, "Registro incompleto",
-                            "No fue posible guardar los datos del cliente. Intenta nuevamente.");
-                }
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro exitoso",
+                        "Usuario registrado correctamente. Ahora puedes iniciar sesión.");
+                txtUsuario.setText(usuario.getUsername());
+                txtPassword.clear();
+                txtPassword.requestFocus();
             } else {
                 mostrarAlerta(Alert.AlertType.ERROR, "Registro fallido",
-                        "No fue posible registrar el usuario. Intenta nuevamente.");
+                        "No fue posible registrar el usuario. Verifica que el nombre de usuario no esté duplicado.");
             }
         });
     }

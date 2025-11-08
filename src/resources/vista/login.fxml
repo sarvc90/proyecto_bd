@@ -14,27 +14,35 @@
    
    <!-- Panel Izquierdo - Imagen/Logo -->
    <VBox alignment="CENTER" prefHeight="500.0" prefWidth="350.0" styleClass="left-panel" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <padding>
+         <Insets left="20.0" right="20.0" />
+      </padding>
       <children>
-         <Label styleClass="app-title" text="SISTEMA DE">
+         <Label styleClass="app-title" text="SISTEMA DE" textAlignment="CENTER" wrapText="true">
             <font>
-               <Font name="System Bold" size="24.0" />
+               <Font name="System Bold" size="26.0" />
             </font>
          </Label>
-         <Label styleClass="app-title" text="ELECTRODOMÉSTICOS">
+         <Label styleClass="app-title" text="ELECTRO-" textAlignment="CENTER">
             <font>
-               <Font name="System Bold" size="28.0" />
+               <Font name="System Bold" size="26.0" />
+            </font>
+         </Label>
+         <Label styleClass="app-title" text="DOMÉSTICOS" textAlignment="CENTER">
+            <font>
+               <Font name="System Bold" size="26.0" />
             </font>
             <VBox.margin>
                <Insets bottom="20.0" />
             </VBox.margin>
          </Label>
-         
-         <Label styleClass="app-subtitle" text="Gestión de Ventas y Créditos">
+
+         <Label styleClass="app-subtitle" text="Gestión de Ventas y Créditos" textAlignment="CENTER" wrapText="true">
             <font>
                <Font size="14.0" />
             </font>
          </Label>
-         
+
          <Label styleClass="app-version" text="v1.0" VBox.vgrow="ALWAYS">
             <font>
                <Font size="12.0" />

@@ -245,8 +245,9 @@ public class UsuarioDAO {
 
         String hashedPassword = Encriptacion.encriptarSHA256(passwordPlana);
 
+        // Usar LOWER en la comparación de password para que sea case-insensitive
         String sql = "SELECT idUsuario, nombreCompleto, username, passwordHash, rol, email, telefono, activo, fechaRegistro, ultimoAcceso " +
-                     "FROM Usuarios WHERE LOWER(username) = LOWER(?) AND passwordHash = ?";
+                     "FROM Usuarios WHERE LOWER(username) = LOWER(?) AND LOWER(passwordHash) = LOWER(?)";
 
         try (Connection conn = ConexionBD.obtenerConexion()) {
             if (conn == null) {
@@ -268,6 +269,7 @@ public class UsuarioDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al iniciar sesión: " + e.getMessage());
+            e.printStackTrace(); // Agregar stack trace para debugging
         }
         return null;
     }
